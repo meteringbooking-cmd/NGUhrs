@@ -103,6 +103,51 @@
             line-height: 1.6;
         }
 
+        .subsections {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            display: none;
+        }
+
+        .subsections.active {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .subsection-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subsection-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .subsection-icon {
+            font-size: 1.2em;
+        }
+
         footer {
             text-align: center;
             color: white;
@@ -210,10 +255,21 @@
                 <p class="module-description">Securely store and manage essential HR documents and compliance files.</p>
             </div>
 
-            <div class="module-card" onclick="navigateToModule('reports')">
+            <div class="module-card" id="reports-card" onclick="toggleReportsSubsections(event)">
                 <span class="module-icon">📈</span>
                 <h2 class="module-title">Reports</h2>
                 <p class="module-description">Generate detailed reports and analytics for informed decision-making.</p>
+                
+                <div class="subsections" id="reports-subsections">
+                    <div class="subsection-item" onclick="navigateToSubsection('attendance-breakdown')">
+                        <span class="subsection-icon">📊</span>
+                        <span>Attendance Breakdown</span>
+                    </div>
+                    <div class="subsection-item" onclick="navigateToSubsection('staff-details-report')">
+                        <span class="subsection-icon">👥</span>
+                        <span>Staff Details Report</span>
+                    </div>
+                </div>
             </div>
 
             <div class="module-card" onclick="navigateToModule('management')">
@@ -241,15 +297,38 @@
             window.location.href = module + '.html';
         }
 
+        function toggleReportsSubsections(event) {
+            event.stopPropagation();
+            const subsections = document.getElementById('reports-subsections');
+            subsections.classList.toggle('active');
+        }
+
+        function navigateToSubsection(subsection) {
+            console.log('Navigating to: ' + subsection + '.html');
+            window.location.href = subsection + '.html';
+        }
+
         // Add smooth hover effects
         document.querySelectorAll('.module-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.background = 'rgba(255, 255, 255, 1)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.background = 'rgba(255, 255, 255, 0.95)';
-            });
+            if (card.id !== 'reports-card') {
+                card.addEventListener('mouseenter', function() {
+                    this.style.background = 'rgba(255, 255, 255, 1)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.95)';
+                });
+            }
+        });
+
+        // Special hover effect for reports card
+        const reportsCard = document.getElementById('reports-card');
+        reportsCard.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(255, 255, 255, 1)';
+        });
+        
+        reportsCard.addEventListener('mouseleave', function() {
+            this.style.background = 'rgba(255, 255, 255, 0.95)';
         });
     </script>
 </body>
