@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -300,7 +299,24 @@
                 personalPhone: '07700 900123',
                 personalEmail: 'john.smith@personal.com',
                 workPhone: '020 1234 5678',
-                workEmail: 'john.smith@company.com'
+                workEmail: 'john.smith@company.com',
+                // Holiday info
+                holidayEntitlement: 28,
+                holidayTaken: 12,
+                holidayRequested: 5,
+                holidayOutstanding: 11,
+                // Work info
+                jobTitle: 'Senior Developer',
+                startDate: '15/03/2022',
+                probationStatus: 'Completed',
+                // Pay info
+                paymentType: 'Monthly Salary',
+                fullTimePay: '£45,000',
+                payDealStartDate: '01/04/2024',
+                // Sickness info
+                sicknessDaysTaken: 3,
+                sicknessHoursTaken: 24,
+                sicknessIncidents: 2
             },
             2: {
                 id: 'EMP002',
@@ -309,7 +325,24 @@
                 personalPhone: '07700 900456',
                 personalEmail: 'sarah.johnson@personal.com',
                 workPhone: '020 2345 6789',
-                workEmail: 'sarah.johnson@company.com'
+                workEmail: 'sarah.johnson@company.com',
+                // Holiday info
+                holidayEntitlement: 25,
+                holidayTaken: 18,
+                holidayRequested: 3,
+                holidayOutstanding: 4,
+                // Work info
+                jobTitle: 'HR Manager',
+                startDate: '10/01/2021',
+                probationStatus: 'Completed',
+                // Pay info
+                paymentType: 'Monthly Salary',
+                fullTimePay: '£42,000',
+                payDealStartDate: '01/04/2024',
+                // Sickness info
+                sicknessDaysTaken: 1,
+                sicknessHoursTaken: 8,
+                sicknessIncidents: 1
             },
             3: {
                 id: 'EMP003',
@@ -318,7 +351,24 @@
                 personalPhone: '07700 900789',
                 personalEmail: 'michael.brown@personal.com',
                 workPhone: '020 3456 7890',
-                workEmail: 'michael.brown@company.com'
+                workEmail: 'michael.brown@company.com',
+                // Holiday info
+                holidayEntitlement: 28,
+                holidayTaken: 8,
+                holidayRequested: 2,
+                holidayOutstanding: 18,
+                // Work info
+                jobTitle: 'Marketing Coordinator',
+                startDate: '01/09/2024',
+                probationStatus: 'In Progress',
+                // Pay info
+                paymentType: 'Monthly Salary',
+                fullTimePay: '£32,000',
+                payDealStartDate: '01/09/2024',
+                // Sickness info
+                sicknessDaysTaken: 0,
+                sicknessHoursTaken: 0,
+                sicknessIncidents: 0
             }
         };
 
@@ -372,6 +422,78 @@
                         <div class="detail-item">
                             <span class="detail-label">Work Email Address</span>
                             <span class="detail-value">${employee.workEmail}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>🏖️ Holiday Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Holiday Entitlement</span>
+                            <span class="detail-value">${employee.holidayEntitlement} days</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Taken/Requested Holidays</span>
+                            <span class="detail-value">${employee.holidayTaken} taken / ${employee.holidayRequested} requested</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Outstanding Entitlement</span>
+                            <span class="detail-value">${employee.holidayOutstanding} days</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>💼 Work Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Job Title</span>
+                            <span class="detail-value">${employee.jobTitle}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Start Date</span>
+                            <span class="detail-value">${employee.startDate}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Probation Status</span>
+                            <span class="detail-value">${employee.probationStatus}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>💰 Pay Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Payment Type</span>
+                            <span class="detail-value">${employee.paymentType}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Full Time Pay</span>
+                            <span class="detail-value">${employee.fullTimePay}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Pay Deal Start Date</span>
+                            <span class="detail-value">${employee.payDealStartDate}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>🏥 Sickness Information</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Days Taken This Calendar Year</span>
+                            <span class="detail-value">${employee.sicknessDaysTaken} days</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Hours Taken This Calendar Year</span>
+                            <span class="detail-value">${employee.sicknessHoursTaken} hours</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Number of Sickness Incidents</span>
+                            <span class="detail-value">${employee.sicknessIncidents}</span>
                         </div>
                     </div>
                 </div>
