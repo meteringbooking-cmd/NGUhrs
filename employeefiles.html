@@ -1,1 +1,416 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Files | NGU-hrs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: #667eea;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .header-left p {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .employee-list {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 25px;
+        }
+
+        .employee-list h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .employee-item {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+
+        .employee-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .employee-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-left-color: #764ba2;
+        }
+
+        .employee-details {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .detail-section {
+            margin-bottom: 30px;
+        }
+
+        .detail-section h3 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            color: #666;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .detail-value {
+            color: #333;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .no-employee {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-employee-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>🗂️ Employee Files</h1>
+                <p>View and manage employee information</p>
+            </div>
+            <a href="index.html" class="back-btn">← Back to Dashboard</a>
+        </header>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by name or employee ID..." onkeyup="filterEmployees()">
+                <button class="search-btn" onclick="filterEmployees()">Search</button>
+            </div>
+        </div>
+
+        <div class="employee-list">
+            <h2>Employee List</h2>
+            <div id="employeeListContainer">
+                <div class="employee-item" onclick="selectEmployee(1)">
+                    <strong>John Smith</strong> - ID: EMP001
+                </div>
+                <div class="employee-item" onclick="selectEmployee(2)">
+                    <strong>Sarah Johnson</strong> - ID: EMP002
+                </div>
+                <div class="employee-item" onclick="selectEmployee(3)">
+                    <strong>Michael Brown</strong> - ID: EMP003
+                </div>
+            </div>
+        </div>
+
+        <div class="employee-details" id="employeeDetails">
+            <div class="no-employee">
+                <div class="no-employee-icon">👤</div>
+                <h3>No Employee Selected</h3>
+                <p>Please select an employee from the list above to view their details</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample employee data - replace with your actual data source
+        const employees = {
+            1: {
+                id: 'EMP001',
+                name: 'John Smith',
+                address: '123 Main Street, London, SE1 1AB',
+                personalPhone: '07700 900123',
+                personalEmail: 'john.smith@personal.com',
+                workPhone: '020 1234 5678',
+                workEmail: 'john.smith@company.com'
+            },
+            2: {
+                id: 'EMP002',
+                name: 'Sarah Johnson',
+                address: '456 Park Avenue, Manchester, M1 2CD',
+                personalPhone: '07700 900456',
+                personalEmail: 'sarah.johnson@personal.com',
+                workPhone: '020 2345 6789',
+                workEmail: 'sarah.johnson@company.com'
+            },
+            3: {
+                id: 'EMP003',
+                name: 'Michael Brown',
+                address: '789 High Street, Birmingham, B1 3EF',
+                personalPhone: '07700 900789',
+                personalEmail: 'michael.brown@personal.com',
+                workPhone: '020 3456 7890',
+                workEmail: 'michael.brown@company.com'
+            }
+        };
+
+        let selectedEmployeeId = null;
+
+        function selectEmployee(id) {
+            selectedEmployeeId = id;
+            const employee = employees[id];
+            
+            // Update active state
+            document.querySelectorAll('.employee-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.employee-item').classList.add('active');
+            
+            // Display employee details
+            const detailsHtml = `
+                <div class="detail-section">
+                    <h3>👤 Employee Details</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Full Name</span>
+                            <span class="detail-value">${employee.name}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Employee ID</span>
+                            <span class="detail-value">${employee.id}</span>
+                        </div>
+                        <div class="detail-item" style="grid-column: 1 / -1;">
+                            <span class="detail-label">Address</span>
+                            <span class="detail-value">${employee.address}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Personal Contact Number</span>
+                            <span class="detail-value">${employee.personalPhone}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Personal Email Address</span>
+                            <span class="detail-value">${employee.personalEmail}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>💼 Work Contact Details</h3>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Work Contact Number</span>
+                            <span class="detail-value">${employee.workPhone}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Work Email Address</span>
+                            <span class="detail-value">${employee.workEmail}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="editEmployee()">✏️ Edit Details</button>
+                    <button class="btn btn-secondary" onclick="printEmployee()">🖨️ Print</button>
+                </div>
+            `;
+            
+            document.getElementById('employeeDetails').innerHTML = detailsHtml;
+        }
+
+        function filterEmployees() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const employeeItems = document.querySelectorAll('.employee-item');
+            
+            employeeItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function editEmployee() {
+            if (selectedEmployeeId) {
+                alert('Edit functionality would open an edit form for employee ID: ' + selectedEmployeeId);
+                // Implement your edit functionality here
+            }
+        }
+
+        function printEmployee() {
+            if (selectedEmployeeId) {
+                window.print();
+            }
+        }
+    </script>
+</body>
+</html>
