@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGU-hrs | HR Management Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .tagline {
+            color: #666;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .module-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .module-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .module-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .module-title {
+            color: #333;
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .module-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .quick-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px 40px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NGU-hrs</h1>
+            <p class="tagline">Complete HR Management Platform</p>
+        </header>
+
+        <div class="quick-stats">
+            <div class="stat-card">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Active Employees</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Pending Applications</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">0</span>
+                <span class="stat-label">Days Holiday Remaining</span>
+            </div>
+        </div>
+
+        <div class="modules-grid">
+            <div class="module-card" onclick="navigateToModule('application')">
+                <span class="module-icon">📝</span>
+                <h2 class="module-title">Application</h2>
+                <p class="module-description">Manage job applications, track candidates, and streamline the hiring process.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('employee')">
+                <span class="module-icon">👥</span>
+                <h2 class="module-title">Employee</h2>
+                <p class="module-description">Access and manage employee information, profiles, and organizational structure.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('holiday')">
+                <span class="module-icon">🏖️</span>
+                <h2 class="module-title">Holiday</h2>
+                <p class="module-description">Submit and approve holiday requests with an intuitive calendar interface.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('absence')">
+                <span class="module-icon">📅</span>
+                <h2 class="module-title">Absence</h2>
+                <p class="module-description">Track and manage employee absences including sick leave and other leave types.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('holiday-overview')">
+                <span class="module-icon">📊</span>
+                <h2 class="module-title">Holiday Overview</h2>
+                <p class="module-description">View comprehensive holiday statistics and team availability at a glance.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('documents')">
+                <span class="module-icon">📄</span>
+                <h2 class="module-title">Mandatory Documents</h2>
+                <p class="module-description">Securely store and manage essential HR documents and compliance files.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('reports')">
+                <span class="module-icon">📈</span>
+                <h2 class="module-title">Reports</h2>
+                <p class="module-description">Generate detailed reports and analytics for informed decision-making.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('management')">
+                <span class="module-icon">⚙️</span>
+                <h2 class="module-title">Management</h2>
+                <p class="module-description">Administrative tools and system settings for HR management.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('employee-files')">
+                <span class="module-icon">🗂️</span>
+                <h2 class="module-title">Employee Files</h2>
+                <p class="module-description">Centralized document repository for all employee-related files and records.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 NGU-hrs. All rights reserved.</p>
+            <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">Your Complete HR Management Solution</p>
+        </footer>
+    </div>
+
+    <script>
+        function navigateToModule(module) {
+            // Placeholder for navigation - you can customize this
+            alert('Navigating to ' + module.replace('-', ' ').toUpperCase() + ' module');
+            // In production, you would navigate to the actual module page:
+            // window.location.href = module + '.html';
+        }
+
+        // Add smooth hover effects
+        document.querySelectorAll('.module-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.background = 'rgba(255, 255, 255, 1)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.background = 'rgba(255, 255, 255, 0.95)';
+            });
+        });
+    </script>
+</body>
+</html>
