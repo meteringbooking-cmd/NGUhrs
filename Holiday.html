@@ -1,1 +1,434 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Booking | NGU-hrs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: #667eea;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .header-left p {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .holiday-stats {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 25px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .booking-form {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 25px;
+        }
+
+        .booking-form h2 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input[type="date"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        input[type="date"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .working-days-display {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .working-days-display strong {
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .info-box p {
+            color: #856404;
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn-primary {
+                flex: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>🏖️ Holiday Booking</h1>
+                <p>Request time off</p>
+            </div>
+            <a href="index.html" class="back-btn">← Back to Dashboard</a>
+        </header>
+
+        <div class="holiday-stats">
+            <h2 style="color: #333; margin-bottom: 15px;">Your Holiday Allowance</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-number">28</span>
+                    <span class="stat-label">Total Entitlement</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">12</span>
+                    <span class="stat-label">Days Taken</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">Days Requested</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">11</span>
+                    <span class="stat-label">Days Remaining</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="booking-form">
+            <h2>Book Holiday</h2>
+            
+            <form id="holidayForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateFrom">Date From *</label>
+                        <input type="date" id="dateFrom" name="dateFrom" required onchange="calculateWorkingDays()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateTo">Date To *</label>
+                        <input type="date" id="dateTo" name="dateTo" required onchange="calculateWorkingDays()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="workingDays">Working Days *</label>
+                    <input type="number" id="workingDays" name="workingDays" step="0.5" min="0.5" required>
+                    <div class="working-days-display" id="calculatedDays" style="display: none;">
+                        Calculated: <strong id="calculatedValue">0</strong> working days
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Holiday Type *</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="fullDay" name="holidayType" value="full" checked>
+                            <label for="fullDay">Full Day</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="morningOnly" name="holidayType" value="morning">
+                            <label for="morningOnly">Morning Only</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="afternoonOnly" name="holidayType" value="afternoon">
+                            <label for="afternoonOnly">Afternoon Only</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" name="notes" placeholder="Add any additional information about your holiday request..."></textarea>
+                </div>
+
+                <div class="info-box">
+                    <p>📌 All holiday requests are subject to manager approval. You will receive a notification once your request has been reviewed.</p>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                    <button type="reset" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('dateFrom').setAttribute('min', today);
+        document.getElementById('dateTo').setAttribute('min', today);
+
+        function calculateWorkingDays() {
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            if (dateFrom && dateTo) {
+                const startDate = new Date(dateFrom);
+                const endDate = new Date(dateTo);
+
+                if (endDate < startDate) {
+                    alert('End date must be after start date');
+                    document.getElementById('dateTo').value = '';
+                    return;
+                }
+
+                let workingDays = 0;
+                let currentDate = new Date(startDate);
+
+                while (currentDate <= endDate) {
+                    const dayOfWeek = currentDate.getDay();
+                    // Count weekdays only (Monday = 1, Friday = 5)
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                        workingDays++;
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                // Show calculated days
+                document.getElementById('calculatedValue').textContent = workingDays;
+                document.getElementById('calculatedDays').style.display = 'block';
+                document.getElementById('workingDays').value = workingDays;
+            }
+        }
+
+        document.getElementById('holidayForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                dateFrom: document.getElementById('dateFrom').value,
+                dateTo: document.getElementById('dateTo').value,
+                workingDays: document.getElementById('workingDays').value,
+                holidayType: document.querySelector('input[name="holidayType"]:checked').value,
+                notes: document.getElementById('notes').value
+            };
+
+            console.log('Holiday Request:', formData);
+            
+            // Here you would send the data to your backend
+            alert('Holiday request submitted successfully!\n\n' +
+                  'From: ' + formData.dateFrom + '\n' +
+                  'To: ' + formData.dateTo + '\n' +
+                  'Days: ' + formData.workingDays + '\n' +
+                  'Type: ' + formData.holidayType + '\n' +
+                  'Notes: ' + formData.notes);
+
+            // Reset form after submission
+            resetForm();
+        });
+
+        function resetForm() {
+            document.getElementById('holidayForm').reset();
+            document.getElementById('calculatedDays').style.display = 'none';
+        }
+
+        // Update date To minimum when date From changes
+        document.getElementById('dateFrom').addEventListener('change', function() {
+            document.getElementById('dateTo').setAttribute('min', this.value);
+        });
+    </script>
+</body>
+</html>
