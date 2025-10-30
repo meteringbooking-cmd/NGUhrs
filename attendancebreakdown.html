@@ -1,1 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Breakdown | NGU-hrs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85em;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border: 1px solid #5568d3;
+        }
+
+        th.location-header,
+        th.name-header {
+            text-align: left;
+            min-width: 150px;
+        }
+
+        th.date-header {
+            min-width: 50px;
+        }
+
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        td.location-cell,
+        td.name-cell {
+            text-align: left;
+            font-weight: 500;
+            background: #f8f9fa;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f0f0f0;
+        }
+
+        .status-X {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-H {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        .status-Sick {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-AAUP {
+            color: #6c757d;
+            font-weight: bold;
+        }
+
+        .status-NPT {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+
+        .status-AWOL {
+            color: #e83e8c;
+            font-weight: bold;
+        }
+
+        .status-baby {
+            color: #9c27b0;
+            font-weight: bold;
+        }
+
+        .day-row {
+            background: #e3e7ff !important;
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Attendance Breakdown - October 2025</h1>
+            <a href="index.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color status-X">X</div>
+                <span>Present</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-H">H</div>
+                <span>Holiday</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-Sick">Sick</div>
+                <span>Sick Leave</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-AAUP">AAUP</div>
+                <span>Authorized Absence Unpaid</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-NPT">NPT</div>
+                <span>No Pay Time</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-AWOL">AWOL</div>
+                <span>Absent Without Leave</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color status-baby">baby</div>
+                <span>Maternity/Paternity</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="location-header">Location</th>
+                        <th class="name-header">Name</th>
+                        <th class="date-header">01-Oct</th>
+                        <th class="date-header">02-Oct</th>
+                        <th class="date-header">03-Oct</th>
+                        <th class="date-header">04-Oct</th>
+                        <th class="date-header">05-Oct</th>
+                        <th class="date-header">06-Oct</th>
+                        <th class="date-header">07-Oct</th>
+                        <th class="date-header">08-Oct</th>
+                        <th class="date-header">09-Oct</th>
+                        <th class="date-header">10-Oct</th>
+                        <th class="date-header">11-Oct</th>
+                        <th class="date-header">12-Oct</th>
+                        <th class="date-header">13-Oct</th>
+                        <th class="date-header">14-Oct</th>
+                        <th class="date-header">15-Oct</th>
+                        <th class="date-header">16-Oct</th>
+                        <th class="date-header">17-Oct</th>
+                        <th class="date-header">18-Oct</th>
+                        <th class="date-header">19-Oct</th>
+                        <th class="date-header">20-Oct</th>
+                        <th class="date-header">21-Oct</th>
+                        <th class="date-header">22-Oct</th>
+                        <th class="date-header">23-Oct</th>
+                        <th class="date-header">24-Oct</th>
+                        <th class="date-header">25-Oct</th>
+                        <th class="date-header">26-Oct</th>
+                        <th class="date-header">27-Oct</th>
+                        <th class="date-header">28-Oct</th>
+                        <th class="date-header">29-Oct</th>
+                        <th class="date-header">30-Oct</th>
+                        <th class="date-header">31-Oct</th>
+                    </tr>
+                    <tr class="day-row">
+                        <td></td>
+                        <td></td>
+                        <td>Wed</td>
+                        <td>Thu</td>
+                        <td>Fri</td>
+                        <td>Sat</td>
+                        <td>Sun</td>
+                        <td>Mon</td>
+                        <td>Tue</td>
+                        <td>Wed</td>
+                        <td>Thu</td>
+                        <td>Fri</td>
+                        <td>Sat</td>
+                        <td>Sun</td>
+                        <td>Mon</td>
+                        <td>Tue</td>
+                        <td>Wed</td>
+                        <td>Thu</td>
+                        <td>Fri</td>
+                        <td>Sat</td>
+                        <td>Sun</td>
+                        <td>Mon</td>
+                        <td>Tue</td>
+                        <td>Wed</td>
+                        <td>Thu</td>
+                        <td>Fri</td>
+                        <td>Sat</td>
+                        <td>Sun</td>
+                        <td>Mon</td>
+                        <td>Tue</td>
+                        <td>Wed</td>
+                        <td>Thu</td>
+                        <td>Fri</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="33" class="empty-state">
+                            <p>📋 No attendance data loaded</p>
+                            <p style="font-size: 0.9em; color: #999;">Data can be populated as required</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
