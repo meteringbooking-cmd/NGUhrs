@@ -1,1 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Overview | NGU-hrs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: #667eea;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .header-left p {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .content-area {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+        }
+
+        .employee-list {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            height: fit-content;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .employee-list h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .employee-item {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+
+        .employee-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .employee-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-left-color: #764ba2;
+        }
+
+        .employee-item strong {
+            display: block;
+            color: #333;
+            font-size: 1.05em;
+            margin-bottom: 3px;
+        }
+
+        .employee-item span {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .holiday-area {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .no-selection {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+
+        .no-selection-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .employee-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .employee-header h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .employee-header p {
+            color: #666;
+        }
+
+        .holiday-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card.taken {
+            border-left-color: #dc3545;
+        }
+
+        .stat-card.requested {
+            border-left-color: #ffc107;
+        }
+
+        .stat-card.remaining {
+            border-left-color: #28a745;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .stat-value {
+            color: #333;
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .section-title {
+            color: #333;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .holiday-record {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .holiday-record.approved {
+            border-left-color: #28a745;
+        }
+
+        .holiday-record.pending {
+            border-left-color: #ffc107;
+        }
+
+        .holiday-record.rejected {
+            border-left-color: #dc3545;
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .record-type {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .record-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .record-dates {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+
+        .record-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .record-detail-item {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .record-detail-item strong {
+            color: #333;
+        }
+
+        .record-notes {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        @media (max-width: 968px) {
+            .content-area {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .holiday-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>🏖️ Holiday Overview</h1>
+                <p>View employee holiday statistics and history</p>
+            </div>
+            <a href="index.html" class="back-btn">← Back to Dashboard</a>
+        </header>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="filterEmployees()">
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="employee-list">
+                <h2>Employees</h2>
+                <div id="employeeListContainer">
+                    <div class="employee-item" onclick="selectEmployee(1)">
+                        <strong>John Smith</strong>
+                        <span>ID: EMP001</span>
+                    </div>
+                    <div class="employee-item" onclick="selectEmployee(2)">
+                        <strong>Sarah Johnson</strong>
+                        <span>ID: EMP002</span>
+                    </div>
+                    <div class="employee-item" onclick="selectEmployee(3)">
+                        <strong>Michael Brown</strong>
+                        <span>ID: EMP003</span>
+                    </div>
+                    <div class="employee-item" onclick="selectEmployee(4)">
+                        <strong>Emma Wilson</strong>
+                        <span>ID: EMP004</span>
+                    </div>
+                    <div class="employee-item" onclick="selectEmployee(5)">
+                        <strong>James Taylor</strong>
+                        <span>ID: EMP005</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="holiday-area">
+                <div id="noSelection" class="no-selection">
+                    <div class="no-selection-icon">🏖️</div>
+                    <h3>No Employee Selected</h3>
+                    <p>Please select an employee from the list to view their holiday records</p>
+                </div>
+
+                <div id="employeeHoliday" style="display: none;">
+                    <div class="employee-header">
+                        <h2 id="employeeName">Employee Name</h2>
+                        <p id="employeeId">Employee ID</p>
+                    </div>
+
+                    <div class="holiday-stats">
+                        <div class="stat-card">
+                            <span class="stat-label">📅 Total Entitlement</span>
+                            <span class="stat-value" id="totalEntitlement">0</span>
+                        </div>
+                        <div class="stat-card taken">
+                            <span class="stat-label">✅ Days Taken</span>
+                            <span class="stat-value" id="daysTaken">0</span>
+                        </div>
+                        <div class="stat-card requested">
+                            <span class="stat-label">⏳ Days Requested</span>
+                            <span class="stat-value" id="daysRequested">0</span>
+                        </div>
+                        <div class="stat-card remaining">
+                            <span class="stat-label">🌴 Days Remaining</span>
+                            <span class="stat-value" id="daysRemaining">0</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                        <h3 class="section-title" style="margin: 0;">📋 Holiday History</h3>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <div>
+                                <label for="filterStatus" style="margin-bottom: 5px; font-size: 0.9em;">Filter by Status:</label>
+                                <select id="filterStatus" onchange="filterHolidays()" style="padding: 8px 12px; width: 180px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
+                                    <option value="all">All Status</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filterMonth" style="margin-bottom: 5px; font-size: 0.9em;">Filter by Month:</label>
+                                <input type="month" id="filterMonth" onchange="filterHolidays()" style="padding: 8px 12px; width: 180px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="holiday-history" id="holidayHistory">
+                        <!-- Records will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedEmployeeId = null;
+
+        const employees = {
+            1: { id: 'EMP001', name: 'John Smith' },
+            2: { id: 'EMP002', name: 'Sarah Johnson' },
+            3: { id: 'EMP003', name: 'Michael Brown' },
+            4: { id: 'EMP004', name: 'Emma Wilson' },
+            5: { id: 'EMP005', name: 'James Taylor' }
+        };
+
+        // Sample holiday data - replace with your actual data
+        const holidayData = {
+            1: {
+                stats: {
+                    totalEntitlement: 28,
+                    daysTaken: 12,
+                    daysRequested: 5,
+                    daysRemaining: 11
+                },
+                records: [
+                    {
+                        status: 'approved',
+                        dateFrom: '2025-01-15',
+                        dateTo: '2025-01-19',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Family holiday'
+                    },
+                    {
+                        status: 'approved',
+                        dateFrom: '2024-12-23',
+                        dateTo: '2024-12-27',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Christmas break'
+                    },
+                    {
+                        status: 'pending',
+                        dateFrom: '2025-03-10',
+                        dateTo: '2025-03-14',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Spring break'
+                    },
+                    {
+                        status: 'approved',
+                        dateFrom: '2024-11-04',
+                        dateTo: '2024-11-04',
+                        days: 1,
+                        type: 'Afternoon Only',
+                        notes: 'Personal appointment'
+                    },
+                    {
+                        status: 'rejected',
+                        dateFrom: '2024-12-30',
+                        dateTo: '2025-01-03',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'New Year - Staff shortage'
+                    },
+                    {
+                        status: 'approved',
+                        dateFrom: '2024-10-14',
+                        dateTo: '2024-10-14',
+                        days: 0.5,
+                        type: 'Morning Only',
+                        notes: 'Dentist appointment'
+                    }
+                ]
+            },
+            2: {
+                stats: {
+                    totalEntitlement: 25,
+                    daysTaken: 18,
+                    daysRequested: 3,
+                    daysRemaining: 4
+                },
+                records: [
+                    {
+                        status: 'approved',
+                        dateFrom: '2025-01-20',
+                        dateTo: '2025-01-24',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'City break'
+                    },
+                    {
+                        status: 'approved',
+                        dateFrom: '2024-12-16',
+                        dateTo: '2024-12-20',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Pre-Christmas break'
+                    },
+                    {
+                        status: 'pending',
+                        dateFrom: '2025-02-14',
+                        dateTo: '2025-02-14',
+                        days: 1,
+                        type: 'Full Day',
+                        notes: 'Valentine\'s Day'
+                    },
+                    {
+                        status: 'approved',
+                        dateFrom: '2024-11-25',
+                        dateTo: '2024-11-29',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Thanksgiving week'
+                    }
+                ]
+            },
+            3: {
+                stats: {
+                    totalEntitlement: 28,
+                    daysTaken: 8,
+                    daysRequested: 2,
+                    daysRemaining: 18
+                },
+                records: [
+                    {
+                        status: 'approved',
+                        dateFrom: '2025-01-06',
+                        dateTo: '2025-01-10',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Post-holiday extension'
+                    },
+                    {
+                        status: 'pending',
+                        dateFrom: '2025-04-07',
+                        dateTo: '2025-04-11',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Easter break'
+                    }
+                ]
+            }
+        };
+
+        let allRecords = [];
+
+        function selectEmployee(id) {
+            selectedEmployeeId = id;
+            const employee = employees[id];
+
+            // Update active state
+            document.querySelectorAll('.employee-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.employee-item').classList.add('active');
+
+            // Show employee holiday area
+            document.getElementById('noSelection').style.display = 'none';
+            document.getElementById('employeeHoliday').style.display = 'block';
+            document.getElementById('employeeName').textContent = employee.name;
+            document.getElementById('employeeId').textContent = 'ID: ' + employee.id;
+
+            // Load holiday data
+            loadHolidayData(id);
+        }
+
+        function loadHolidayData(employeeId) {
+            const data = holidayData[employeeId] || {
+                stats: { totalEntitlement: 0, daysTaken: 0, daysRequested: 0, daysRemaining: 0 },
+                records: []
+            };
+
+            // Store all records globally for filtering
+            allRecords = data.records;
+
+            // Update stats
+            document.getElementById('totalEntitlement').textContent = data.stats.totalEntitlement;
+            document.getElementById('daysTaken').textContent = data.stats.daysTaken;
+            document.getElementById('daysRequested').textContent = data.stats.daysRequested;
+            document.getElementById('daysRemaining').textContent = data.stats.daysRemaining;
+
+            // Reset filters
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterMonth').value = '';
+
+            // Display all records initially
+            displayHolidayRecords(allRecords);
+        }
+
+        function displayHolidayRecords(records) {
+            const historyContainer = document.getElementById('holidayHistory');
+            
+            if (records.length === 0) {
+                historyContainer.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">No holiday records found</p>';
+                return;
+            }
+
+            const statusLabels = {
+                'approved': '✅ Approved',
+                'pending': '⏳ Pending',
+                'rejected': '❌ Rejected'
+            };
+
+            const statusClasses = {
+                'approved': 'status-approved',
+                'pending': 'status-pending',
+                'rejected': 'status-rejected'
+            };
+
+            let html = '';
+            records.forEach(record => {
+                html += `
+                    <div class="holiday-record ${record.status}">
+                        <div class="record-header">
+                            <span class="record-type">${record.type}</span>
+                            <span class="record-status ${statusClasses[record.status]}">${statusLabels[record.status]}</span>
+                        </div>
+                        <div class="record-dates">${formatDate(record.dateFrom)} - ${formatDate(record.dateTo)}</div>
+                        <div class="record-details">
+                            <div class="record-detail-item">
+                                <strong>Days:</strong> ${record.days}
+                            </div>
+                        </div>
+                        ${record.notes ? `<div class="record-notes">📝 ${record.notes}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            historyContainer.innerHTML = html;
+        }
+
+        function filterHolidays() {
+            const statusFilter = document.getElementById('filterStatus').value;
+            const monthFilter = document.getElementById('filterMonth').value;
+
+            let filtered = [...allRecords];
+
+            // Filter by status
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(record => record.status === statusFilter);
+            }
+
+            // Filter by month
+            if (monthFilter) {
+                filtered = filtered.filter(record => {
+                    const recordMonth = record.dateFrom.substring(0, 7); // Get YYYY-MM
+                    return recordMonth === monthFilter;
+                });
+            }
+
+            // Update stats based on filtered results
+            updateFilteredStats(filtered);
+
+            // Display filtered records
+            displayHolidayRecords(filtered);
+        }
+
+        function updateFilteredStats(records) {
+            let daysTaken = 0;
+            let daysRequested = 0;
+
+            records.forEach(record => {
+                if (record.status === 'approved') {
+                    daysTaken += parseFloat(record.days);
+                } else if (record.status === 'pending') {
+                    daysRequested += parseFloat(record.days);
+                }
+            });
+
+            const originalData = holidayData[selectedEmployeeId];
+            const totalEntitlement = originalData.stats.totalEntitlement;
+            const daysRemaining = totalEntitlement - daysTaken - daysRequested;
+
+            document.getElementById('daysTaken').textContent = daysTaken;
+            document.getElementById('daysRequested').textContent = daysRequested;
+            document.getElementById('daysRemaining').textContent = daysRemaining;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function filterEmployees() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const employeeItems = document.querySelectorAll('.employee-item');
+
+            employeeItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
