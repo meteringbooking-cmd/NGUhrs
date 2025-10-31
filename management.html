@@ -33,16 +33,6 @@
                             font-size:1em; transition:border .3s; }
         .search-box input:focus { outline:none; border-color:#667eea; }
 
-        .view-all-buttons {
-            display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap;
-        }
-        .view-all-btn {
-            background: #667eea; color: white; padding: 8px 16px;
-            border: none; border-radius: 8px; cursor: pointer;
-            font-size: 0.9em; font-weight: 600; transition: all 0.3s;
-        }
-        .view-all-btn:hover { background: #5a6fd8; transform: translateY(-1px); }
-
         .tabs { display:flex; gap:5px; margin-bottom:20px; flex-wrap:wrap; }
         .tab-btn { background:#f1f3f5; color:#555; padding:10px 16px;
                    border:none; border-radius:8px; cursor:pointer;
@@ -64,7 +54,7 @@
             margin-bottom:20px; color:#333; font-size:1.4em;
         }
         table {
-            width:100%; border-collapse:collapse; min-width:1200px;
+            width:100%; border-collapse:collapse; min-width:1400px;
         }
         th, td {
             padding:14px 12px; text-align:center; border-bottom:1px solid #e0e0e0;
@@ -104,7 +94,6 @@
             .tabs { justify-content:center; }
             table { font-size:0.8em; }
             th, td { padding:10px 6px; }
-            .view-all-buttons { justify-content: center; }
         }
     </style>
 </head>
@@ -131,17 +120,13 @@
                 <div class="eligibility-table">
                     <h2>Employee Section Eligibility</h2>
 
-                    <!-- VIEW ALL BUTTONS -->
-                    <div class="view-all-buttons">
-                        <button class="view-all-btn" onclick="setViewAllOffice()">View All – Office</button>
-                        <button class="view-all-btn" onclick="setViewAllNoneOffice()">View All – None Office</button>
-                    </div>
-
                     <table id="eligibilityTable">
                         <thead>
                             <tr>
                                 <th>Employee</th>
                                 <th>View All</th>
+                                <th>View All – Office</th>
+                                <th>View All – None Office</th>
                                 <th>Employee Files</th>
                                 <th>Reports</th>
                                 <th>Management</th>
@@ -157,10 +142,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Sample Employees -->
+                            <!-- Employee 1 -->
                             <tr>
                                 <td><div class="employee-name">John Smith</div><div class="employee-id">ID: EMP001</div></td>
                                 <td><input type="checkbox" class="view-all" data-emp="1"></td>
+                                <td><input type="checkbox" class="view-all-office" data-emp="1"></td>
+                                <td><input type="checkbox" class="view-all-none-office" data-emp="1"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="employee-files"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="reports"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="management"></td>
@@ -174,10 +161,12 @@
                                 <td><input type="checkbox" data-emp="1" data-section="holiday"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="holiday-office"></td>
                             </tr>
-                            <!-- Repeat for other employees -->
+                            <!-- Employee 2 -->
                             <tr>
                                 <td><div class="employee-name">Sarah Johnson</div><div class="employee-id">ID: EMP002</div></td>
                                 <td><input type="checkbox" class="view-all" data-emp="2"></td>
+                                <td><input type="checkbox" class="view-all-office" data-emp="2"></td>
+                                <td><input type="checkbox" class="view-all-none-office" data-emp="2"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="employee-files"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="reports"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="management"></td>
@@ -191,7 +180,7 @@
                                 <td><input type="checkbox" data-emp="2" data-section="holiday"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="holiday-office"></td>
                             </tr>
-                            <!-- Add more rows as needed -->
+                            <!-- Add more employees as needed -->
                         </tbody>
                     </table>
                     <button class="save-btn" onclick="savePermissions()">Save Permissions</button>
@@ -213,11 +202,11 @@
     </div>
 
     <script>
-        // All sections
+        // Section groups
         const officeSections = ['employee-files', 'reports', 'management', 'mandatory-docs', 'application', 'absence-office', 'holiday-office'];
         const noneOfficeSections = ['bonus', 'additional-payments', 'cognito-forms', 'absence', 'holiday'];
 
-        // Load permissions
+        // Load saved permissions
         function loadPermissions() {
             const saved = localStorage.getItem('employeePermissions');
             if (!saved) return;
@@ -229,7 +218,7 @@
                     cb.checked = perms[emp][sec];
                 }
             });
-            syncAllViewAllCheckboxes();
+            syncAllCheckboxes();
         }
 
         // Save permissions
@@ -247,50 +236,64 @@
             alert('Permissions saved successfully!');
         }
 
-        // Sync per-row "View All"
-        function syncAllViewAllCheckboxes() {
-            document.querySelectorAll('.view-all').forEach(viewAll => {
-                const emp = viewAll.dataset.emp;
-                const rowCheckboxes = document.querySelectorAll(`input[data-emp="${emp}"][data-section]`);
-                const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
-                const anyChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
-                viewAll.indeterminate = anyChecked && !allChecked;
-                viewAll.checked = allChecked;
+        // Sync all checkbox states (View All, Office, None Office)
+        function syncAllCheckboxes() {
+            document.querySelectorAll('.view-all, .view-all-office, .view-all-none-office').forEach(master => {
+                const emp = master.dataset.emp;
+                let targetSections = [];
+                if (master.classList.contains('view-all-office')) targetSections = officeSections;
+                else if (master.classList.contains('view-all-none-office')) targetSections = noneOfficeSections;
+                else targetSections = [...officeSections, ...noneOfficeSections]; // View All = all
+
+                const checkboxes = targetSections.map(sec => document.querySelector(`input[data-emp="${emp}"][data-section="${sec}"]`)).filter(Boolean);
+                const allChecked = checkboxes.every(cb => cb.checked);
+                const anyChecked = checkboxes.some(cb => cb.checked);
+                master.indeterminate = anyChecked && !allChecked;
+                master.checked = allChecked;
             });
         }
 
-        // "View All – Office"
-        function setViewAllOffice() {
-            document.querySelectorAll('input[data-section]').forEach(cb => {
-                const sec = cb.dataset.section;
-                cb.checked = officeSections.includes(sec);
-            });
-            syncAllViewAllCheckboxes();
-        }
-
-        // "View All – None Office"
-        function setViewAllNoneOffice() {
-            document.querySelectorAll('input[data-section]').forEach(cb => {
-                const sec = cb.dataset.section;
-                cb.checked = noneOfficeSections.includes(sec);
-            });
-            syncAllViewAllCheckboxes();
-        }
-
-        // Handle per-row "View All"
-        document.querySelectorAll('.view-all').forEach(viewAll => {
-            viewAll.addEventListener('change', function() {
+        // Handle "View All – Office"
+        document.querySelectorAll('.view-all-office').forEach(cb => {
+            cb.addEventListener('change', function() {
                 const emp = this.dataset.emp;
                 const isChecked = this.checked;
-                document.querySelectorAll(`input[data-emp="${emp}"][data-section]`).forEach(cb => {
-                    cb.checked = isChecked;
+                officeSections.forEach(sec => {
+                    const box = document.querySelector(`input[data-emp="${emp}"][data-section="${sec}"]`);
+                    if (box) box.checked = isChecked;
                 });
+                syncAllCheckboxes();
             });
         });
 
-        // Any individual change → update row "View All"
+        // Handle "View All – None Office"
+        document.querySelectorAll('.view-all-none-office').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const emp = this.dataset.emp;
+                const isChecked = this.checked;
+                noneOfficeSections.forEach(sec => {
+                    const box = document.querySelector(`input[data-emp="${emp}"][data-section="${sec}"]`);
+                    if (box) box.checked = isChecked;
+                });
+                syncAllCheckboxes();
+            });
+        });
+
+        // Handle "View All" (all sections)
+        document.querySelectorAll('.view-all').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const emp = this.dataset.emp;
+                const isChecked = this.checked;
+                document.querySelectorAll(`input[data-emp="${emp}"][data-section]`).forEach(box => {
+                    box.checked = isChecked;
+                });
+                syncAllCheckboxes();
+            });
+        });
+
+        // Any individual section change → update all masters
         document.querySelectorAll('input[data-section]').forEach(cb => {
-            cb.addEventListener('change', syncAllViewAllCheckboxes);
+            cb.addEventListener('change', syncAllCheckboxes);
         });
 
         // Access check
