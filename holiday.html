@@ -364,6 +364,20 @@
         document.getElementById('dateFrom').setAttribute('min', today);
         document.getElementById('dateTo').setAttribute('min', today);
 
+        function addNewEmployee() {
+    const name = prompt("Enter employee name:");
+    if (!name || name.trim() === "") return alert("Name is required");
+
+    const emp = EMPLOYEES.add(name.trim());
+    alert(`Employee added!\nName: ${emp.name}\nID: ${emp.id}`);
+
+    // THIS LINE IS CRITICAL
+    renderEmployeeList();
+
+    // Optional: auto-select the new employee
+    selectEmployee(emp.id);
+}
+
         function calculateWorkingDays() {
             const dateFrom = document.getElementById('dateFrom').value;
             const dateTo = document.getElementById('dateTo').value;
