@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandatory Documents | NGU-hrs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            color: #667eea;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        .header-left p {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .content-area {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+        }
+
+        .employee-list {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            height: fit-content;
+            max-height: 700px;
+            overflow-y: auto;
+        }
+
+        .employee-list h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .employee-item {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+
+        .employee-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .employee-item.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-left-color: #764ba2;
+        }
+
+        .employee-item strong {
+            display: block;
+            color: #333;
+            font-size: 1.05em;
+            margin-bottom: 3px;
+        }
+
+        .employee-item span {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .documents-area {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .no-selection {
+            text-align: center;
+            padding: 80px 20px;
+            color: #666;
+        }
+
+        .no-selection-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        .employee-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .employee-header h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .employee-header p {
+            color: #666;
+        }
+
+        .folders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .folder-card {
+            background: #f8f9fa;
+            padding: 30px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .folder-card:hover {
+            background: #fff;
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .folder-icon {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .folder-name {
+            color: #333;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .folder-count {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .breadcrumb {
+            background: #e7f3ff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            color: #764ba2;
+        }
+
+        .breadcrumb span {
+            color: #666;
+        }
+
+        .folder-contents {
+            display: none;
+        }
+
+        .folder-contents.active {
+            display: block;
+        }
+
+        .file-list {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .file-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .file-item:hover {
+            background: #f8f9fa;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-icon {
+            font-size: 1.8em;
+        }
+
+        .file-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-name {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .file-meta {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .btn-view {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-download {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 2px dashed #667eea;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: transform 0.2s;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .no-files {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        @media (max-width: 968px) {
+            .content-area {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .folders-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>📄 Mandatory Documents</h1>
+                <p>Manage employee documentation</p>
+            </div>
+            <a href="index.html" class="back-btn">← Back to Dashboard</a>
+        </header>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="filterEmployees()">
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="employee-list">
+                <h2>Employees</h2>
+                <div id="employeeListContainer">
+                    <div class="employee-item" onclick="selectEmployee(1)">
+                        <strong>John Smith</strong>
+                        <span>ID: EMP001</span>
+                    </div>
+                    <div class="employee-item" onclick="selectEmployee(2)">
+                        <strong>Sarah Johnson</strong>
+                        <span>ID: EMP002</span>
+                    </div>
+                    <div class="employee-item" onclick="selectEmployee(3)">
+                        <strong>Michael Brown</strong>
+                        <span>ID: EMP003</span>
+                    </div>
+                    <div class="employee-item" onclick="selectEmployee(4)">
+                        <strong>Emma Wilson</strong>
+                        <span>ID: EMP004</span>
+                    </div>
+                    <div class="employee-item" onclick="selectEmployee(5)">
+                        <strong>James Taylor</strong>
+                        <span>ID: EMP005</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="documents-area">
+                <div id="noSelection" class="no-selection">
+                    <div class="no-selection-icon">📁</div>
+                    <h3>No Employee Selected</h3>
+                    <p>Please select an employee from the list to view their documents</p>
+                </div>
+
+                <div id="employeeDocuments" style="display: none;">
+                    <div class="employee-header">
+                        <h2 id="employeeName">Employee Name</h2>
+                        <p id="employeeId">Employee ID</p>
+                    </div>
+
+                    <div id="foldersView" class="folders-view">
+                        <div class="folders-grid">
+                            <div class="folder-card" onclick="openFolder('disciplinaries')">
+                                <span class="folder-icon">⚠️</span>
+                                <div class="folder-name">Disciplinaries</div>
+                                <div class="folder-count" id="count-disciplinaries">0 documents</div>
+                            </div>
+
+                            <div class="folder-card" onclick="openFolder('one-to-ones')">
+                                <span class="folder-icon">💬</span>
+                                <div class="folder-name">1-2-1's</div>
+                                <div class="folder-count" id="count-one-to-ones">0 documents</div>
+                            </div>
+
+                            <div class="folder-card" onclick="openFolder('certificates')">
+                                <span class="folder-icon">🎓</span>
+                                <div class="folder-name">Certificates</div>
+                                <div class="folder-count" id="count-certificates">0 documents</div>
+                            </div>
+
+                            <div class="folder-card" onclick="openFolder('dbs-checks')">
+                                <span class="folder-icon">✅</span>
+                                <div class="folder-name">DBS Checks</div>
+                                <div class="folder-count" id="count-dbs-checks">0 documents</div>
+                            </div>
+
+                            <div class="folder-card" onclick="openFolder('miscellaneous')">
+                                <span class="folder-icon">📋</span>
+                                <div class="folder-name">Miscellaneous</div>
+                                <div class="folder-count" id="count-miscellaneous">0 documents</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="folderContents" class="folder-contents">
+                        <div class="breadcrumb">
+                            <a href="#" onclick="closeFolderView(); return false;">📁 Documents</a>
+                            <span>›</span>
+                            <span id="currentFolderName">Folder</span>
+                        </div>
+
+                        <div class="upload-section">
+                            <button class="upload-btn" onclick="uploadDocument()">📤 Upload Document</button>
+                        </div>
+
+                        <div class="file-list" id="fileListContainer">
+                            <div class="no-files">
+                                <p>No documents in this folder</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedEmployeeId = null;
+        let currentFolder = null;
+
+        const employees = {
+            1: { id: 'EMP001', name: 'John Smith' },
+            2: { id: 'EMP002', name: 'Sarah Johnson' },
+            3: { id: 'EMP003', name: 'Michael Brown' },
+            4: { id: 'EMP004', name: 'Emma Wilson' },
+            5: { id: 'EMP005', name: 'James Taylor' }
+        };
+
+        // Sample document data - replace with your actual data
+        const documents = {
+            1: {
+                'disciplinaries': [
+                    { name: 'Written Warning - Tardiness.pdf', date: '15/01/2025', size: '234 KB' },
+                    { name: 'Verbal Warning Record.pdf', date: '03/12/2024', size: '156 KB' }
+                ],
+                'one-to-ones': [
+                    { name: '1-2-1 Meeting - January 2025.pdf', date: '20/01/2025', size: '189 KB' },
+                    { name: '1-2-1 Meeting - December 2024.pdf', date: '15/12/2024', size: '201 KB' }
+                ],
+                'certificates': [
+                    { name: 'First Aid Certificate.pdf', date: '10/06/2024', size: '421 KB' },
+                    { name: 'Health & Safety Training.pdf', date: '22/03/2024', size: '367 KB' }
+                ],
+                'dbs-checks': [
+                    { name: 'DBS Certificate 2024.pdf', date: '05/01/2024', size: '512 KB' }
+                ],
+                'miscellaneous': [
+                    { name: 'Reference Letter.pdf', date: '01/03/2022', size: '145 KB' },
+                    { name: 'Proof of Address.pdf', date: '01/03/2022', size: '234 KB' }
+                ]
+            },
+            2: {
+                'disciplinaries': [],
+                'one-to-ones': [
+                    { name: '1-2-1 Meeting - January 2025.pdf', date: '22/01/2025', size: '198 KB' }
+                ],
+                'certificates': [
+                    { name: 'Management Training Certificate.pdf', date: '15/09/2024', size: '389 KB' }
+                ],
+                'dbs-checks': [
+                    { name: 'Enhanced DBS Check.pdf', date: '10/01/2024', size: '478 KB' }
+                ],
+                'miscellaneous': []
+            }
+        };
+
+        function selectEmployee(id) {
+            selectedEmployeeId = id;
+            const employee = employees[id];
+
+            // Update active state
+            document.querySelectorAll('.employee-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.employee-item').classList.add('active');
+
+            // Show employee documents area
+            document.getElementById('noSelection').style.display = 'none';
+            document.getElementById('employeeDocuments').style.display = 'block';
+            document.getElementById('employeeName').textContent = employee.name;
+            document.getElementById('employeeId').textContent = 'ID: ' + employee.id;
+
+            // Reset to folders view
+            closeFolderView();
+
+            // Update document counts
+            updateDocumentCounts(id);
+        }
+
+        function updateDocumentCounts(employeeId) {
+            const empDocs = documents[employeeId] || {};
+            
+            document.getElementById('count-disciplinaries').textContent = 
+                (empDocs['disciplinaries']?.length || 0) + ' documents';
+            document.getElementById('count-one-to-ones').textContent = 
+                (empDocs['one-to-ones']?.length || 0) + ' documents';
+            document.getElementById('count-certificates').textContent = 
+                (empDocs['certificates']?.length || 0) + ' documents';
+            document.getElementById('count-dbs-checks').textContent = 
+                (empDocs['dbs-checks']?.length || 0) + ' documents';
+            document.getElementById('count-miscellaneous').textContent = 
+                (empDocs['miscellaneous']?.length || 0) + ' documents';
+        }
+
+        function openFolder(folderName) {
+            if (!selectedEmployeeId) return;
+
+            currentFolder = folderName;
+            document.getElementById('foldersView').style.display = 'none';
+            document.getElementById('folderContents').classList.add('active');
+
+            const folderNames = {
+                'disciplinaries': 'Disciplinaries',
+                'one-to-ones': '1-2-1\'s',
+                'certificates': 'Certificates',
+                'dbs-checks': 'DBS Checks',
+                'miscellaneous': 'Miscellaneous'
+            };
+
+            document.getElementById('currentFolderName').textContent = folderNames[folderName];
+
+            // Load documents
+            loadDocuments(selectedEmployeeId, folderName);
+        }
+
+        function closeFolderView() {
+            document.getElementById('foldersView').style.display = 'block';
+            document.getElementById('folderContents').classList.remove('active');
+            currentFolder = null;
+        }
+
+        function loadDocuments(employeeId, folderName) {
+            const empDocs = documents[employeeId] || {};
+            const folderDocs = empDocs[folderName] || [];
+            const container = document.getElementById('fileListContainer');
+
+            if (folderDocs.length === 0) {
+                container.innerHTML = '<div class="no-files"><p>No documents in this folder</p></div>';
+                return;
+            }
+
+            let html = '';
+            folderDocs.forEach((doc, index) => {
+                html += `
+                    <div class="file-item">
+                        <div class="file-info">
+                            <span class="file-icon">📄</span>
+                            <div class="file-details">
+                                <span class="file-name">${doc.name}</span>
+                                <span class="file-meta">${doc.date} • ${doc.size}</span>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="action-btn btn-view" onclick="viewDocument('${doc.name}')">View</button>
+                            <button class="action-btn btn-download" onclick="downloadDocument('${doc.name}')">Download</button>
+                            <button class="action-btn btn-delete" onclick="deleteDocument('${doc.name}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function filterEmployees() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const employeeItems = document.querySelectorAll('.employee-item');
+
+            employeeItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function uploadDocument() {
+            alert('Upload document functionality for ' + currentFolder);
+            // Implement your upload functionality here
+        }
+
+        function viewDocument(docName) {
+            alert('Viewing: ' + docName);
+            // Implement your view functionality here
+        }
+
+        function downloadDocument(docName) {
+            alert('Downloading: ' + docName);
+            // Implement your download functionality here
+        }
+
+        function deleteDocument(docName) {
+            if (confirm('Are you sure you want to delete "' + docName + '"?')) {
+                alert('Deleted: ' + docName);
+                // Implement your delete functionality here
+                loadDocuments(selectedEmployeeId, currentFolder);
+            }
+        }
+    </script>
+</body>
+</html>
