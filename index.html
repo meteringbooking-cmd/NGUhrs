@@ -356,6 +356,19 @@
     </div>
 
     <script>
+        function addNewEmployee() {
+    const name = prompt("Enter employee name:");
+    if (!name || name.trim() === "") return alert("Name is required");
+
+    const emp = EMPLOYEES.add(name.trim());
+    alert(`Employee added!\nName: ${emp.name}\nID: ${emp.id}`);
+
+    // Refresh list
+    renderEmployeeList();
+
+    // Optional: auto-select new employee
+    selectEmployee(emp.id);
+}
         function navigateToModule(module) {
             console.log('Navigating to: ' + module + '.html');
             window.location.href = module + '.html';
