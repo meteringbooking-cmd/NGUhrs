@@ -52,6 +52,7 @@
         }
         .eligibility-table h2 {
             margin-bottom:20px; color:#333; font-size:1.4em;
+            display:flex; justify-content:space-between; align-items:center;
         }
         table {
             width:100%; border-collapse:collapse; min-width:1400px;
@@ -85,6 +86,12 @@
         }
         .save-btn:hover { background:#218838; }
 
+        .btn-success {
+            background:#28a745; color:white; padding:8px 16px;
+            border:none; border-radius:8px; cursor:pointer;
+            font-weight:600; font-size:0.9em;
+        }
+
         .no-access {
             text-align:center; padding:60px 20px; color:#666;
         }
@@ -107,6 +114,13 @@
             <a href="index.html" class="back-btn">Back to Dashboard</a>
         </header>
 
+        <!-- ADD EMPLOYEE BUTTON -->
+        <div style="text-align:center; margin:20px 0;">
+            <button onclick="addNewEmployee()" class="btn-success">
+                + Add New Employee
+            </button>
+        </div>
+
         <div class="search-section">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
                 <div class="search-box" style="flex:1; min-width:250px;">
@@ -118,7 +132,9 @@
         <div class="content-area">
             <div id="eligibility" class="tab-content active">
                 <div class="eligibility-table">
-                    <h2>Employee Section Eligibility</h2>
+                    <h2>Employee Section Eligibility
+                        <button onclick="addNewEmployee()" class="btn-success">+ Add</button>
+                    </h2>
 
                     <table id="eligibilityTable">
                         <thead>
@@ -141,46 +157,8 @@
                                 <th>Holiday Office</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- Employee 1 -->
-                            <tr>
-                                <td><div class="employee-name">John Smith</div><div class="employee-id">ID: EMP001</div></td>
-                                <td><input type="checkbox" class="view-all" data-emp="1"></td>
-                                <td><input type="checkbox" class="view-all-office" data-emp="1"></td>
-                                <td><input type="checkbox" class="view-all-none-office" data-emp="1"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="employee-files"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="reports"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="management"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="mandatory-docs"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="application"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="cognito-forms"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="additional-payments"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="bonus"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="absence"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="absence-office"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="holiday"></td>
-                                <td><input type="checkbox" data-emp="1" data-section="holiday-office"></td>
-                            </tr>
-                            <!-- Employee 2 -->
-                            <tr>
-                                <td><div class="employee-name">Sarah Johnson</div><div class="employee-id">ID: EMP002</div></td>
-                                <td><input type="checkbox" class="view-all" data-emp="2"></td>
-                                <td><input type="checkbox" class="view-all-office" data-emp="2"></td>
-                                <td><input type="checkbox" class="view-all-none-office" data-emp="2"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="employee-files"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="reports"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="management"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="mandatory-docs"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="application"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="cognito-forms"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="additional-payments"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="bonus"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="absence"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="absence-office"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="holiday"></td>
-                                <td><input type="checkbox" data-emp="2" data-section="holiday-office"></td>
-                            </tr>
-                            <!-- Add more employees as needed -->
+                        <tbody id="permissionsBody">
+                            <!-- DYNAMIC ROWS WILL BE ADDED HERE -->
                         </tbody>
                     </table>
                     <button class="save-btn" onclick="savePermissions()">Save Permissions</button>
@@ -201,12 +179,106 @@
         </div>
     </div>
 
+    <script src="employees.js"></script>
     <script>
         // Section groups
         const officeSections = ['employee-files', 'reports', 'management', 'mandatory-docs', 'application', 'absence-office', 'holiday-office'];
         const noneOfficeSections = ['bonus', 'additional-payments', 'cognito-forms', 'absence', 'holiday'];
 
-        // Load saved permissions
+        // === 1. Add New Employee ===
+        function addNewEmployee() {
+            const name = prompt("Enter employee name:");
+            if (!name || name.trim() === "") return alert("Name is required");
+
+            const emp = EMPLOYEES.add(name.trim());
+            alert(`Added: ${emp.name} (ID: ${emp.id})`);
+            renderPermissionsTable();
+        }
+
+        // === 2. Render Permissions Table ===
+        function renderPermissionsTable() {
+            EMPLOYEES.init();
+            const tbody = document.getElementById('permissionsBody');
+            tbody.innerHTML = '';
+
+            EMPLOYEES.data.forEach((emp, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <div class="employee-name">${emp.name}</div>
+                        <div class="employee-id">ID: ${emp.id}</div>
+                    </td>
+                    <td><input type="checkbox" class="view-all" data-emp="${emp.id}"></td>
+                    <td><input type="checkbox" class="view-all-office" data-emp="${emp.id}"></td>
+                    <td><input type="checkbox" class="view-all-none-office" data-emp="${emp.id}"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="employee-files"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="reports"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="management"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="mandatory-docs"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="application"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="cognito-forms"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="additional-payments"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="bonus"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="absence"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="absence-office"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="holiday"></td>
+                    <td><input type="checkbox" data-emp="${emp.id}" data-section="holiday-office"></td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Re-attach event listeners
+            attachCheckboxListeners();
+            loadPermissions();
+        }
+
+        // === 3. Attach Checkbox Listeners ===
+        function attachCheckboxListeners() {
+            // View All – Office
+            document.querySelectorAll('.view-all-office').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const emp = this.dataset.emp;
+                    const isChecked = this.checked;
+                    officeSections.forEach(sec => {
+                        const box = document.querySelector(`input[data-emp="${emp}"][data-section="${sec}"]`);
+                        if (box) box.checked = isChecked;
+                    });
+                    syncAllCheckboxes();
+                });
+            });
+
+            // View All – None Office
+            document.querySelectorAll('.view-all-none-office').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const emp = this.dataset.emp;
+                    const isChecked = this.checked;
+                    noneOfficeSections.forEach(sec => {
+                        const box = document.querySelector(`input[data-emp="${emp}"][data-section="${sec}"]`);
+                        if (box) box.checked = isChecked;
+                    });
+                    syncAllCheckboxes();
+                });
+            });
+
+            // View All (all sections)
+            document.querySelectorAll('.view-all').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const emp = this.dataset.emp;
+                    const isChecked = this.checked;
+                    document.querySelectorAll(`input[data-emp="${emp}"][data-section]`).forEach(box => {
+                        box.checked = isChecked;
+                    });
+                    syncAllCheckboxes();
+                });
+            });
+
+            // Individual changes
+            document.querySelectorAll('input[data-section]').forEach(cb => {
+                cb.addEventListener('change', syncAllCheckboxes);
+            });
+        }
+
+        // === 4. Load Permissions ===
         function loadPermissions() {
             const saved = localStorage.getItem('employeePermissions');
             if (!saved) return;
@@ -221,7 +293,7 @@
             syncAllCheckboxes();
         }
 
-        // Save permissions
+        // === 5. Save Permissions ===
         function savePermissions() {
             const perms = {};
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
@@ -236,16 +308,19 @@
             alert('Permissions saved successfully!');
         }
 
-        // Sync all checkbox states (View All, Office, None Office)
+        // === 6. Sync Master Checkboxes ===
         function syncAllCheckboxes() {
             document.querySelectorAll('.view-all, .view-all-office, .view-all-none-office').forEach(master => {
                 const emp = master.dataset.emp;
                 let targetSections = [];
                 if (master.classList.contains('view-all-office')) targetSections = officeSections;
                 else if (master.classList.contains('view-all-none-office')) targetSections = noneOfficeSections;
-                else targetSections = [...officeSections, ...noneOfficeSections]; // View All = all
+                else targetSections = [...officeSections, ...noneOfficeSections];
 
-                const checkboxes = targetSections.map(sec => document.querySelector(`input[data-emp="${emp}"][data-section="${sec}"]`)).filter(Boolean);
+                const checkboxes = targetSections.map(sec => 
+                    document.querySelector(`input[data-emp="${emp}"][data-section="${sec}"]`)
+                ).filter(Boolean);
+
                 const allChecked = checkboxes.every(cb => cb.checked);
                 const anyChecked = checkboxes.some(cb => cb.checked);
                 master.indeterminate = anyChecked && !allChecked;
@@ -253,57 +328,16 @@
             });
         }
 
-        // Handle "View All – Office"
-        document.querySelectorAll('.view-all-office').forEach(cb => {
-            cb.addEventListener('change', function() {
-                const emp = this.dataset.emp;
-                const isChecked = this.checked;
-                officeSections.forEach(sec => {
-                    const box = document.querySelector(`input[data-emp="${emp}"][data-section="${sec}"]`);
-                    if (box) box.checked = isChecked;
-                });
-                syncAllCheckboxes();
+        // === 7. Search ===
+        function filterTable() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('#eligibilityTable tbody tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
             });
-        });
-
-        // Handle "View All – None Office"
-        document.querySelectorAll('.view-all-none-office').forEach(cb => {
-            cb.addEventListener('change', function() {
-                const emp = this.dataset.emp;
-                const isChecked = this.checked;
-                noneOfficeSections.forEach(sec => {
-                    const box = document.querySelector(`input[data-emp="${emp}"][data-section="${sec}"]`);
-                    if (box) box.checked = isChecked;
-                });
-                syncAllCheckboxes();
-            });
-        });
-
-        // Handle "View All" (all sections)
-        document.querySelectorAll('.view-all').forEach(cb => {
-            cb.addEventListener('change', function() {
-                const emp = this.dataset.emp;
-                const isChecked = this.checked;
-                document.querySelectorAll(`input[data-emp="${emp}"][data-section]`).forEach(box => {
-                    box.checked = isChecked;
-                });
-                syncAllCheckboxes();
-            });
-        });
-
-        // Any individual section change → update all masters
-        document.querySelectorAll('input[data-section]').forEach(cb => {
-            cb.addEventListener('change', syncAllCheckboxes);
-        });
-
-        // Access check
-        const currentUserId = '1'; // Change to test
-        function checkAccess(section) {
-            const perms = JSON.parse(localStorage.getItem('employeePermissions') || '{}');
-            return perms[currentUserId]?.[section] || false;
         }
 
-        // Tab logic
+        // === 8. Tab Logic ===
         function openTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -312,7 +346,9 @@
             if (event && event.target) event.target.classList.add('active');
 
             if (tabName === 'management') {
-                if (checkAccess('management')) {
+                const currentUserId = 'EMP001'; // Change to test
+                const perms = JSON.parse(localStorage.getItem('employeePermissions') || '{}');
+                if (perms[currentUserId]?.['management']) {
                     document.getElementById('managementContent').style.display = 'block';
                     document.getElementById('accessDenied').style.display = 'none';
                 } else {
@@ -322,18 +358,9 @@
             }
         }
 
-        // Search
-        function filterTable() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('#eligibilityTable tbody tr').forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(term) ? '' : 'none';
-            });
-        }
-
-        // Initialize
+        // === 9. ON LOAD ===
         window.onload = function() {
-            loadPermissions();
+            renderPermissionsTable();
             openTab('eligibility');
         };
     </script>
