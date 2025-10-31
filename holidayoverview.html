@@ -93,6 +93,24 @@
             border-color: #667eea;
         }
 
+        .export-all-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .export-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
         .content-area {
             display: grid;
             grid-template-columns: 350px 1fr;
@@ -347,6 +365,7 @@
         <div class="search-section">
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="filterEmployees()">
+                <button class="export-all-btn" onclick="exportAllToCSV()">📥 Export All Employees</button>
             </div>
         </div>
 
@@ -426,8 +445,8 @@
                                 <input type="month" id="filterMonth" onchange="filterHolidays()" style="padding: 8px 12px; width: 180px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
                             </div>
                             <div>
-                                <button onclick="exportToCSV()" style="padding: 8px 20px; background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 600; transition: all 0.3s;">
-                                    📥 Export to CSV
+                                <button onclick="exportEmployeeToCSV()" style="padding: 8px 20px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 600; transition: all 0.3s;">
+                                    📥 Export This Employee
                                 </button>
                             </div>
                         </div>
@@ -576,6 +595,50 @@
                         days: 5,
                         type: 'Full Day',
                         notes: 'Easter break'
+                    }
+                ]
+            },
+            4: {
+                stats: {
+                    totalEntitlement: 25,
+                    daysTaken: 15,
+                    daysRequested: 0,
+                    daysRemaining: 10
+                },
+                records: [
+                    {
+                        status: 'approved',
+                        dateFrom: '2024-11-11',
+                        dateTo: '2024-11-15',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Family visit'
+                    }
+                ]
+            },
+            5: {
+                stats: {
+                    totalEntitlement: 28,
+                    daysTaken: 10,
+                    daysRequested: 5,
+                    daysRemaining: 13
+                },
+                records: [
+                    {
+                        status: 'approved',
+                        dateFrom: '2024-12-02',
+                        dateTo: '2024-12-06',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Winter break'
+                    },
+                    {
+                        status: 'pending',
+                        dateFrom: '2025-05-26',
+                        dateTo: '2025-05-30',
+                        days: 5,
+                        type: 'Full Day',
+                        notes: 'Summer planning'
                     }
                 ]
             }
@@ -734,13 +797,61 @@
             });
         }
 
-        function exportToCSV() {
+        function exportAllToCSV() {
+            // Create CSV content with headers
+            let csv = 'Employee Name,Employee ID,Total Entitlement,Days Taken,Days Requested,Days Remaining,Status,Date From,Date To,Days,Holiday Type,Notes\n';
+
+            // Loop through all employees
+            Object.keys(employees).forEach(empId => {
+                const employee = employees[empId];
+                const data = holidayData[empId];
+
+                if (!data || !data.records || data.records.length === 0) {
+                    // Add employee with stats but no records
+                    csv += `${employee.name},${employee.id},${data?.stats.totalEntitlement || 0},${data?.stats.daysTaken || 0},${data?.stats.daysRequested || 0},${data?.stats.daysRemaining || 0},,,,,,"No holiday records"\n`;
+                } else {
+                    // Add each holiday record for this employee
+                    data.records.forEach(record => {
+                        const row = [
+                            employee.name,
+                            employee.id,
+                            data.stats.totalEntitlement,
+                            data.stats.daysTaken,
+                            data.stats.daysRequested,
+                            data.stats.daysRemaining,
+                            record.status.charAt(0).toUpperCase() + record.status.slice(1),
+                            formatDate(record.dateFrom),
+                            formatDate(record.dateTo),
+                            record.days,
+                            record.type,
+                            record.notes ? record.notes.replace(/,/g, ';') : ''
+                        ];
+                        csv += row.join(',') + '\n';
+                    });
+                }
+            });
+
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `All_Employees_Holiday_Report_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportEmployeeToCSV() {
             if (!selectedEmployeeId) {
                 alert('Please select an employee first');
                 return;
             }
 
             const employee = employees[selectedEmployeeId];
+            const data = holidayData[selectedEmployeeId];
             const statusFilter = document.getElementById('filterStatus').value;
             const monthFilter = document.getElementById('filterMonth').value;
 
@@ -765,39 +876,4 @@
             }
 
             // Create CSV content
-            let csv = 'Employee Name,Employee ID,Status,Date From,Date To,Days,Holiday Type,Notes\n';
-
-            recordsToExport.forEach(record => {
-                const row = [
-                    employee.name,
-                    employee.id,
-                    record.status.charAt(0).toUpperCase() + record.status.slice(1),
-                    formatDate(record.dateFrom),
-                    formatDate(record.dateTo),
-                    record.days,
-                    record.type,
-                    record.notes ? record.notes.replace(/,/g, ';') : ''
-                ];
-                csv += row.join(',') + '\n';
-            });
-
-            // Create download link
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            
-            const filterInfo = [];
-            if (statusFilter !== 'all') filterInfo.push(statusFilter);
-            if (monthFilter) filterInfo.push(monthFilter);
-            const filterSuffix = filterInfo.length > 0 ? '_' + filterInfo.join('_') : '';
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', `Holiday_Report_${employee.id}${filterSuffix}_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    </script>
-</body>
-</html>
+            let csv = 'Employee Name,Employee ID,Total Entitlement,Days Taken,Days
