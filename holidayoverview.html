@@ -646,6 +646,20 @@
 
         let allRecords = [];
 
+        function addNewEmployee() {
+    const name = prompt("Enter employee name:");
+    if (!name || name.trim() === "") return alert("Name is required");
+
+    const emp = EMPLOYEES.add(name.trim());
+    alert(`Employee added!\nName: ${emp.name}\nID: ${emp.id}`);
+
+    // THIS LINE IS CRITICAL
+    renderEmployeeList();
+
+    // Optional: auto-select the new employee
+    selectEmployee(emp.id);
+}
+
         function selectEmployee(id) {
             selectedEmployeeId = id;
             const employee = employees[id];
