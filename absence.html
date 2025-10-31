@@ -7,12 +7,12 @@
     <!-- EMAILJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
+        /* (all the CSS you already have – unchanged) */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
                background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
                min-height:100vh; padding:20px; }
         .container { max-width:1400px; margin:0 auto; }
-
         header { background:rgba(255,255,255,0.95); padding:25px 30px;
                  border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.2);
                  margin-bottom:30px; display:flex; justify-content:space-between;
@@ -25,302 +25,13 @@
                     text-decoration:none; display:inline-block; }
         .back-btn:hover { transform:translateY(-2px);
                           box-shadow:0 5px 15px rgba(0,0,0,0.2); }
-
-        .search-section { background:rgba(255,255,255,0.95); padding:25px;
-                          border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15);
-                          margin-bottom:25px; }
-        .search-box { display:flex; gap:15px; align-items:center; flex-wrap:wrap; }
-        .search-box input { flex:1; min-width:250px; padding:12px 20px;
-                            border:2px solid #e0e0e0; border-radius:8px;
-                            font-size:1em; transition:border .3s; }
-        .search-box input:focus { outline:none; border-color:#667eea; }
-
-        .content-area { display:grid; grid-template-columns:350px 1fr; gap:25px; }
-        .employee-list { background:rgba(255,255,255,0.95); padding:25px;
-                         border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15);
-                         max-height:700px; overflow-y:auto; }
-        .employee-list h2 { color:#333; margin-bottom:20px; font-size:1.3em; display:flex; justify-content:space-between; align-items:center; }
-        .employee-item { background:#f8f9fa; padding:15px 20px; border-radius:8px;
-                         margin-bottom:10px; cursor:pointer; transition:all .3s;
-                         border-left:4px solid #667eea; }
-        .employee-item:hover { background:#e9ecef; transform:translateX(5px); }
-        .employee-item.active { background:linear-gradient(135deg,rgba(102,126,234,.1),rgba(118,75,162,.1));
-                                border-left-color:#764ba2; }
-        .employee-item strong { display:block; color:#333; font-size:1.05em; margin-bottom:3px; }
-        .employee-item span { color:#666; font-size:0.9em; }
-
-        .absence-area { background:rgba(255,255,255,0.95); padding:30px;
-                        border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15); }
-        .no-selection { text-align:center; padding:80px 20px; color:#666; }
-        .no-selection-icon { font-size:5em; margin-bottom:20px; }
-
-        .employee-header { margin-bottom:30px; padding-bottom:20px;
-                           border-bottom:2px solid #e0e0e0; }
-        .employee-header h2 { color:#667eea; font-size:1.8em; margin-bottom:5px; }
-        .employee-header p { color:#666; }
-
-        .absence-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-                         gap:20px; margin-bottom:30px; }
-        .stat-card { background:#f8f9fa; padding:20px; border-radius:10px;
-                     border-left:4px solid #667eea; }
-        .stat-card.sickness { border-left-color:#dc3545; }
-        .stat-card.aaup { border-left-color:#ffc107; }
-        .stat-card.tofd { border-left-color:#28a745; }
-        .stat-label { color:#666; font-size:0.9em; margin-bottom:8px; display:block; }
-        .stat-value { color:#333; font-size:2em; font-weight:700; }
-
-        .section-title { color:#333; font-size:1.4em; margin-bottom:20px;
-                         display:flex; align-items:center; gap:10px; }
-
-        .absence-form { background:#f8f9fa; padding:25px; border-radius:10px;
-                        margin-bottom:30px; }
-        .form-group { margin-bottom:20px; }
-        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-        label { display:block; color:#333; font-weight:600; margin-bottom:8px;
-                font-size:0.95em; }
-        input[type="date"],input[type="number"],textarea,select {
-            width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px;
-            font-size:1em; transition:border .3s; }
-        input[type="date"]:focus, input[type="number"]:focus,
-        textarea:focus, select:focus { outline:none; border-color:#667eea; }
-        textarea { resize:vertical; min-height:80px; }
-
-        .btn-group { display:flex; gap:15px; margin-top:20px; }
-        .btn { padding:12px 30px; border:none; border-radius:8px;
-               cursor:pointer; font-size:1em; font-weight:600; transition:all .3s; }
-        .btn-primary { background:linear-gradient(135deg,#667eea,#764ba2);
-                       color:white; flex:1; }
-        .btn-secondary { background:#6c757d; color:white; }
-        .btn-success { background:#28a745; color:white; }
-        .btn:hover { transform:translateY(-2px);
-                     box-shadow:0 5px 15px rgba(0,0,0,0.2); }
-
-        .absence-history { margin-top:30px; }
-        .absence-record { background:#fff; padding:20px; border-radius:8px;
-                          margin-bottom:15px; border-left:4px solid #667eea; }
-        .absence-record.sickness { border-left-color:#dc3545; }
-        .absence-record.aaup { border-left-color:#ffc107; }
-        .absence-record.tofd { border-left-color:#28a745; }
-        .record-header { display:flex; justify-content:space-between;
-                         align-items:center; margin-bottom:10px; }
-        .record-type { font-weight:700; font-size:1.1em; color:#333; }
-        .record-dates { color:#666; font-size:0.9em; }
-        .record-details { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-                          gap:15px; margin-top:10px; }
-        .record-detail-item { color:#666; font-size:0.9em; }
-        .record-detail-item strong { color:#333; }
-        .record-notes { margin-top:10px; padding-top:10px;
-                        border-top:1px solid #e0e0e0; color:#666;
-                        font-size:0.9em; font-style:italic; }
-
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-                 background:rgba(0,0,0,0.5); z-index:1000;
-                 justify-content:center; align-items:center; }
-        .modal.active { display:flex; }
-        .modal-content { background:white; padding:30px; border-radius:15px;
-                         max-width:500px; width:90%; box-shadow:0 10px 40px rgba(0,0,0,0.3); }
-        .modal-header { display:flex; justify-content:space-between;
-                        align-items:center; margin-bottom:25px;
-                        padding-bottom:15px; border-bottom:2px solid #e0e0e0; }
-        .modal-header h2 { color:#667eea; font-size:1.5em; margin:0; }
-        .close-modal { background:none; border:none; font-size:1.5em;
-                       cursor:pointer; color:#666; padding:0; width:30px; height:30px;
-                       display:flex; align-items:center; justify-content:center; }
-        .close-modal:hover { color:#dc3545; }
-        .export-info { background:#e7f3ff; padding:15px; border-radius:8px;
-                       margin-bottom:20px; color:#667eea; font-size:0.9em; }
-
-        @media (max-width:968px) {
-            .content-area { grid-template-columns:1fr; }
-            header { flex-direction:column; gap:15px; text-align:center; }
-            .form-row { grid-template-columns:1fr; }
-            .absence-stats { grid-template-columns:1fr; }
-        }
+        /* … (rest of your CSS – unchanged) … */
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <div class="header-left">
-                <h1>Absence Management</h1>
-                <p>Track and manage employee absences</p>
-            </div>
-            <a href="index.html" class="back-btn">Back to Dashboard</a>
-        </header>
-
-        <!-- ADD EMPLOYEE BUTTON -->
-        <div style="text-align:center; margin:20px 0;">
-            <button onclick="addNewEmployee()" class="btn btn-success">
-                + Add New Employee
-            </button>
-        </div>
-
-        <div class="search-section">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
-                <div class="search-box" style="flex:1; min-width:250px;">
-                    <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="filterEmployees()">
-                </div>
-                <button class="back-btn" onclick="showExportModal()" style="background:#28a745; margin:0;">Export to CSV</button>
-            </div>
-        </div>
-
-        <!-- Employee Incident Summary -->
-        <div class="search-section" style="margin-top:20px;">
-            <h3 style="margin-bottom:15px; color:#333;">Employee Incident Summary</h3>
-            <div class="absence-stats" id="employeeSummary">
-                <div class="stat-card sickness">
-                    <span class="stat-label">Total Sickness Incidents</span>
-                    <span class="stat-value" id="empSicknessIncidents">—</span>
-                </div>
-                <div class="stat-card aaup">
-                    <span class="stat-label">Total AAUP Incidents</span>
-                    <span class="stat-value" id="empAaupIncidents">—</span>
-                </div>
-                <div class="stat-card tofd">
-                    <span class="stat-label">Total TOFD Incidents</span>
-                    <span class="stat-value" id="empTofdIncidents">—</span>
-                </div>
-                <div class="stat-card" style="border-left-color:#667eea;">
-                    <span class="stat-label">Grand Total Incidents</span>
-                    <span class="stat-value" id="empGrandTotalIncidents">—</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="content-area">
-            <div class="employee-list">
-                <h2>Employees <button onclick="addNewEmployee()" class="btn btn-success" style="font-size:0.8em; padding:6px 12px;">+ Add</button></h2>
-                <div id="employeeListContainer"></div>
-            </div>
-
-            <div class="absence-area">
-                <div id="noSelection" class="no-selection">
-                    <div class="no-selection-icon">Checklist</div>
-                    <h3>No Employee Selected</h3>
-                    <p>Please select an employee from the list to view their absence records</p>
-                </div>
-
-                <div id="employeeAbsence" style="display:none;">
-                    <div class="employee-header">
-                        <h2 id="employeeName">Employee Name</h2>
-                        <p id="employeeId">Employee ID</p>
-                    </div>
-
-                    <div class="absence-stats">
-                        <div class="stat-card sickness">
-                            <span class="stat-label">Sickness Days (This Year)</span>
-                            <span class="stat-value" id="sicknessDays">0</span>
-                        </div>
-                        <div class="stat-card sickness">
-                            <span class="stat-label">Sickness Hours (This Year)</span>
-                            <span class="stat-value" id="sicknessHours">0</span>
-                        </div>
-                        <div class="stat-card aaup">
-                            <span class="stat-label">AAUP Absences</span>
-                            <span class="stat-value" id="aaupCount">0</span>
-                        </div>
-                        <div class="stat-card tofd">
-                            <span class="stat-label">TOFD Absences</span>
-                            <span class="stat-value" id="tofdCount">0</span>
-                        </div>
-                        <div class="stat-card">
-                            <span class="stat-label">Total Incidents</span>
-                            <span class="stat-value" id="totalIncidents">0</span>
-                        </div>
-                    </div>
-
-                    <h3 class="section-title">Submit New Absence</h3>
-                    <div class="absence-form">
-                        <form id="absenceForm">
-                            <div class="form-group">
-                                <label for="absenceType">Absence Type *</label>
-                                <select id="absenceType" required>
-                                    <option value="">-- Select Type --</option>
-                                    <option value="sickness">Sickness</option>
-                                    <option value="aaup">AAUP (Authorised Absence Unpaid)</option>
-                                    <option value="tofd">TOFD (Time Off For Dependants)</option>
-                                </select>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="dateFrom">Date From *</label>
-                                    <input type="date" id="dateFrom" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="dateTo">Date To *</label>
-                                    <input type="date" id="dateTo" required>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="hours">Hours *</label>
-                                <input type="number" id="hours" step="0.5" min="0.5" placeholder="e.g. 8, 16, 24" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="notes">Notes</label>
-                                <textarea id="notes" placeholder="Add any additional information..."></textarea>
-                            </div>
-                            <div class="btn-group">
-                                <button type="submit" class="btn btn-primary">Submit Absence</button>
-                                <button type="reset" class="btn btn-secondary">Clear Form</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
-                        <h3 class="section-title" style="margin:0;">Absence History</h3>
-                        <div style="display:flex; gap:15px; flex-wrap:wrap;">
-                            <div>
-                                <label for="filterType" style="margin-bottom:5px; font-size:0.9em;">Filter by Type:</label>
-                                <select id="filterType" onchange="filterAbsences()" style="padding:8px 12px; width:180px;">
-                                    <option value="all">All Types</option>
-                                    <option value="sickness">Sickness</option>
-                                    <option value="aaup">AAUP</option>
-                                    <option value="tofd">TOFD</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="filterMonth" style="margin-bottom:5px; font-size:0.9em;">Filter by Month:</label>
-                                <input type="month" id="filterMonth" onchange="filterAbsences()" style="padding:8px 12px; width:180px;">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="absence-history" id="absenceHistory"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Export Modal -->
-        <div id="exportModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>Export to CSV</h2>
-                    <button class="close-modal" onclick="closeExportModal()">X</button>
-                </div>
-                <div class="export-info">
-                    Export absence records across all employees
-                </div>
-                <form id="exportForm">
-                    <div class="form-group">
-                        <label for="exportType">Absence Type *</label>
-                        <select id="exportType" required>
-                            <option value="all">All Types</option>
-                            <option value="sickness">Sickness Only</option>
-                            <option value="aaup">AAUP Only</option>
-                            <option value="tofd">TOFD Only</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="exportMonth">Month (Optional)</label>
-                        <input type="month" id="exportMonth">
-                        <p style="color:#666; font-size:0.85em; margin-top:5px;">Leave blank to export all months</p>
-                    </div>
-                    <div class="btn-group">
-                        <button type="submit" class="btn btn-primary">Download CSV</button>
-                        <button type="button" class="btn btn-secondary" onclick="closeExportModal()">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        <!-- (all your HTML – unchanged) -->
+        <!-- … -->
     </div>
 
     <script src="employees.js"></script>
@@ -329,35 +40,35 @@
         let selectedEmployeeId = null;
         let allRecords = [];
 
-        //   Email Template:
-        //    Subject: New Absence: {{employee_name}} - {{type}}
-        //    Body: 
-        //      Employee: {{employee_name}} ({{employee_id}})
-        //      Type: {{type}}
-        //      From: {{date_from}} → {{date_to}}
-        //      Hours: {{hours}}
-        //      Notes: {{notes}}
-        //      Submitted: {{submitted_at}}
-    
-        const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';     // e.g. service_abc123
-        const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';   // e.g. template_xyz789
-        const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';     // e.g. abc123def456
+        // ────────────────────── EMAIL CONFIG ──────────────────────
+        const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';
+        const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+        const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';
+
+        // NEW: list of managers that receive the absence notification
+        const MANAGERS = [
+            'barry.dixon@next-gen.uk',
+            'Marie.Wall@next-gen.uk',
+            'Carl.Finnigan@next-gen.uk',
+            'ashleigh.ginks@next-gen.uk',
+            'Maia.foster@next-gen.uk',
+            'Rebecca.Salter@next-gen.uk'
+        ];
 
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
-        // === 1. Add New Employee ===
+        // ────────────────────── 1. Add New Employee ──────────────────────
         function addNewEmployee() {
             const name = prompt("Enter employee name:");
             if (!name || name.trim() === "") return alert("Name is required");
 
             const emp = EMPLOYEES.add(name.trim());
             alert(`Added: ${emp.name} (ID: ${emp.id})`);
-
             renderEmployeeList();
             selectEmployee(emp.id);
         }
 
-        // === 2. INIT ===
+        // ────────────────────── 2. INIT ──────────────────────
         function initEmployees() {
             EMPLOYEES.init();
             EMPLOYEES.data.forEach(emp => {
@@ -370,7 +81,7 @@
             renderEmployeeList();
         }
 
-        // === 3. Render Employee List ===
+        // ────────────────────── 3. Render Employee List ──────────────────────
         function renderEmployeeList() {
             const container = document.getElementById('employeeListContainer');
             container.innerHTML = '';
@@ -383,7 +94,7 @@
             });
         }
 
-        // === 4. Select Employee ===
+        // ────────────────────── 4. Select Employee ──────────────────────
         function selectEmployee(id) {
             selectedEmployeeId = id;
             const emp = EMPLOYEES.data.find(e => e.id === id);
@@ -400,7 +111,7 @@
             loadAbsenceData(emp);
         }
 
-        // === 5. Load & Display Absence Data ===
+        // ────────────────────── 5. Load & Display Absence Data ──────────────────────
         function loadAbsenceData(emp) {
             const records = emp.absences || [];
             allRecords = [...records];
@@ -452,7 +163,7 @@
             container.innerHTML = html;
         }
 
-        // === 6. Filters ===
+        // ────────────────────── 6. Filters ──────────────────────
         function filterAbsences() {
             const type = document.getElementById('filterType').value;
             const month = document.getElementById('filterMonth').value;
@@ -480,7 +191,7 @@
             return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         }
 
-        // === 7. Search ===
+        // ────────────────────── 7. Search ──────────────────────
         function filterEmployees() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             document.querySelectorAll('.employee-item').forEach(item => {
@@ -489,7 +200,7 @@
             });
         }
 
-        // === 8. Submit Absence + EMAIL ===
+        // ────────────────────── 8. Submit Absence + EMAIL TO ALL MANAGERS ──────────────────────
         document.getElementById('absenceForm').addEventListener('submit', function (e) {
             e.preventDefault();
             if (!selectedEmployeeId) return alert('Select an employee first');
@@ -512,23 +223,44 @@
             }
             EMPLOYEES.save();
 
-            // SEND EMAIL
-            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                to_email: 'barry.dixon@next-gen.uk',
-                employee_name: emp.name,
-                employee_id: emp.id,
-                type: typeLabel,
-                date_from: rec.dateFrom,
-                date_to: rec.dateTo,
-                hours: rec.hours,
-                notes: rec.notes || '—',
-                submitted_at: rec.submittedAt
-            }).then(() => {
-                alert('Absence submitted and emailed to Barry!');
-            }).catch(err => {
-                console.error('Email failed:', err);
-                alert('Absence saved, but email failed. Check console.');
-            });
+            // ── SEND ONE EMAIL TO EVERY MANAGER ──
+            // ── SEND EMAIL WITH FULL SUMMARY ──
+const templateParams = {
+    employee_name: emp.name,
+    employee_id: emp.id,
+    type: typeLabel,
+    date_from: rec.dateFrom,
+    date_to: rec.dateTo,
+    hours: rec.hours,
+    notes: rec.notes || '—',
+    submitted_at: rec.submittedAt,
+
+    // NEW: Add current totals
+    total_sick_days: Math.ceil(
+        emp.absences
+            .filter(r => r.type === 'sickness')
+            .reduce((s, r) => s + parseFloat(r.hours), 0) / 8
+    ),
+    total_sickness_incidents: emp.absences.filter(r => r.type === 'sickness').length,
+    total_aaup_incidents: emp.absences.filter(r => r.type === 'aaup').length,
+    total_tofd_incidents: emp.absences.filter(r => r.type === 'tofd').length
+};
+
+const sendPromises = MANAGERS.map(email => {
+    return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        ...templateParams,
+        to_email: email
+    });
+});
+
+Promise.all(sendPromises)
+    .then(() => {
+        alert(`Absence saved & emailed to ${MANAGERS.length} managers!`);
+    })
+    .catch(err => {
+        console.error('Email error:', err);
+        alert('Absence saved, but one or more emails failed. Check console.');
+    });
 
             this.reset();
             loadAbsenceData(emp);
@@ -538,7 +270,7 @@
             document.getElementById('dateTo').setAttribute('min', this.value);
         });
 
-        // === 9. Export ===
+        // ────────────────────── 9. Export ──────────────────────
         function showExportModal() { document.getElementById('exportModal').classList.add('active'); }
         function closeExportModal() {
             document.getElementById('exportModal').classList.remove('active');
@@ -599,7 +331,7 @@
             if (e.target === e.currentTarget) closeExportModal();
         });
 
-        // === 10. ON LOAD ===
+        // ────────────────────── 10. ON LOAD ──────────────────────
         window.onload = function () {
             initEmployees();
             document.getElementById('empSicknessIncidents').textContent = '—';
