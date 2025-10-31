@@ -876,4 +876,43 @@
             }
 
             // Create CSV content
-            let csv = 'Employee Name,Employee ID,Total Entitlement,Days Taken,Days
+            let csv = 'Employee Name,Employee ID,Total Entitlement,Days Taken,Days Requested,Days Remaining,Status,Date From,Date To,Days,Holiday Type,Notes\n';
+
+            recordsToExport.forEach(record => {
+                const row = [
+                    employee.name,
+                    employee.id,
+                    data.stats.totalEntitlement,
+                    data.stats.daysTaken,
+                    data.stats.daysRequested,
+                    data.stats.daysRemaining,
+                    record.status.charAt(0).toUpperCase() + record.status.slice(1),
+                    formatDate(record.dateFrom),
+                    formatDate(record.dateTo),
+                    record.days,
+                    record.type,
+                    record.notes ? record.notes.replace(/,/g, ';') : ''
+                ];
+                csv += row.join(',') + '\n';
+            });
+
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const filterInfo = [];
+            if (statusFilter !== 'all') filterInfo.push(statusFilter);
+            if (monthFilter) filterInfo.push(monthFilter);
+            const filterSuffix = filterInfo.length > 0 ? '_' + filterInfo.join('_') : '';
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Holiday_Report_${employee.id}${filterSuffix}_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
