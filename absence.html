@@ -679,6 +679,9 @@
                 records: []
             };
 
+            // Store all records globally for filtering
+            allRecords = data.records;
+
             // Update stats
             document.getElementById('sicknessDays').textContent = data.stats.sicknessDays;
             document.getElementById('sicknessHours').textContent = data.stats.sicknessHours;
@@ -686,10 +689,18 @@
             document.getElementById('tofdCount').textContent = data.stats.tofdCount;
             document.getElementById('totalIncidents').textContent = data.stats.totalIncidents;
 
-            // Load absence history
+            // Reset filters
+            document.getElementById('filterType').value = 'all';
+            document.getElementById('filterMonth').value = '';
+
+            // Display all records initially
+            displayAbsenceRecords(allRecords);
+        }
+
+        function displayAbsenceRecords(records) {
             const historyContainer = document.getElementById('absenceHistory');
             
-            if (data.records.length === 0) {
+            if (records.length === 0) {
                 historyContainer.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">No absence records found</p>';
                 return;
             }
@@ -701,7 +712,7 @@
             };
 
             let html = '';
-            data.records.forEach(record => {
+            records.forEach(record => {
                 html += `
                     <div class="absence-record ${record.type}">
                         <div class="record-header">
@@ -722,6 +733,56 @@
             });
 
             historyContainer.innerHTML = html;
+        }
+
+        function filterAbsences() {
+            const typeFilter = document.getElementById('filterType').value;
+            const monthFilter = document.getElementById('filterMonth').value;
+
+            let filtered = [...allRecords];
+
+            // Filter by type
+            if (typeFilter !== 'all') {
+                filtered = filtered.filter(record => record.type === typeFilter);
+            }
+
+            // Filter by month
+            if (monthFilter) {
+                filtered = filtered.filter(record => {
+                    const recordMonth = record.dateFrom.substring(0, 7); // Get YYYY-MM
+                    return recordMonth === monthFilter;
+                });
+            }
+
+            // Update stats based on filtered results
+            updateFilteredStats(filtered);
+
+            // Display filtered records
+            displayAbsenceRecords(filtered);
+        }
+
+        function updateFilteredStats(records) {
+            let sicknessDays = 0;
+            let sicknessHours = 0;
+            let aaupCount = 0;
+            let tofdCount = 0;
+
+            records.forEach(record => {
+                if (record.type === 'sickness') {
+                    sicknessHours += parseFloat(record.hours);
+                    sicknessDays += Math.ceil(record.hours / 8);
+                } else if (record.type === 'aaup') {
+                    aaupCount++;
+                } else if (record.type === 'tofd') {
+                    tofdCount++;
+                }
+            });
+
+            document.getElementById('sicknessDays').textContent = sicknessDays;
+            document.getElementById('sicknessHours').textContent = sicknessHours;
+            document.getElementById('aaupCount').textContent = aaupCount;
+            document.getElementById('tofdCount').textContent = tofdCount;
+            document.getElementById('totalIncidents').textContent = records.length;
         }
 
         function formatDate(dateStr) {
