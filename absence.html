@@ -521,7 +521,24 @@
                         </form>
                     </div>
 
-                    <h3 class="section-title">📋 Absence History</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                        <h3 class="section-title" style="margin: 0;">📋 Absence History</h3>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <div>
+                                <label for="filterType" style="margin-bottom: 5px; font-size: 0.9em;">Filter by Type:</label>
+                                <select id="filterType" onchange="filterAbsences()" style="padding: 8px 12px; width: 180px;">
+                                    <option value="all">All Types</option>
+                                    <option value="sickness">Sickness</option>
+                                    <option value="aaup">AAUP</option>
+                                    <option value="tofd">TOFD</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filterMonth" style="margin-bottom: 5px; font-size: 0.9em;">Filter by Month:</label>
+                                <input type="month" id="filterMonth" onchange="filterAbsences()" style="padding: 8px 12px; width: 180px;">
+                            </div>
+                        </div>
+                    </div>
                     <div class="absence-history" id="absenceHistory">
                         <!-- Records will be loaded here -->
                     </div>
@@ -560,6 +577,13 @@
                         notes: 'Flu symptoms'
                     },
                     {
+                        type: 'sickness',
+                        dateFrom: '2024-12-10',
+                        dateTo: '2024-12-11',
+                        hours: 16,
+                        notes: 'Stomach bug'
+                    },
+                    {
                         type: 'aaup',
                         dateFrom: '2024-12-20',
                         dateTo: '2024-12-20',
@@ -572,6 +596,20 @@
                         dateTo: '2024-11-10',
                         hours: 4,
                         notes: 'Child care emergency'
+                    },
+                    {
+                        type: 'tofd',
+                        dateFrom: '2025-01-22',
+                        dateTo: '2025-01-22',
+                        hours: 3,
+                        notes: 'School meeting'
+                    },
+                    {
+                        type: 'aaup',
+                        dateFrom: '2024-10-15',
+                        dateTo: '2024-10-15',
+                        hours: 4,
+                        notes: 'Moving house'
                     }
                 ]
             },
@@ -611,6 +649,9 @@
                 records: []
             }
         };
+
+        let allRecords = [];
+        let filteredRecords = [];
 
         function selectEmployee(id) {
             selectedEmployeeId = id;
