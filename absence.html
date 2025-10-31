@@ -379,6 +379,74 @@
             font-style: italic;
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #dc3545;
+        }
+
+        .export-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #667eea;
+            font-size: 0.9em;
+        }
+
         @media (max-width: 968px) {
             .content-area {
                 grid-template-columns: 1fr;
@@ -411,8 +479,11 @@
         </header>
 
         <div class="search-section">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="filterEmployees()">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div class="search-box" style="flex: 1; min-width: 250px;">
+                    <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="filterEmployees()">
+                </div>
+                <button class="back-btn" onclick="showExportModal()" style="background: #28a745; margin: 0;">📊 Export to CSV</button>
             </div>
         </div>
 
@@ -543,6 +614,43 @@
                         <!-- Records will be loaded here -->
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Export Modal -->
+        <div id="exportModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>📊 Export to CSV</h2>
+                    <button class="close-modal" onclick="closeExportModal()">✕</button>
+                </div>
+
+                <div class="export-info">
+                    ℹ️ Export absence records across all employees
+                </div>
+
+                <form id="exportForm">
+                    <div class="form-group">
+                        <label for="exportType">Absence Type *</label>
+                        <select id="exportType" name="exportType" required>
+                            <option value="all">All Types</option>
+                            <option value="sickness">Sickness Only</option>
+                            <option value="aaup">AAUP Only</option>
+                            <option value="tofd">TOFD Only</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exportMonth">Month (Optional)</label>
+                        <input type="month" id="exportMonth" name="exportMonth">
+                        <p style="color: #666; font-size: 0.85em; margin-top: 5px;">Leave blank to export all months</p>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">Download CSV</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeExportModal()">Cancel</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -843,6 +951,106 @@
         // Update date To minimum when date From changes
         document.getElementById('dateFrom').addEventListener('change', function() {
             document.getElementById('dateTo').setAttribute('min', this.value);
+        });
+
+        // Export Modal Functions
+        function showExportModal() {
+            document.getElementById('exportModal').classList.add('active');
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+            document.getElementById('exportForm').reset();
+        }
+
+        document.getElementById('exportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const exportType = document.getElementById('exportType').value;
+            const exportMonth = document.getElementById('exportMonth').value;
+
+            // Collect all records from all employees
+            let allAbsenceRecords = [];
+            
+            Object.keys(absenceData).forEach(empId => {
+                const employee = employees[empId];
+                const records = absenceData[empId].records || [];
+                
+                records.forEach(record => {
+                    allAbsenceRecords.push({
+                        employeeId: employee.id,
+                        employeeName: employee.name,
+                        ...record
+                    });
+                });
+            });
+
+            // Filter by type
+            if (exportType !== 'all') {
+                allAbsenceRecords = allAbsenceRecords.filter(record => record.type === exportType);
+            }
+
+            // Filter by month
+            if (exportMonth) {
+                allAbsenceRecords = allAbsenceRecords.filter(record => {
+                    const recordMonth = record.dateFrom.substring(0, 7);
+                    return recordMonth === exportMonth;
+                });
+            }
+
+            // Generate CSV
+            exportToCSV(allAbsenceRecords, exportType, exportMonth);
+            
+            closeExportModal();
+        });
+
+        function exportToCSV(records, typeFilter, monthFilter) {
+            if (records.length === 0) {
+                alert('No records found matching your criteria');
+                return;
+            }
+
+            // CSV Headers
+            let csv = 'Employee ID,Employee Name,Absence Type,Date From,Date To,Hours,Days,Notes\n';
+
+            // CSV Data
+            records.forEach(record => {
+                const days = Math.ceil(record.hours / 8);
+                const notes = (record.notes || '').replace(/"/g, '""'); // Escape quotes
+                
+                csv += `"${record.employeeId}","${record.employeeName}","${record.type}","${record.dateFrom}","${record.dateTo}",${record.hours},${days},"${notes}"\n`;
+            });
+
+            // Create download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            // Generate filename
+            let filename = 'absence_export_';
+            if (typeFilter !== 'all') {
+                filename += typeFilter + '_';
+            }
+            if (monthFilter) {
+                filename += monthFilter + '_';
+            }
+            filename += new Date().toISOString().split('T')[0] + '.csv';
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            alert(`Exported ${records.length} absence record(s) to CSV`);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('exportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeExportModal();
+            }
         });
     </script>
 </body>
