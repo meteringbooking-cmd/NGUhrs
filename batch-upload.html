@@ -1,0 +1,29 @@
+<input type="file" id="batchFile" accept=".csv,.xlsx">
+<button onclick="uploadBatch()">Upload & Update</button>
+
+<script>
+async function uploadBatch() {
+    const file = document.getElementById('batchFile').files[0];
+    if (!file) return alert("Select a file");
+
+    const text = await file.text();
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const headers = lines[0].split(',').map(h => h.trim());
+    let updated = 0;
+
+    for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        const row = {};
+        headers.forEach((h, idx) => row[h] = values[idx]);
+
+        const emp = EMPLOYEES.findByNameOrId(row.name || row.id);
+        if (emp) {
+            // Update only provided fields
+            delete row.name; delete row.id;
+            EMPLOYEES.update(emp.id, row);
+            updated++;
+        }
+    }
+    alert(`Updated ${updated} employees`);
+}
+</script>
