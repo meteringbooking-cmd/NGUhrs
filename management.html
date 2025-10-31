@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absence Management | NGU-hrs</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+               background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+               min-height:100vh; padding:20px; }
+        .container { max-width:1400px; margin:0 auto; }
+
+        header { background:rgba(255,255,255,0.95); padding:25px 30px;
+                 border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.2);
+                 margin-bottom:30px; display:flex; justify-content:space-between;
+                 align-items:center; }
+        .header-left h1 { color:#667eea; font-size:2.2em; font-weight:700; }
+        .header-left p { color:#666; margin-top:5px; }
+        .back-btn { background:linear-gradient(135deg,#667eea,#764ba2);
+                    color:white; padding:12px 25px; border:none; border-radius:8px;
+                    cursor:pointer; font-size:1em; transition:transform .2s;
+                    text-decoration:none; display:inline-block; }
+        .back-btn:hover { transform:translateY(-2px);
+                          box-shadow:0 5px 15px rgba(0,0,0,0.2); }
+
+        .search-section { background:rgba(255,255,255,0.95); padding:25px;
+                          border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15);
+                          margin-bottom:25px; }
+        .search-box { display:flex; gap:15px; align-items:center; flex-wrap:wrap; }
+        .search-box input { flex:1; min-width:250px; padding:12px 20px;
+                            border:2px solid #e0e0e0; border-radius:8px;
+                            font-size:1em; transition:border .3s; }
+        .search-box input:focus { outline:none; border-color:#667eea; }
+
+        /* Tabs */
+        .tabs { display:flex; gap:5px; margin-bottom:20px; flex-wrap:wrap; }
+        .tab-btn { background:#f1f3f5; color:#555; padding:10px 16px;
+                   border:none; border-radius:8px; cursor:pointer;
+                   font-size:0.95em; font-weight:600; transition:all .3s; }
+        .tab-btn.active { background:#667eea; color:white; }
+        .tab-btn:hover { background:#d5d9eb; }
+        .tab-btn.active:hover { background:#5a6fd8; }
+
+        .content-area { display:grid; grid-template-columns:380px 1fr; gap:25px; }
+        
+        /* Sidebar */
+        .sidebar { background:rgba(255,255,255,0.95); padding:25px;
+                   border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15);
+                   height:fit-content; max-height:700px; overflow-y:auto; }
+        .sidebar h2 { color:#333; margin-bottom:15px; font-size:1.3em; }
+        .employee-item { display:flex; align-items:center; gap:10px;
+                         background:#f8f9fa; padding:12px 16px; border-radius:8px;
+                         margin-bottom:8px; cursor:pointer; transition:all .3s;
+                         border-left:4px solid #667eea; }
+        .employee-item:hover { background:#e9ecef; transform:translateX(3px); }
+        .employee-item input[type="checkbox"] { cursor:pointer; }
+        .employee-item label { cursor:pointer; flex:1; margin:0; }
+        .employee-item strong { display:block; color:#333; font-size:1.02em; }
+        .employee-item span { color:#666; font-size:0.85em; }
+
+        .bulk-actions { margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; }
+        .bulk-btn { background:#28a745; color:white; padding:10px 16px;
+                    border:none; border-radius:8px; cursor:pointer;
+                    font-size:0.9em; font-weight:600; transition:all .3s; }
+        .bulk-btn:hover { background:#218838; transform:translateY(-1px); }
+
+        /* Main Content */
+        .main-content { background:rgba(255,255,255,0.95); padding:30px;
+                        border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        .no-selection { text-align:center; padding:60px 20px; color:#666; }
+        .no-selection-icon { font-size:4.5em; margin-bottom:15px; }
+
+        /* Reusable stat cards */
+        .absence-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+                         gap:20px; margin:25px 0; }
+        .stat-card { background:#f8f9fa; padding:18px; border-radius:10px;
+                     border-left:4px solid #667eea; text-align:center; }
+        .stat-card.sickness { border-left-color:#dc3545; }
+        .stat-card.aaup { border-left-color:#ffc107; }
+        .stat-card.tofd { border-left-color:#28a745; }
+        .stat-label { color:#666; font-size:0.9em; display:block; }
+        .stat-value { color:#333; font-size:1.9em; font-weight:700; }
+
+        @media (max-width:968px) {
+            .content-area { grid-template-columns:1fr; }
+            header, .tabs { flex-direction:column; text-align:center; gap:15px; }
+            .bulk-actions { justify-content:center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <h1>Absence Management</h1>
+                <p>Track and manage employee absences</p>
+            </div>
+            <a href="index.html" class="back-btn">Back to Dashboard</a>
+        </header>
+
+        <div class="search-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+                <div class="search-box" style="flex:1; min-width:250px;">
+                    <input type="text" id="searchInput" placeholder="Search by name or ID..." onkeyup="filterEmployees()">
+                </div>
+                <button class="back-btn" onclick="showExportModal()" style="background:#28a745; margin:0;">Export to CSV</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('view-all')">View all</button>
+            <button class="tab-btn" onclick="openTab('employee-files')">Employee files</button>
+            <button class="tab-btn" onclick="openTab('reports')">Reports</button>
+            <button class="tab-btn" onclick="openTab('management')">Management</button>
+            <button class="tab-btn" onclick="openTab('mandatory-docs')">Mandatory Documents</button>
+            <button class="tab-btn" onclick="openTab('application')">Application</button>
+        </div>
+
+        <div class="content-area">
+            <!-- Sidebar with Checkboxes -->
+            <div class="sidebar">
+                <h2>Employees</h2>
+                <div id="employeeList">
+                    <div class="employee-item" onclick="toggleSelect(1)">
+                        <input type="checkbox" id="emp1">
+                        <label for="emp1">
+                            <strong>John Smith</strong>
+                            <span>ID: EMP001</span>
+                        </label>
+                    </div>
+                    <div class="employee-item" onclick="toggleSelect(2)">
+                        <input type="checkbox" id="emp2">
+                        <label for="emp2">
+                            <strong>Sarah Johnson</strong>
+                            <span>ID: EMP002</span>
+                        </label>
+                    </div>
+                    <div class="employee-item" onclick="toggleSelect(3)">
+                        <input type="checkbox" id="emp3">
+                        <label for="emp3">
+                            <strong>Michael Brown</strong>
+                            <span>ID: EMP003</span>
+                        </label>
+                    </div>
+                    <div class="employee-item" onclick="toggleSelect(4)">
+                        <input type="checkbox" id="emp4">
+                        <label for="emp4">
+                            <strong>Emma Wilson</strong>
+                            <span>ID: EMP004</span>
+                        </label>
+                    </div>
+                    <div class="employee-item" onclick="toggleSelect(5)">
+                        <input type="checkbox" id="emp5">
+                        <label for="emp5">
+                            <strong>James Taylor</strong>
+                            <span>ID: EMP005</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Bulk Actions (Management Tab) -->
+                <div id="bulkActions" style="display:none; margin-top:20px;">
+                    <div class="bulk-actions">
+                        <button class="bulk-btn" onclick="sendReminder()">Send Reminder</button>
+                        <button class="bulk-btn" onclick="exportSelected()">Export Selected</button>
+                        <button class="bulk-btn" onclick="generateReport()">Generate Report</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="main-content">
+                <!-- View All -->
+                <div id="view-all" class="tab-content active">
+                    <div id="noSelection" class="no-selection">
+                        <div class="no-selection-icon">Checklist</div>
+                        <h3>Select employees to view details</h3>
+                        <p>Check one or more employees from the list</p>
+                    </div>
+                    <div id="selectedSummary" style="display:none;">
+                        <h3>Selected Employees Summary</h3>
+                        <div class="absence-stats">
+                            <div class="stat-card sickness">
+                                <span class="stat-label">Total Sickness Incidents</span>
+                                <span class="stat-value" id="selSickness">0</span>
+                            </div>
+                            <div class="stat-card aaup">
+                                <span class="stat-label">Total AAUP Incidents</span>
+                                <span class="stat-value" id="selAaup">0</span>
+                            </div>
+                            <div class="stat-card tofd">
+                                <span class="stat-label">Total TOFD Incidents</span>
+                                <span class="stat-value" id="selTofd">0</span>
+                            </div>
+                            <div class="stat-card" style="border-left-color:#667eea;">
+                                <span class="stat-label">Grand Total</span>
+                                <span class="stat-value" id="selTotal">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Tabs (Placeholder) -->
+                <div id="employee-files" class="tab-content">
+                    <h3>Employee Files</h3>
+                    <p>View contracts, certifications, and personal documents.</p>
+                </div>
+                <div id="reports" class="tab-content">
+                    <h3>Reports</h3>
+                    <p>Absence trends, compliance reports, and analytics.</p>
+                </div>
+                <div id="management" class="tab-content">
+                    <h3>Management Tools</h3>
+                    <p>Use checkboxes to select employees and perform bulk actions.</p>
+                </div>
+                <div id="mandatory-docs" class="tab-content">
+                    <h3>Mandatory Documents</h3>
+                    <p>Track required training, certifications, and compliance docs.</p>
+                </div>
+                <div id="application" class="tab-content">
+                    <h3>Application Portal</h3>
+                    <p>Submit leave requests, view approvals, and upload documents.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Modal -->
+        <div id="exportModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Export to CSV</h2>
+                    <button class="close-modal" onclick="closeExportModal()">X</button>
+                </div>
+                <form id="exportForm">
+                    <div class="form-group">
+                        <label for="exportType">Absence Type *</label>
+                        <select id="exportType" required>
+                            <option value="all">All Types</option>
+                            <option value="sickness">Sickness Only</option>
+                            <option value="aaup">AAUP Only</option>
+                            <option value="tofd">TOFD Only</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="exportMonth">Month (Optional)</label>
+                        <input type="month" id="exportMonth">
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">Download CSV</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeExportModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const employees = {
+            1: { id: 'EMP001', name: 'John Smith' },
+            2: { id: 'EMP002', name: 'Sarah Johnson' },
+            3: { id: 'EMP003', name: 'Michael Brown' },
+            4: { id: 'EMP004', name: 'Emma Wilson' },
+            5: { id: 'EMP005', name: 'James Taylor' }
+        };
+
+        const absenceData = {
+            1: { records: [
+                {type:'sickness',dateFrom:'2025-01-15',dateTo:'2025-01-17',hours:24,notes:'Flu'},
+                {type:'sickness',dateFrom:'2024-12-10',dateTo:'2024-12-11',hours:16,notes:'Stomach bug'},
+                {type:'aaup',dateFrom:'2024-12-20',dateTo:'2024-12-20',hours:8,notes:'Appointment'},
+                {type:'tofd',dateFrom:'2024-11-10',dateTo:'2024-11-10',hours:4,notes:'Child care'}
+            ]},
+            2: { records: [
+                {type:'sickness',dateFrom:'2025-01-20',dateTo:'2025-01-20',hours:8,notes:'Migraine'},
+                {type:'tofd',dateFrom:'2024-12-05',dateTo:'2024-12-05',hours:3,notes:'School'}
+            ]},
+            3: { records: [] }
+        };
+
+        // Toggle checkbox on click (excluding label)
+        function toggleSelect(id) {
+            const checkbox = document.getElementById(`emp${id}`);
+            checkbox.checked = !checkbox.checked;
+            updateSelection();
+        }
+
+        // Update selected summary
+        function updateSelection() {
+            const checked = Array.from(document.querySelectorAll('.employee-item input:checked'))
+                                 .map(cb => parseInt(cb.id.replace('emp', '')));
+
+            const noSel = document.getElementById('noSelection');
+            const sum = document.getElementById('selectedSummary');
+
+            if (checked.length === 0) {
+                noSel.style.display = 'block';
+                sum.style.display = 'none';
+                return;
+            }
+
+            noSel.style.display = 'none';
+            sum.style.display = 'block';
+
+            let sickness = 0, aaup = 0, tofd = 0;
+            checked.forEach(id => {
+                const recs = (absenceData[id]?.records || []);
+                sickness += recs.filter(r => r.type === 'sickness').length;
+                aaup += recs.filter(r => r.type === 'aaup').length;
+                tofd += recs.filter(r => r.type === 'tofd').length;
+            });
+
+            document.getElementById('selSickness').textContent = sickness;
+            document.getElementById('selAaup').textContent = aaup;
+            document.getElementById('selTofd').textContent = tofd;
+            document.getElementById('selTotal').textContent = sickness + aaup + tofd;
+        }
+
+        // Tabs
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Show bulk actions only on Management tab
+            document.getElementById('bulkActions').style.display = tabName === 'management' ? 'block' : 'none';
+        }
+
+        // Bulk Actions
+        function sendReminder() {
+            const selected = getSelectedIds();
+            if (!selected.length) return alert('Select at least one employee');
+            alert(`Reminder sent to ${selected.length} employee(s)`);
+        }
+        function exportSelected() {
+            const selected = getSelectedIds();
+            if (!selected.length) return alert('Select employees to export');
+            alert(`Exporting data for ${selected.length} employee(s)`);
+        }
+        function generateReport() {
+            const selected = getSelectedIds();
+            if (!selected.length) return alert('Select employees for report');
+            alert(`Generating report for ${selected.length} employee(s)`);
+        }
+
+        function getSelectedIds() {
+            return Array.from(document.querySelectorAll('.employee-item input:checked'))
+                        .map(cb => parseInt(cb.id.replace('emp', '')));
+        }
+
+        // Search
+        function filterEmployees() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.employee-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(term) ? 'flex' : 'none';
+            });
+        }
+
+        // Export Modal
+        function showExportModal() { document.getElementById('exportModal').classList.add('active'); }
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.remove('active');
+            document.getElementById('exportForm').reset();
+        }
+
+        // Initialize
+        document.querySelectorAll('.employee-item input').forEach(cb => {
+            cb.addEventListener('change', updateSelection);
+        });
+    </script>
+</body>
+</html>
