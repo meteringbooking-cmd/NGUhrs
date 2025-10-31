@@ -148,6 +148,27 @@
             font-size: 1.2em;
         }
 
+        .form-container {
+            margin-top: 15px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         footer {
             text-align: center;
             color: white;
@@ -206,7 +227,7 @@
     <div class="container">
         <header>
             <h1>Next Generation Utilities Hub</h1>
-            <p class="tagline">Complete Management Platform</ T></p>
+            <p class="tagline">Complete Management Platform</p>
         </header>
 
         <div class="quick-stats">
@@ -285,13 +306,12 @@
                 <p class="module-description">Centralised document repository for all employee-related files and records.</p>
             </div>
 
-            <div class="module-card" id="cognito-card" onclick="toggleCognitoFormsSubsections(event)">
+            <div class="module-card" id="cognito-card" onclick="toggleCognitoSubsections(event)">
                 <span class="module-icon">📋</span>
                 <h2 class="module-title">Cognito Forms</h2>
                 <p class="module-description">Access to all appropriate forms in one space.</p>
-            </div>
 
-            <div class="subsections" id="cognitoforms-subsections">
+                <div class="subsections" id="cognitoforms-subsections">
                     <div class="subsection-item" onclick="showForm(event, 'payment-form')">
                         <span class="subsection-icon">⏰</span>
                         <span>Additional Payment Claim Form</span>
@@ -302,6 +322,18 @@
                     </div>
                 </div>
 
+                <div id="payment-form" class="form-container">
+                    <h3 style="margin-bottom: 15px; color: #667eea;">Additional Payment Claim Form</h3>
+                    <script src="https://www.cognitoforms.com/f/seamless.js" data-key="8hDPMS_zkE6OIS_T5xoOSw" data-form="218"></script>
+                </div>
+
+                <div id="vehicle-form" class="form-container">
+                    <h3 style="margin-bottom: 15px; color: #667eea;">Daily Vehicle Check Form</h3>
+                    <script src="https://www.cognitoforms.com/f/seamless.js" data-key="8hDPMS_zkE6OIS_T5xoOSw" data-form="42"></script>
+                </div>
+            </div>
+
+            <!-- Remaining Modules -->
             <div class="module-card" onclick="navigateToModule('additionalpayments')">
                 <span class="module-icon">💳</span>
                 <h2 class="module-title">Additional Payments</h2>
@@ -317,79 +349,64 @@
 
         <footer>
             <p>© 2025 Next Generation Utilities Hub System.</p>
-            <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;"></p>
         </footer>
     </div>
 
     <script>
-    /* -------------------------------------------------
-       1. Navigate to a full module page (e.g. holiday.html)
-       ------------------------------------------------- */
-    function navigateToModule(module) {
-        console.log('Navigating to: ' + module + '.html');
-        window.location.href = module + '.html';
-    }
-
-    /* -------------------------------------------------
-       2. Reports card – toggle its subsections
-       ------------------------------------------------- */
-    function toggleReportsSubsections(event) {
-        event.stopPropagation();
-        const subsections = document.getElementById('reports-subsections');
-        subsections.classList.toggle('active');
-    }
-
-    /* -------------------------------------------------
-       3. Cognito Forms card – toggle its subsections
-       ------------------------------------------------- */
-    function toggleCognitoSubsections(event) {
-        event.stopPropagation();
-        const subsections = document.getElementById('cognitoforms-subsections');
-        subsections.classList.toggle('active');
-
-        // Hide any open form when the menu opens
-        document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
-    }
-
-    /* -------------------------------------------------
-       4. Show a specific embedded Cognito form
-       ------------------------------------------------- */
-    function showForm(event, formId) {
-        event.stopPropagation();
-
-        // Hide every form
-        document.querySelectorAll('.form-container').forEach(form => {
-            form.classList.remove('active');
-        });
-
-        // Show the requested one
-        const target = document.getElementById(formId);
-        if (target) {
-            target.classList.add('active');
-            target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        function navigateToModule(module) {
+            console.log('Navigating to: ' + module + '.html');
+            window.location.href = module + '.html';
         }
-    }
 
-    function navigateToSubsection(subsection) {
-        console.log('Navigating to: ' + subsection + '.html');
-        window.location.href = subsection + '.html';
-    }
+        function toggleReportsSubsections(event) {
+            event.stopPropagation();
+            const subsections = document.getElementById('reports-subsections');
+            subsections.classList.toggle('active');
+        }
 
-      document.querySelectorAll('.module-card').forEach(card => {
-        card.addEventListener('mouseenter', function () {
-            this.style.background = 'rgba(255, 255, 255, 1)';
-        });
-        card.addEventListener('mouseleave', function () {
-            this.style.background = 'rgba(255, 255, 255, 0.95)';
-        });
-    });
+        function toggleCognitoSubsections(event) {
+            event.stopPropagation();
+            const subsections = document.getElementById('cognitoforms-subsections');
+            subsections.classList.toggle('active');
+            document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
+        }
 
-       document.addEventListener('click', function (e) {
-        const cognitoCard = document.getElementById('cognito-card');
-        if (cognitoCard && !e.target.closest('#cognito-card')) {
+        function showForm(event, formId) {
+            event.stopPropagation();
             document.querySelectorAll('.form-container').forEach(form => {
                 form.classList.remove('active');
             });
+            const target = document.getElementById(formId);
+            if (target) {
+                target.classList.add('active');
+                target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         }
-    });
-</script>
+
+        function navigateToSubsection(subsection) {
+            console.log('Navigating to: ' + subsection + '.html');
+            window.location.href = subsection + '.html';
+        }
+
+        // Hover effects
+        document.querySelectorAll('.module-card').forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                this.style.background = 'rgba(255, 255, 255, 1)';
+            });
+            card.addEventListener('mouseleave', function () {
+                this.style.background = 'rgba(255, 255, 255, 0.95)';
+            });
+        });
+
+        // Close forms when clicking outside
+        document.addEventListener('click', function (e) {
+            const cognitoCard = document.getElementById('cognito-card');
+            if (cognitoCard && !e.target.closest('#cognito-card')) {
+                document.querySelectorAll('.form-container').forEach(form => {
+                    form.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
