@@ -285,7 +285,7 @@
                 <p class="module-description">Centralised document repository for all employee-related files and records.</p>
             </div>
 
-            <div class="module-card" id="cognito-card" onclick="toggleCognitoSubsections(event)">
+            <div class="module-card" id="cognito-card" onclick="toggleCognitoFormsSubsections(event)">
                 <span class="module-icon">📋</span>
                 <h2 class="module-title">Cognito Forms</h2>
                 <p class="module-description">Access to all appropriate forms in one space.</p>
@@ -322,44 +322,74 @@
     </div>
 
     <script>
-        function navigateToModule(module) {
-            console.log('Navigating to: ' + module + '.html');
-            window.location.href = module + '.html';
-        }
+    /* -------------------------------------------------
+       1. Navigate to a full module page (e.g. holiday.html)
+       ------------------------------------------------- */
+    function navigateToModule(module) {
+        console.log('Navigating to: ' + module + '.html');
+        window.location.href = module + '.html';
+    }
 
-        function toggleReportsSubsections(event) {
-            event.stopPropagation();
-            const subsections = document.getElementById('reports-subsections');
-            subsections.classList.toggle('active');
-        }
+    /* -------------------------------------------------
+       2. Reports card – toggle its subsections
+       ------------------------------------------------- */
+    function toggleReportsSubsections(event) {
+        event.stopPropagation();
+        const subsections = document.getElementById('reports-subsections');
+        subsections.classList.toggle('active');
+    }
 
-        function navigateToSubsection(subsection) {
-            console.log('Navigating to: ' + subsection + '.html');
-            window.location.href = subsection + '.html';
-        }
+    /* -------------------------------------------------
+       3. Cognito Forms card – toggle its subsections
+       ------------------------------------------------- */
+    function toggleCognitoSubsections(event) {
+        event.stopPropagation();
+        const subsections = document.getElementById('cognitoforms-subsections');
+        subsections.classList.toggle('active');
 
-        // Add smooth hover effects
-        document.querySelectorAll('.module-card').forEach(card => {
-            if (card.id !== 'reports-card') {
-                card.addEventListener('mouseenter', function() {
-                    this.style.background = 'rgba(255, 255, 255, 1)';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.background = 'rgba(255, 255, 255, 0.95)';
-                });
-            }
+        // Hide any open form when the menu opens
+        document.querySelectorAll('.form-container').forEach(f => f.classList.remove('active'));
+    }
+
+    /* -------------------------------------------------
+       4. Show a specific embedded Cognito form
+       ------------------------------------------------- */
+    function showForm(event, formId) {
+        event.stopPropagation();
+
+        // Hide every form
+        document.querySelectorAll('.form-container').forEach(form => {
+            form.classList.remove('active');
         });
 
-        // Special hover effect for reports card
-        const reportsCard = document.getElementById('reports-card');
-        reportsCard.addEventListener('mouseenter', function() {
+        // Show the requested one
+        const target = document.getElementById(formId);
+        if (target) {
+            target.classList.add('active');
+            target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    function navigateToSubsection(subsection) {
+        console.log('Navigating to: ' + subsection + '.html');
+        window.location.href = subsection + '.html';
+    }
+
+      document.querySelectorAll('.module-card').forEach(card => {
+        card.addEventListener('mouseenter', function () {
             this.style.background = 'rgba(255, 255, 255, 1)';
         });
-        
-        reportsCard.addEventListener('mouseleave', function() {
+        card.addEventListener('mouseleave', function () {
             this.style.background = 'rgba(255, 255, 255, 0.95)';
         });
-    </script>
-</body>
-</html>
+    });
+
+       document.addEventListener('click', function (e) {
+        const cognitoCard = document.getElementById('cognito-card');
+        if (cognitoCard && !e.target.closest('#cognito-card')) {
+            document.querySelectorAll('.form-container').forEach(form => {
+                form.classList.remove('active');
+            });
+        }
+    });
+</script>
