@@ -5,466 +5,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Absence Management | NGU-hrs</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-left h1 {
-            color: #667eea;
-            font-size: 2.2em;
-            font-weight: 700;
-        }
-
-        .header-left p {
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .back-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: transform 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .search-section {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            margin-bottom: 25px;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .search-box input {
-            flex: 1;
-            min-width: 250px;
-            padding: 12px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border 0.3s;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .content-area {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 25px;
-        }
-
-        .employee-list {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            height: fit-content;
-            max-height: 700px;
-            overflow-y: auto;
-        }
-
-        .employee-list h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-        }
-
-        .employee-item {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-left: 4px solid #667eea;
-        }
-
-        .employee-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-
-        .employee-item.active {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-left-color: #764ba2;
-        }
-
-        .employee-item strong {
-            display: block;
-            color: #333;
-            font-size: 1.05em;
-            margin-bottom: 3px;
-        }
-
-        .employee-item span {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .absence-area {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .no-selection {
-            text-align: center;
-            padding: 80px 20px;
-            color: #666;
-        }
-
-        .no-selection-icon {
-            font-size: 5em;
-            margin-bottom: 20px;
-        }
-
-        .employee-header {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-
-        .employee-header h2 {
-            color: #667eea;
-            font-size: 1.8em;
-            margin-bottom: 5px;
-        }
-
-        .employee-header p {
-            color: #666;
-        }
-
-        .absence-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-        }
-
-        .stat-card.sickness {
-            border-left-color: #dc3545;
-        }
-
-        .stat-card.aaup {
-            border-left-color: #ffc107;
-        }
-
-        .stat-card.tofd {
-            border-left-color: #28a745;
-        }
-
-        .stat-label {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .stat-value {
-            color: #333;
-            font-size: 2em;
-            font-weight: 700;
-        }
-
-        .section-title {
-            color: #333;
-            font-size: 1.4em;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .absence-form {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        label {
-            display: block;
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.95em;
-        }
-
-        input[type="date"],
-        input[type="number"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border 0.3s;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        input[type="date"]:focus,
-        input[type="number"]:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            flex: 1;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .absence-history {
-            margin-top: 30px;
-        }
-
-        .absence-record {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-        }
-
-        .absence-record.sickness {
-            border-left-color: #dc3545;
-        }
-
-        .absence-record.aaup {
-            border-left-color: #ffc107;
-        }
-
-        .absence-record.tofd {
-            border-left-color: #28a745;
-        }
-
-        .record-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .record-type {
-            font-weight: 700;
-            font-size: 1.1em;
-            color: #333;
-        }
-
-        .record-dates {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .record-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .record-detail-item {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .record-detail-item strong {
-            color: #333;
-        }
-
-        .record-notes {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #e0e0e0;
-            color: #666;
-            font-size: 0.9em;
-            font-style: italic;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-
-        .modal-header h2 {
-            color: #667eea;
-            font-size: 1.5em;
-            margin: 0;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #666;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .close-modal:hover {
-            color: #dc3545;
-        }
-
-        .export-info {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            color: #667eea;
-            font-size: 0.9em;
-        }
-
-        @media (max-width: 968px) {
-            .content-area {
-                grid-template-columns: 1fr;
-            }
-
-            header {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .absence-stats {
-                grid-template-columns: 1fr;
-            }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+               background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+               min-height:100vh; padding:20px; }
+        .container { max-width:1400px; margin:0 auto; }
+
+        header { background:rgba(255,255,255,0.95); padding:25px 30px;
+                 border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.2);
+                 margin-bottom:30px; display:flex; justify-content:space-between;
+                 align-items:center; }
+        .header-left h1 { color:#667eea; font-size:2.2em; font-weight:700; }
+        .header-left p { color:#666; margin-top:5px; }
+        .back-btn { background:linear-gradient(135deg,#667eea,#764ba2);
+                    color:white; padding:12px 25px; border:none; border-radius:8px;
+                    cursor:pointer; font-size:1em; transition:transform .2s;
+                    text-decoration:none; display:inline-block; }
+        .back-btn:hover { transform:translateY(-2px);
+                          box-shadow:0 5px 15px rgba(0,0,0,0.2); }
+
+        .search-section { background:rgba(255,255,255,0.95); padding:25px;
+                          border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15);
+                          margin-bottom:25px; }
+        .search-box { display:flex; gap:15px; align-items:center; flex-wrap:wrap; }
+        .search-box input { flex:1; min-width:250px; padding:12px 20px;
+                            border:2px solid #e0e0e0; border-radius:8px;
+                            font-size:1em; transition:border .3s; }
+        .search-box input:focus { outline:none; border-color:#667eea; }
+
+        .content-area { display:grid; grid-template-columns:350px 1fr; gap:25px; }
+        .employee-list { background:rgba(255,255,255,0.95); padding:25px;
+                         border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15);
+                         max-height:700px; overflow-y:auto; }
+        .employee-list h2 { color:#333; margin-bottom:20px; font-size:1.3em; }
+        .employee-item { background:#f8f9fa; padding:15px 20px; border-radius:8px;
+                         margin-bottom:10px; cursor:pointer; transition:all .3s;
+                         border-left:4px solid #667eea; }
+        .employee-item:hover { background:#e9ecef; transform:translateX(5px); }
+        .employee-item.active { background:linear-gradient(135deg,rgba(102,126,234,.1),rgba(118,75,162,.1));
+                                border-left-color:#764ba2; }
+        .employee-item strong { display:block; color:#333; font-size:1.05em; margin-bottom:3px; }
+        .employee-item span { color:#666; font-size:0.9em; }
+
+        .absence-area { background:rgba(255,255,255,0.95); padding:30px;
+                        border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15); }
+        .no-selection { text-align:center; padding:80px 20px; color:#666; }
+        .no-selection-icon { font-size:5em; margin-bottom:20px; }
+
+        .employee-header { margin-bottom:30px; padding-bottom:20px;
+                           border-bottom:2px solid #e0e0e0; }
+        .employee-header h2 { color:#667eea; font-size:1.8em; margin-bottom:5px; }
+        .employee-header p { color:#666; }
+
+        .absence-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+                         gap:20px; margin-bottom:30px; }
+        .stat-card { background:#f8f9fa; padding:20px; border-radius:10px;
+                     border-left:4px solid #667eea; }
+        .stat-card.sickness { border-left-color:#dc3545; }
+        .stat-card.aaup { border-left-color:#ffc107; }
+        .stat-card.tofd { border-left-color:#28a745; }
+        .stat-label { color:#666; font-size:0.9em; margin-bottom:8px; display:block; }
+        .stat-value { color:#333; font-size:2em; font-weight:700; }
+
+        .section-title { color:#333; font-size:1.4em; margin-bottom:20px;
+                         display:flex; align-items:center; gap:10px; }
+
+        .absence-form { background:#f8f9fa; padding:25px; border-radius:10px;
+                        margin-bottom:30px; }
+        .form-group { margin-bottom:20px; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        label { display:block; color:#333; font-weight:600; margin-bottom:8px;
+                font-size:0.95em; }
+        input[type="date"],input[type="number"],textarea,select {
+            width:100%; padding:12px; border:2px solid #e0e0e0; border-radius:8px;
+            font-size:1em; transition:border .3s; }
+        input[type="date"]:focus, input[type="number"]:focus,
+        textarea:focus, select:focus { outline:none; border-color:#667eea; }
+        textarea { resize:vertical; min-height:80px; }
+
+        .btn-group { display:flex; gap:15px; margin-top:20px; }
+        .btn { padding:12px 30px; border:none; border-radius:8px;
+               cursor:pointer; font-size:1em; font-weight:600; transition:all .3s; }
+        .btn-primary { background:linear-gradient(135deg,#667eea,#764ba2);
+                       color:white; flex:1; }
+        .btn-secondary { background:#6c757d; color:white; }
+        .btn:hover { transform:translateY(-2px);
+                     box-shadow:0 5px 15px rgba(0,0,0,0.2); }
+
+        .absence-history { margin-top:30px; }
+        .absence-record { background:#fff; padding:20px; border-radius:8px;
+                          margin-bottom:15px; border-left:4px solid #667eea; }
+        .absence-record.sickness { border-left-color:#dc3545; }
+        .absence-record.aaup { border-left-color:#ffc107; }
+        .absence-record.tofd { border-left-color:#28a745; }
+        .record-header { display:flex; justify-content:space-between;
+                         align-items:center; margin-bottom:10px; }
+        .record-type { font-weight:700; font-size:1.1em; color:#333; }
+        .record-dates { color:#666; font-size:0.9em; }
+        .record-details { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+                          gap:15px; margin-top:10px; }
+        .record-detail-item { color:#666; font-size:0.9em; }
+        .record-detail-item strong { color:#333; }
+        .record-notes { margin-top:10px; padding-top:10px;
+                        border-top:1px solid #e0e0e0; color:#666;
+                        font-size:0.9em; font-style:italic; }
+
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+                 background:rgba(0,0,0,0.5); z-index:1000;
+                 justify-content:center; align-items:center; }
+        .modal.active { display:flex; }
+        .modal-content { background:white; padding:30px; border-radius:15px;
+                         max-width:500px; width:90%; box-shadow:0 10px 40px rgba(0,0,0,0.3); }
+        .modal-header { display:flex; justify-content:space-between;
+                        align-items:center; margin-bottom:25px;
+                        padding-bottom:15px; border-bottom:2px solid #e0e0e0; }
+        .modal-header h2 { color:#667eea; font-size:1.5em; margin:0; }
+        .close-modal { background:none; border:none; font-size:1.5em;
+                       cursor:pointer; color:#666; padding:0; width:30px; height:30px;
+                       display:flex; align-items:center; justify-content:center; }
+        .close-modal:hover { color:#dc3545; }
+        .export-info { background:#e7f3ff; padding:15px; border-radius:8px;
+                       margin-bottom:20px; color:#667eea; font-size:0.9em; }
+
+        @media (max-width:968px) {
+            .content-area { grid-template-columns:1fr; }
+            header { flex-direction:column; gap:15px; text-align:center; }
+            .form-row { grid-template-columns:1fr; }
+            .absence-stats { grid-template-columns:1fr; }
         }
     </style>
 </head>
@@ -479,33 +146,33 @@
         </header>
 
         <div class="search-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div class="search-box" style="flex: 1; min-width: 250px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
+                <div class="search-box" style="flex:1; min-width:250px;">
                     <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="filterEmployees()">
                 </div>
-                <button class="back-btn" onclick="showExportModal()" style="background: #28a745; margin: 0;">Export to CSV</button>
+                <button class="back-btn" onclick="showExportModal()" style="background:#28a745; margin:0;">Export to CSV</button>
             </div>
         </div>
 
-        <!-- Global Absence Summary -->
-        <div class="search-section" style="margin-top: 20px;">
-            <h3 style="margin-bottom: 15px; color: #333;">Global Incident Summary (All Employees)</h3>
-            <div class="absence-stats" id="globalStats">
+        <!-- Employee Incident Summary (selected employee only) -->
+        <div class="search-section" style="margin-top:20px;">
+            <h3 style="margin-bottom:15px; color:#333;">Employee Incident Summary</h3>
+            <div class="absence-stats" id="employeeSummary">
                 <div class="stat-card sickness">
                     <span class="stat-label">Total Sickness Incidents</span>
-                    <span class="stat-value" id="totalSicknessIncidents">0</span>
+                    <span class="stat-value" id="empSicknessIncidents">—</span>
                 </div>
                 <div class="stat-card aaup">
                     <span class="stat-label">Total AAUP Incidents</span>
-                    <span class="stat-value" id="totalAaupIncidents">0</span>
+                    <span class="stat-value" id="empAaupIncidents">—</span>
                 </div>
                 <div class="stat-card tofd">
                     <span class="stat-label">Total TOFD Incidents</span>
-                    <span class="stat-value" id="totalTofdIncidents">0</span>
+                    <span class="stat-value" id="empTofdIncidents">—</span>
                 </div>
-                <div class="stat-card" style="border-left-color: #667eea;">
+                <div class="stat-card" style="border-left-color:#667eea;">
                     <span class="stat-label">Grand Total Incidents</span>
-                    <span class="stat-value" id="grandTotalIncidents">0</span>
+                    <span class="stat-value" id="empGrandTotalIncidents">—</span>
                 </div>
             </div>
         </div>
@@ -544,7 +211,7 @@
                     <p>Please select an employee from the list to view their absence records</p>
                 </div>
 
-                <div id="employeeAbsence" style="display: none;">
+                <div id="employeeAbsence" style="display:none;">
                     <div class="employee-header">
                         <h2 id="employeeName">Employee Name</h2>
                         <p id="employeeId">Employee ID</p>
@@ -578,35 +245,31 @@
                         <form id="absenceForm">
                             <div class="form-group">
                                 <label for="absenceType">Absence Type *</label>
-                                <select id="absenceType" name="absenceType" required>
+                                <select id="absenceType" required>
                                     <option value="">-- Select Type --</option>
                                     <option value="sickness">Sickness</option>
                                     <option value="aaup">AAUP (Authorised Absence Unpaid)</option>
                                     <option value="tofd">TOFD (Time Off For Dependants)</option>
                                 </select>
                             </div>
-
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="dateFrom">Date From *</label>
-                                    <input type="date" id="dateFrom" name="dateFrom" required>
+                                    <input type="date" id="dateFrom" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="dateTo">Date To *</label>
-                                    <input type="date" id="dateTo" name="dateTo" required>
+                                    <input type="date" id="dateTo" required>
                                 </div>
                             </div>
-
                             <div class="form-group">
                                 <label for="hours">Hours *</label>
-                                <input type="number" id="hours" name="hours" step="0.5" min="0.5" placeholder="e.g. 8, 16, 24" required>
+                                <input type="number" id="hours" step="0.5" min="0.5" placeholder="e.g. 8, 16, 24" required>
                             </div>
-
                             <div class="form-group">
                                 <label for="notes">Notes</label>
-                                <textarea id="notes" name="notes" placeholder="Add any additional information about this absence..."></textarea>
+                                <textarea id="notes" placeholder="Add any additional information..."></textarea>
                             </div>
-
                             <div class="btn-group">
                                 <button type="submit" class="btn btn-primary">Submit Absence</button>
                                 <button type="reset" class="btn btn-secondary">Clear Form</button>
@@ -614,12 +277,12 @@
                         </form>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-                        <h3 class="section-title" style="margin: 0;">Absence History</h3>
-                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+                        <h3 class="section-title" style="margin:0;">Absence History</h3>
+                        <div style="display:flex; gap:15px; flex-wrap:wrap;">
                             <div>
-                                <label for="filterType" style="margin-bottom: 5px; font-size: 0.9em;">Filter by Type:</label>
-                                <select id="filterType" onchange="filterAbsences()" style="padding: 8px 12px; width: 180px;">
+                                <label for="filterType" style="margin-bottom:5px; font-size:0.9em;">Filter by Type:</label>
+                                <select id="filterType" onchange="filterAbsences()" style="padding:8px 12px; width:180px;">
                                     <option value="all">All Types</option>
                                     <option value="sickness">Sickness</option>
                                     <option value="aaup">AAUP</option>
@@ -627,14 +290,12 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="filterMonth" style="margin-bottom: 5px; font-size: 0.9em;">Filter by Month:</label>
-                                <input type="month" id="filterMonth" onchange="filterAbsences()" style="padding: 8px 12px; width: 180px;">
+                                <label for="filterMonth" style="margin-bottom:5px; font-size:0.9em;">Filter by Month:</label>
+                                <input type="month" id="filterMonth" onchange="filterAbsences()" style="padding:8px 12px; width:180px;">
                             </div>
                         </div>
                     </div>
-                    <div class="absence-history" id="absenceHistory">
-                        <!-- Records will be loaded here -->
-                    </div>
+                    <div class="absence-history" id="absenceHistory"></div>
                 </div>
             </div>
         </div>
@@ -646,28 +307,24 @@
                     <h2>Export to CSV</h2>
                     <button class="close-modal" onclick="closeExportModal()">X</button>
                 </div>
-
                 <div class="export-info">
-                    Info: Export absence records across all employees
+                    Export absence records across all employees
                 </div>
-
                 <form id="exportForm">
                     <div class="form-group">
                         <label for="exportType">Absence Type *</label>
-                        <select id="exportType" name="exportType" required>
+                        <select id="exportType" required>
                             <option value="all">All Types</option>
                             <option value="sickness">Sickness Only</option>
                             <option value="aaup">AAUP Only</option>
                             <option value="tofd">TOFD Only</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label for="exportMonth">Month (Optional)</label>
-                        <input type="month" id="exportMonth" name="exportMonth">
-                        <p style="color: #666; font-size: 0.85em; margin-top: 5px;">Leave blank to export all months</p>
+                        <input type="month" id="exportMonth">
+                        <p style="color:#666; font-size:0.85em; margin-top:5px;">Leave blank to export all months</p>
                     </div>
-
                     <div class="btn-group">
                         <button type="submit" class="btn btn-primary">Download CSV</button>
                         <button type="button" class="btn btn-secondary" onclick="closeExportModal()">Cancel</button>
@@ -679,234 +336,204 @@
 
     <script>
         let selectedEmployeeId = null;
-
         const employees = {
-            1: { id: 'EMP001', name: 'John Smith' },
-            2: { id: 'EMP002', name: 'Sarah Johnson' },
-            3: { id: 'EMP003', name: 'Michael Brown' },
-            4: { id: 'EMP004', name: 'Emma Wilson' },
-            5: { id: 'EMP005', name: 'James Taylor' }
+            1:{id:'EMP001',name:'John Smith'},
+            2:{id:'EMP002',name:'Sarah Johnson'},
+            3:{id:'EMP003',name:'Michael Brown'},
+            4:{id:'EMP004',name:'Emma Wilson'},
+            5:{id:'EMP005',name:'James Taylor'}
         };
 
-        // Sample absence data
+        // Sample data – replace with real data later
         const absenceData = {
-            1: {
-                stats: {
-                    sicknessDays: 3,
-                    sicknessHours: 24,
-                    aaupCount: 1,
-                    tofdCount: 2,
-                    totalIncidents: 6
-                },
-                records: [
-                    { type: 'sickness', dateFrom: '2025-01-15', dateTo: '2025-01-17', hours: 24, notes: 'Flu symptoms' },
-                    { type: 'sickness', dateFrom: '2024-12-10', dateTo: '2024-12-11', hours: 16, notes: 'Stomach bug' },
-                    { type: 'aaup', dateFrom: '2024-12-20', dateTo: '2024-12-20', hours: 8, notes: 'Personal appointment' },
-                    { type: 'tofd', dateFrom: '2024-11-10', dateTo: '2024-11-10', hours: 4, notes: 'Child care emergency' },
-                    { type: 'tofd', dateFrom: '2025-01-22', dateTo: '2025-01-22', hours: 3, notes: 'School meeting' },
-                    { type: 'aaup', dateFrom: '2024-10-15', dateTo: '2024-10-15', hours: 4, notes: 'Moving house' }
-                ]
-            },
-            2: {
-                stats: {
-                    sicknessDays: 1,
-                    sicknessHours: 8,
-                    aaupCount: 0,
-                    tofdCount: 1,
-                    totalIncidents: 2
-                },
-                records: [
-                    { type: 'sickness', dateFrom: '2025-01-20', dateTo: '2025-01-20', hours: 8, notes: 'Migraine' },
-                    { type: 'tofd', dateFrom: '2024-12-05', dateTo: '2024-12-05', hours: 3, notes: 'School emergency' }
-                ]
-            },
-            3: {
-                stats: { sicknessDays: 0, sicknessHours: 0, aaupCount: 0, tofdCount: 0, totalIncidents: 0 },
-                records: []
-            }
+            1:{records:[
+                {type:'sickness',dateFrom:'2025-01-15',dateTo:'2025-01-17',hours:24,notes:'Flu symptoms'},
+                {type:'sickness',dateFrom:'2024-12-10',dateTo:'2024-12-11',hours:16,notes:'Stomach bug'},
+                {type:'aaup',dateFrom:'2024-12-20',dateTo:'2024-12-20',hours:8,notes:'Personal appointment'},
+                {type:'tofd',dateFrom:'2024-11-10',dateTo:'2024-11-10',hours:4,notes:'Child care emergency'},
+                {type:'tofd',dateFrom:'2025-01-22',dateTo:'2025-01-22',hours:3,notes:'School meeting'},
+                {type:'aaup',dateFrom:'2024-10-15',dateTo:'2024-10-15',hours:4,notes:'Moving house'}
+            ]},
+            2:{records:[
+                {type:'sickness',dateFrom:'2025-01-20',dateTo:'2025-01-20',hours:8,notes:'Migraine'},
+                {type:'tofd',dateFrom:'2024-12-05',dateTo:'2024-12-05',hours:3,notes:'School emergency'}
+            ]},
+            3:{records:[]}
         };
 
         let allRecords = [];
-        let filteredRecords = [];
 
-        function selectEmployee(id) {
+        /* ---------- Employee Selection ---------- */
+        function selectEmployee(id){
             selectedEmployeeId = id;
-            const employee = employees[id];
+            const emp = employees[id];
 
-            document.querySelectorAll('.employee-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.employee-item').forEach(i=>i.classList.remove('active'));
             event.target.closest('.employee-item').classList.add('active');
 
-            document.getElementById('noSelection').style.display = 'none';
-            document.getElementById('employeeAbsence').style.display = 'block';
-            document.getElementById('employeeName').textContent = employee.name;
-            document.getElementById('employeeId').textContent = 'ID: ' + employee.id;
+            document.getElementById('noSelection').style.display='none';
+            document.getElementById('employeeAbsence').style.display='block';
+            document.getElementById('employeeName').textContent = emp.name;
+            document.getElementById('employeeId').textContent = 'ID: '+emp.id;
 
             loadAbsenceData(id);
         }
 
-        function loadAbsenceData(employeeId) {
-            const data = absenceData[employeeId] || {
-                stats: { sicknessDays: 0, sicknessHours: 0, aaupCount: 0, tofdCount: 0, totalIncidents: 0 },
-                records: []
-            };
-
+        /* ---------- Load & Display Data ---------- */
+        function loadAbsenceData(empId){
+            const data = absenceData[empId] || {records:[]};
             allRecords = data.records;
 
-            document.getElementById('sicknessDays').textContent = data.stats.sicknessDays;
-            document.getElementById('sicknessHours').textContent = data.stats.sicknessHours;
-            document.getElementById('aaupCount').textContent = data.stats.aaupCount;
-            document.getElementById('tofdCount').textContent = data.stats.tofdCount;
-            document.getElementById('totalIncidents').textContent = data.stats.totalIncidents;
+            // Employee-level stats (lower section)
+            const sicknessHours = data.records.filter(r=>r.type==='sickness')
+                                            .reduce((s,r)=>s+parseFloat(r.hours),0);
+            const sicknessDays = Math.ceil(sicknessHours/8);
+            const aaupCount = data.records.filter(r=>r.type==='aaup').length;
+            const tofdCount = data.records.filter(r=>r.type==='tofd').length;
 
-            document.getElementById('filterType').value = 'all';
-            document.getElementById('filterMonth').value = '';
-
-            displayAbsenceRecords(allRecords);
-        }
-
-        function displayAbsenceRecords(records) {
-            const historyContainer = document.getElementById('absenceHistory');
-            if (records.length === 0) {
-                historyContainer.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">No absence records found</p>';
-                return;
-            }
-
-            const typeLabels = { 'sickness': 'Sickness', 'aaup': 'AAUP', 'tofd': 'TOFD' };
-            let html = '';
-            records.forEach(record => {
-                html += `
-                    <div class="absence-record ${record.type}">
-                        <div class="record-header">
-                            <span class="record-type">${typeLabels[record.type]}</span>
-                            <span class="record-dates">${formatDate(record.dateFrom)} - ${formatDate(record.dateTo)}</span>
-                        </div>
-                        <div class="record-details">
-                            <div class="record-detail-item"><strong>Hours:</strong> ${record.hours}</div>
-                            <div class="record-detail-item"><strong>Days:</strong> ${Math.ceil(record.hours / 8)}</div>
-                        </div>
-                        ${record.notes ? `<div class="record-notes">Note: ${record.notes}</div>` : ''}
-                    </div>
-                `;
-            });
-            historyContainer.innerHTML = html;
-        }
-
-        function filterAbsences() {
-            const typeFilter = document.getElementById('filterType').value;
-            const monthFilter = document.getElementById('filterMonth').value;
-            let filtered = [...allRecords];
-
-            if (typeFilter !== 'all') filtered = filtered.filter(r => r.type === typeFilter);
-            if (monthFilter) filtered = filtered.filter(r => r.dateFrom.substring(0, 7) === monthFilter);
-
-            updateFilteredStats(filtered);
-            displayAbsenceRecords(filtered);
-        }
-
-        function updateFilteredStats(records) {
-            let sicknessDays = 0, sicknessHours = 0, aaupCount = 0, tofdCount = 0;
-            records.forEach(r => {
-                if (r.type === 'sickness') {
-                    sicknessHours += parseFloat(r.hours);
-                    sicknessDays += Math.ceil(r.hours / 8);
-                } else if (r.type === 'aaup') aaupCount++;
-                else if (r.type === 'tofd') tofdCount++;
-            });
             document.getElementById('sicknessDays').textContent = sicknessDays;
             document.getElementById('sicknessHours').textContent = sicknessHours;
             document.getElementById('aaupCount').textContent = aaupCount;
             document.getElementById('tofdCount').textContent = tofdCount;
+            document.getElementById('totalIncidents').textContent = data.records.length;
+
+            // Summary cards at the top (selected employee only)
+            const sicknessInc = data.records.filter(r=>r.type==='sickness').length;
+            const aaupInc     = data.records.filter(r=>r.type==='aaup').length;
+            const tofdInc     = data.records.filter(r=>r.type==='tofd').length;
+            const grandTotal  = data.records.length;
+
+            document.getElementById('empSicknessIncidents').textContent = sicknessInc;
+            document.getElementById('empAaupIncidents').textContent     = aaupInc;
+            document.getElementById('empTofdIncidents').textContent     = tofdInc;
+            document.getElementById('empGrandTotalIncidents').textContent = grandTotal;
+
+            // Reset filters
+            document.getElementById('filterType').value='all';
+            document.getElementById('filterMonth').value='';
+
+            displayAbsenceRecords(allRecords);
+        }
+
+        function displayAbsenceRecords(records){
+            const container = document.getElementById('absenceHistory');
+            if(!records.length){
+                container.innerHTML='<p style="color:#666;text-align:center;padding:40px;">No absence records found</p>';
+                return;
+            }
+            const labels = {sickness:'Sickness',aaup:'AAUP',tofd:'TOFD'};
+            let html = '';
+            records.forEach(r=>{
+                html+=`
+                    <div class="absence-record ${r.type}">
+                        <div class="record-header">
+                            <span class="record-type">${labels[r.type]}</span>
+                            <span class="record-dates">${formatDate(r.dateFrom)} - ${formatDate(r.dateTo)}</span>
+                        </div>
+                        <div class="record-details">
+                            <div class="record-detail-item"><strong>Hours:</strong> ${r.hours}</div>
+                            <div class="record-detail-item"><strong>Days:</strong> ${Math.ceil(r.hours/8)}</div>
+                        </div>
+                        ${r.notes?`<div class="record-notes">Note: ${r.notes}</div>`:''}
+                    </div>`;
+            });
+            container.innerHTML=html;
+        }
+
+        /* ---------- Filtering ---------- */
+        function filterAbsences(){
+            const type = document.getElementById('filterType').value;
+            const month = document.getElementById('filterMonth').value;
+            let filtered = [...allRecords];
+            if(type!=='all') filtered = filtered.filter(r=>r.type===type);
+            if(month) filtered = filtered.filter(r=>r.dateFrom.substring(0,7)===month);
+            updateFilteredStats(filtered);
+            displayAbsenceRecords(filtered);
+        }
+        function updateFilteredStats(records){
+            const sicknessHours = records.filter(r=>r.type==='sickness')
+                                         .reduce((s,r)=>s+parseFloat(r.hours),0);
+            const sicknessDays = Math.ceil(sicknessHours/8);
+            const aaup = records.filter(r=>r.type==='aaup').length;
+            const tofd = records.filter(r=>r.type==='tofd').length;
+            document.getElementById('sicknessDays').textContent = sicknessDays;
+            document.getElementById('sicknessHours').textContent = sicknessHours;
+            document.getElementById('aaupCount').textContent = aaup;
+            document.getElementById('tofdCount').textContent = tofd;
             document.getElementById('totalIncidents').textContent = records.length;
         }
 
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        function formatDate(str){
+            const d = new Date(str);
+            return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
         }
 
-        function filterEmployees() {
+        /* ---------- Search Employees ---------- */
+        function filterEmployees(){
             const term = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('.employee-item').forEach(item => {
-                item.style.display = item.textContent.toLowerCase().includes(term) ? 'block' : 'none';
+            document.querySelectorAll('.employee-item').forEach(item=>{
+                item.style.display = item.textContent.toLowerCase().includes(term)?'block':'none';
             });
         }
 
-        // Submit new absence
-        document.getElementById('absenceForm').addEventListener('submit', function(e) {
+        /* ---------- Submit New Absence ---------- */
+        document.getElementById('absenceForm').addEventListener('submit',function(e){
             e.preventDefault();
-            if (!selectedEmployeeId) return alert('Please select an employee');
+            if(!selectedEmployeeId) return alert('Select an employee first');
 
-            const formData = {
+            const rec = {
                 type: document.getElementById('absenceType').value,
                 dateFrom: document.getElementById('dateFrom').value,
                 dateTo: document.getElementById('dateTo').value,
                 hours: parseFloat(document.getElementById('hours').value),
                 notes: document.getElementById('notes').value
             };
+            if(!absenceData[selectedEmployeeId].records) absenceData[selectedEmployeeId].records=[];
+            absenceData[selectedEmployeeId].records.push(rec);
 
-            // Add to absenceData
-            if (!absenceData[selectedEmployeeId].records) absenceData[selectedEmployeeId].records = [];
-            absenceData[selectedEmployeeId].records.push(formData);
-
-            alert('Absence submitted successfully!');
+            alert('Absence submitted!');
             this.reset();
-            loadAbsenceData(selectedEmployeeId);
-            updateGlobalStats(); // Update global totals
+            loadAbsenceData(selectedEmployeeId);   // refreshes both sections
         });
 
-        document.getElementById('dateFrom').addEventListener('change', function() {
-            document.getElementById('dateTo').setAttribute('min', this.value);
+        document.getElementById('dateFrom').addEventListener('change',function(){
+            document.getElementById('dateTo').setAttribute('min',this.value);
         });
 
-        // Global Stats
-        function updateGlobalStats() {
-            let totalSickness = 0, totalAaup = 0, totalTofd = 0;
-            Object.keys(absenceData).forEach(empId => {
-                (absenceData[empId].records || []).forEach(r => {
-                    if (r.type === 'sickness') totalSickness++;
-                    if (r.type === 'aaup') totalAaup++;
-                    if (r.type === 'tofd') totalTofd++;
-                });
-            });
-            const grandTotal = totalSickness + totalAaup + totalTofd;
-            document.getElementById('totalSicknessIncidents').textContent = totalSickness;
-            document.getElementById('totalAaupIncidents').textContent = totalAaup;
-            document.getElementById('totalTofdIncidents').textContent = totalTofd;
-            document.getElementById('grandTotalIncidents').textContent = grandTotal;
+        /* ---------- Export Modal ---------- */
+        function showExportModal(){ document.getElementById('exportModal').classList.add('active'); }
+        function closeExportModal(){
+            document.getElementById('exportModal').classList.remove('active');
+            document.getElementById('exportForm').reset();
         }
 
-        // Export Modal
-        function showExportModal() { document.getElementById('exportModal').classList.add('active'); }
-        function closeExportModal() { document.getElementById('exportModal').classList.remove('active'); document.getElementById('exportForm').reset(); }
-
-        document.getElementById('exportForm').addEventListener('submit', function(e) {
+        document.getElementById('exportForm').addEventListener('submit',function(e){
             e.preventDefault();
             const type = document.getElementById('exportType').value;
             const month = document.getElementById('exportMonth').value;
 
             let records = [];
-            Object.keys(absenceData).forEach(empId => {
+            Object.keys(absenceData).forEach(empId=>{
                 const emp = employees[empId];
-                (absenceData[empId].records || []).forEach(r => {
-                    records.push({ employeeId: emp.id, employeeName: emp.name, ...r });
+                (absenceData[empId].records||[]).forEach(r=>{
+                    records.push({employeeId:emp.id,employeeName:emp.name,...r});
                 });
             });
+            if(type!=='all') records = records.filter(r=>r.type===type);
+            if(month) records = records.filter(r=>r.dateFrom.substring(0,7)===month);
 
-            if (type !== 'all') records = records.filter(r => r.type === type);
-            if (month) records = records.filter(r => r.dateFrom.substring(0, 7) === month);
-
-            exportToCSV(records, type, month);
+            exportToCSV(records,type,month);
             closeExportModal();
         });
 
-        function exportToCSV(records, typeFilter, monthFilter) {
-            if (records.length === 0) return alert('No records found');
+        function exportToCSV(records,typeFilter,monthFilter){
+            if(!records.length) return alert('No records to export');
 
-            // Summary
-            let totalSickness = records.filter(r => r.type === 'sickness').length;
-            let totalAaup = records.filter(r => r.type === 'aaup').length;
-            let totalTofd = records.filter(r => r.type === 'tofd').length;
-            let grandTotal = records.length;
+            // Summary (for the filtered set)
+            const totalSickness = records.filter(r=>r.type==='sickness').length;
+            const totalAaup     = records.filter(r=>r.type==='aaup').length;
+            const totalTofd     = records.filter(r=>r.type==='tofd').length;
+            const grandTotal    = records.length;
 
             let csv = `,,,"Summary Totals",,,,\n`;
             csv += `,,,"Sickness Incidents","${totalSickness}",,,\n`;
@@ -915,31 +542,34 @@
             csv += `,,,"Grand Total","${grandTotal}",,,\n\n`;
             csv += 'Employee ID,Employee Name,Absence Type,Date From,Date To,Hours,Days,Notes\n';
 
-            records.forEach(r => {
-                const days = Math.ceil(r.hours / 8);
-                const notes = (r.notes || '').replace(/"/g, '""');
+            records.forEach(r=>{
+                const days = Math.ceil(r.hours/8);
+                const notes = (r.notes||'').replace(/"/g,'""');
                 csv += `"${r.employeeId}","${r.employeeName}","${r.type}","${r.dateFrom}","${r.dateTo}",${r.hours},${days},"${notes}"\n`;
             });
 
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
-            let filename = `absence_export_${typeFilter !== 'all' ? typeFilter + '_' : ''}${monthFilter ? monthFilter + '_' : ''}${new Date().toISOString().split('T')[0]}.csv`;
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
+            const fn = `absence_export_${typeFilter!=='all'?typeFilter+'_':''}${monthFilter?monthFilter+'_':''}${new Date().toISOString().split('T')[0]}.csv`;
+            link.setAttribute('href',url);
+            link.setAttribute('download',fn);
+            link.style.visibility='hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-
             alert(`Exported ${records.length} record(s)`);
         }
 
-        // Close modal on outside click
-        document.getElementById('exportModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeExportModal(); });
+        document.getElementById('exportModal').addEventListener('click',e=>{
+            if(e.target===e.currentTarget) closeExportModal();
+        });
 
-        // Initialize
-        updateGlobalStats();
+        // Initial state – no employee selected
+        document.getElementById('empSicknessIncidents').textContent = '—';
+        document.getElementById('empAaupIncidents').textContent = '—';
+        document.getElementById('empTofdIncidents').textContent = '—';
+        document.getElementById('empGrandTotalIncidents').textContent = '—';
     </script>
 </body>
 </html>
