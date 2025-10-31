@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Details Report | NGU-hrs</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .report-wrapper {
+            padding: 30px;
+            min-height: 80vh;
+        }
+
+        /* SharePoint Embed Responsive */
+        .sharepoint-embed {
+            width: 100%;
+            height: 800px;
+            border: none;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .sharepoint-embed {
+                height: 600px;
+            }
+            header h1 {
+                font-size: 1.5em;
+            }
+            .report-wrapper {
+                padding: 15px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #d32f2f;
+            background: #ffebee;
+            border-radius: 8px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Staff Details Report</h1>
+            <a href="index.html" class="back-btn">← Back to Dashboard</a>
+        </header>
+
+        <div class="report-wrapper">
+            <!-- Loading State -->
+            <div class="loading" id="loading">
+                <p>Loading Staff Details Report...</p>
+            </div>
+
+            <!-- SharePoint Excel Embed -->
+            <iframe
+                id="sharepoint-iframe"
+                class="sharepoint-embed"
+                src="https://nextgenerationutilities.sharepoint.com/:x:/s/NextGenerationUtilities/EZWqgjKjNMtAmzYZLoZnUCcBPgawVkGej0fs87AencHqmA?e=VxnpBs&CID=32ed784b-76a1-b380-3275-aa2f0a7d638e"
+                title="Staff Details Report - Excel Workbook"
+                allowfullscreen
+                style="display: none;">
+            </iframe>
+
+            <!-- Error State (Hidden by Default) -->
+            <div class="error" id="error" style="display: none;">
+                <h3>Unable to Load Report</h3>
+                <p>Please <strong>sign in to Microsoft 365</strong> or contact IT if you see this message.</p>
+                <a href="https://login.microsoftonline.com/" target="_blank">Sign In to Microsoft</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const iframe = document.getElementById('sharepoint-iframe');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+
+        // Show embed after load
+        iframe.onload = function() {
+            loading.style.display = 'none';
+            iframe.style.display = 'block';
+        };
+
+        // Show error on load fail
+        iframe.onerror = function() {
+            loading.style.display = 'none';
+            error.style.display = 'block';
+        };
+
+        // Auto-resize iframe height (optional enhancement)
+        window.addEventListener('message', function(event) {
+            if (event.origin === 'https://nextgenerationutilities.sharepoint.com') {
+                const height = event.data.height;
+                if (height) {
+                    iframe.style.height = height + 'px';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
