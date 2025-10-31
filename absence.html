@@ -472,10 +472,10 @@
     <div class="container">
         <header>
             <div class="header-left">
-                <h1>📅 Absence Management</h1>
+                <h1>Absence Management</h1>
                 <p>Track and manage employee absences</p>
             </div>
-            <a href="index.html" class="back-btn">← Back to Dashboard</a>
+            <a href="index.html" class="back-btn">Back to Dashboard</a>
         </header>
 
         <div class="search-section">
@@ -483,7 +483,30 @@
                 <div class="search-box" style="flex: 1; min-width: 250px;">
                     <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="filterEmployees()">
                 </div>
-                <button class="back-btn" onclick="showExportModal()" style="background: #28a745; margin: 0;">📊 Export to CSV</button>
+                <button class="back-btn" onclick="showExportModal()" style="background: #28a745; margin: 0;">Export to CSV</button>
+            </div>
+        </div>
+
+        <!-- Global Absence Summary -->
+        <div class="search-section" style="margin-top: 20px;">
+            <h3 style="margin-bottom: 15px; color: #333;">Global Incident Summary (All Employees)</h3>
+            <div class="absence-stats" id="globalStats">
+                <div class="stat-card sickness">
+                    <span class="stat-label">Total Sickness Incidents</span>
+                    <span class="stat-value" id="totalSicknessIncidents">0</span>
+                </div>
+                <div class="stat-card aaup">
+                    <span class="stat-label">Total AAUP Incidents</span>
+                    <span class="stat-value" id="totalAaupIncidents">0</span>
+                </div>
+                <div class="stat-card tofd">
+                    <span class="stat-label">Total TOFD Incidents</span>
+                    <span class="stat-value" id="totalTofdIncidents">0</span>
+                </div>
+                <div class="stat-card" style="border-left-color: #667eea;">
+                    <span class="stat-label">Grand Total Incidents</span>
+                    <span class="stat-value" id="grandTotalIncidents">0</span>
+                </div>
             </div>
         </div>
 
@@ -516,7 +539,7 @@
 
             <div class="absence-area">
                 <div id="noSelection" class="no-selection">
-                    <div class="no-selection-icon">📋</div>
+                    <div class="no-selection-icon">Checklist</div>
                     <h3>No Employee Selected</h3>
                     <p>Please select an employee from the list to view their absence records</p>
                 </div>
@@ -529,28 +552,28 @@
 
                     <div class="absence-stats">
                         <div class="stat-card sickness">
-                            <span class="stat-label">🏥 Sickness Days (This Year)</span>
+                            <span class="stat-label">Sickness Days (This Year)</span>
                             <span class="stat-value" id="sicknessDays">0</span>
                         </div>
                         <div class="stat-card sickness">
-                            <span class="stat-label">🏥 Sickness Hours (This Year)</span>
+                            <span class="stat-label">Sickness Hours (This Year)</span>
                             <span class="stat-value" id="sicknessHours">0</span>
                         </div>
                         <div class="stat-card aaup">
-                            <span class="stat-label">⚠️ AAUP Absences</span>
+                            <span class="stat-label">AAUP Absences</span>
                             <span class="stat-value" id="aaupCount">0</span>
                         </div>
                         <div class="stat-card tofd">
-                            <span class="stat-label">📋 TOFD Absences</span>
+                            <span class="stat-label">TOFD Absences</span>
                             <span class="stat-value" id="tofdCount">0</span>
                         </div>
                         <div class="stat-card">
-                            <span class="stat-label">📊 Total Incidents</span>
+                            <span class="stat-label">Total Incidents</span>
                             <span class="stat-value" id="totalIncidents">0</span>
                         </div>
                     </div>
 
-                    <h3 class="section-title">➕ Submit New Absence</h3>
+                    <h3 class="section-title">Submit New Absence</h3>
                     <div class="absence-form">
                         <form id="absenceForm">
                             <div class="form-group">
@@ -568,7 +591,6 @@
                                     <label for="dateFrom">Date From *</label>
                                     <input type="date" id="dateFrom" name="dateFrom" required>
                                 </div>
-                                
                                 <div class="form-group">
                                     <label for="dateTo">Date To *</label>
                                     <input type="date" id="dateTo" name="dateTo" required>
@@ -593,7 +615,7 @@
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
-                        <h3 class="section-title" style="margin: 0;">📋 Absence History</h3>
+                        <h3 class="section-title" style="margin: 0;">Absence History</h3>
                         <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                             <div>
                                 <label for="filterType" style="margin-bottom: 5px; font-size: 0.9em;">Filter by Type:</label>
@@ -621,12 +643,12 @@
         <div id="exportModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>📊 Export to CSV</h2>
-                    <button class="close-modal" onclick="closeExportModal()">✕</button>
+                    <h2>Export to CSV</h2>
+                    <button class="close-modal" onclick="closeExportModal()">X</button>
                 </div>
 
                 <div class="export-info">
-                    ℹ️ Export absence records across all employees
+                    Info: Export absence records across all employees
                 </div>
 
                 <form id="exportForm">
@@ -666,7 +688,7 @@
             5: { id: 'EMP005', name: 'James Taylor' }
         };
 
-        // Sample absence data - replace with your actual data
+        // Sample absence data
         const absenceData = {
             1: {
                 stats: {
@@ -677,48 +699,12 @@
                     totalIncidents: 6
                 },
                 records: [
-                    {
-                        type: 'sickness',
-                        dateFrom: '2025-01-15',
-                        dateTo: '2025-01-17',
-                        hours: 24,
-                        notes: 'Flu symptoms'
-                    },
-                    {
-                        type: 'sickness',
-                        dateFrom: '2024-12-10',
-                        dateTo: '2024-12-11',
-                        hours: 16,
-                        notes: 'Stomach bug'
-                    },
-                    {
-                        type: 'aaup',
-                        dateFrom: '2024-12-20',
-                        dateTo: '2024-12-20',
-                        hours: 8,
-                        notes: 'Personal appointment'
-                    },
-                    {
-                        type: 'tofd',
-                        dateFrom: '2024-11-10',
-                        dateTo: '2024-11-10',
-                        hours: 4,
-                        notes: 'Child care emergency'
-                    },
-                    {
-                        type: 'tofd',
-                        dateFrom: '2025-01-22',
-                        dateTo: '2025-01-22',
-                        hours: 3,
-                        notes: 'School meeting'
-                    },
-                    {
-                        type: 'aaup',
-                        dateFrom: '2024-10-15',
-                        dateTo: '2024-10-15',
-                        hours: 4,
-                        notes: 'Moving house'
-                    }
+                    { type: 'sickness', dateFrom: '2025-01-15', dateTo: '2025-01-17', hours: 24, notes: 'Flu symptoms' },
+                    { type: 'sickness', dateFrom: '2024-12-10', dateTo: '2024-12-11', hours: 16, notes: 'Stomach bug' },
+                    { type: 'aaup', dateFrom: '2024-12-20', dateTo: '2024-12-20', hours: 8, notes: 'Personal appointment' },
+                    { type: 'tofd', dateFrom: '2024-11-10', dateTo: '2024-11-10', hours: 4, notes: 'Child care emergency' },
+                    { type: 'tofd', dateFrom: '2025-01-22', dateTo: '2025-01-22', hours: 3, notes: 'School meeting' },
+                    { type: 'aaup', dateFrom: '2024-10-15', dateTo: '2024-10-15', hours: 4, notes: 'Moving house' }
                 ]
             },
             2: {
@@ -730,30 +716,12 @@
                     totalIncidents: 2
                 },
                 records: [
-                    {
-                        type: 'sickness',
-                        dateFrom: '2025-01-20',
-                        dateTo: '2025-01-20',
-                        hours: 8,
-                        notes: 'Migraine'
-                    },
-                    {
-                        type: 'tofd',
-                        dateFrom: '2024-12-05',
-                        dateTo: '2024-12-05',
-                        hours: 3,
-                        notes: 'School emergency'
-                    }
+                    { type: 'sickness', dateFrom: '2025-01-20', dateTo: '2025-01-20', hours: 8, notes: 'Migraine' },
+                    { type: 'tofd', dateFrom: '2024-12-05', dateTo: '2024-12-05', hours: 3, notes: 'School emergency' }
                 ]
             },
             3: {
-                stats: {
-                    sicknessDays: 0,
-                    sicknessHours: 0,
-                    aaupCount: 0,
-                    tofdCount: 0,
-                    totalIncidents: 0
-                },
+                stats: { sicknessDays: 0, sicknessHours: 0, aaupCount: 0, tofdCount: 0, totalIncidents: 0 },
                 records: []
             }
         };
@@ -765,19 +733,14 @@
             selectedEmployeeId = id;
             const employee = employees[id];
 
-            // Update active state
-            document.querySelectorAll('.employee-item').forEach(item => {
-                item.classList.remove('active');
-            });
+            document.querySelectorAll('.employee-item').forEach(item => item.classList.remove('active'));
             event.target.closest('.employee-item').classList.add('active');
 
-            // Show employee absence area
             document.getElementById('noSelection').style.display = 'none';
             document.getElementById('employeeAbsence').style.display = 'block';
             document.getElementById('employeeName').textContent = employee.name;
             document.getElementById('employeeId').textContent = 'ID: ' + employee.id;
 
-            // Load absence data
             loadAbsenceData(id);
         }
 
@@ -787,38 +750,28 @@
                 records: []
             };
 
-            // Store all records globally for filtering
             allRecords = data.records;
 
-            // Update stats
             document.getElementById('sicknessDays').textContent = data.stats.sicknessDays;
             document.getElementById('sicknessHours').textContent = data.stats.sicknessHours;
             document.getElementById('aaupCount').textContent = data.stats.aaupCount;
             document.getElementById('tofdCount').textContent = data.stats.tofdCount;
             document.getElementById('totalIncidents').textContent = data.stats.totalIncidents;
 
-            // Reset filters
             document.getElementById('filterType').value = 'all';
             document.getElementById('filterMonth').value = '';
 
-            // Display all records initially
             displayAbsenceRecords(allRecords);
         }
 
         function displayAbsenceRecords(records) {
             const historyContainer = document.getElementById('absenceHistory');
-            
             if (records.length === 0) {
                 historyContainer.innerHTML = '<p style="color: #666; text-align: center; padding: 40px;">No absence records found</p>';
                 return;
             }
 
-            const typeLabels = {
-                'sickness': '🏥 Sickness',
-                'aaup': '⚠️ AAUP',
-                'tofd': '📋 TOFD'
-            };
-
+            const typeLabels = { 'sickness': 'Sickness', 'aaup': 'AAUP', 'tofd': 'TOFD' };
             let html = '';
             records.forEach(record => {
                 html += `
@@ -828,64 +781,37 @@
                             <span class="record-dates">${formatDate(record.dateFrom)} - ${formatDate(record.dateTo)}</span>
                         </div>
                         <div class="record-details">
-                            <div class="record-detail-item">
-                                <strong>Hours:</strong> ${record.hours}
-                            </div>
-                            <div class="record-detail-item">
-                                <strong>Days:</strong> ${Math.ceil(record.hours / 8)}
-                            </div>
+                            <div class="record-detail-item"><strong>Hours:</strong> ${record.hours}</div>
+                            <div class="record-detail-item"><strong>Days:</strong> ${Math.ceil(record.hours / 8)}</div>
                         </div>
-                        ${record.notes ? `<div class="record-notes">📝 ${record.notes}</div>` : ''}
+                        ${record.notes ? `<div class="record-notes">Note: ${record.notes}</div>` : ''}
                     </div>
                 `;
             });
-
             historyContainer.innerHTML = html;
         }
 
         function filterAbsences() {
             const typeFilter = document.getElementById('filterType').value;
             const monthFilter = document.getElementById('filterMonth').value;
-
             let filtered = [...allRecords];
 
-            // Filter by type
-            if (typeFilter !== 'all') {
-                filtered = filtered.filter(record => record.type === typeFilter);
-            }
+            if (typeFilter !== 'all') filtered = filtered.filter(r => r.type === typeFilter);
+            if (monthFilter) filtered = filtered.filter(r => r.dateFrom.substring(0, 7) === monthFilter);
 
-            // Filter by month
-            if (monthFilter) {
-                filtered = filtered.filter(record => {
-                    const recordMonth = record.dateFrom.substring(0, 7); // Get YYYY-MM
-                    return recordMonth === monthFilter;
-                });
-            }
-
-            // Update stats based on filtered results
             updateFilteredStats(filtered);
-
-            // Display filtered records
             displayAbsenceRecords(filtered);
         }
 
         function updateFilteredStats(records) {
-            let sicknessDays = 0;
-            let sicknessHours = 0;
-            let aaupCount = 0;
-            let tofdCount = 0;
-
-            records.forEach(record => {
-                if (record.type === 'sickness') {
-                    sicknessHours += parseFloat(record.hours);
-                    sicknessDays += Math.ceil(record.hours / 8);
-                } else if (record.type === 'aaup') {
-                    aaupCount++;
-                } else if (record.type === 'tofd') {
-                    tofdCount++;
-                }
+            let sicknessDays = 0, sicknessHours = 0, aaupCount = 0, tofdCount = 0;
+            records.forEach(r => {
+                if (r.type === 'sickness') {
+                    sicknessHours += parseFloat(r.hours);
+                    sicknessDays += Math.ceil(r.hours / 8);
+                } else if (r.type === 'aaup') aaupCount++;
+                else if (r.type === 'tofd') tofdCount++;
             });
-
             document.getElementById('sicknessDays').textContent = sicknessDays;
             document.getElementById('sicknessHours').textContent = sicknessHours;
             document.getElementById('aaupCount').textContent = aaupCount;
@@ -899,143 +825,106 @@
         }
 
         function filterEmployees() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const employeeItems = document.querySelectorAll('.employee-item');
-
-            employeeItems.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.employee-item').forEach(item => {
+                item.style.display = item.textContent.toLowerCase().includes(term) ? 'block' : 'none';
             });
         }
 
+        // Submit new absence
         document.getElementById('absenceForm').addEventListener('submit', function(e) {
             e.preventDefault();
-
-            if (!selectedEmployeeId) {
-                alert('Please select an employee first');
-                return;
-            }
+            if (!selectedEmployeeId) return alert('Please select an employee');
 
             const formData = {
-                employeeId: selectedEmployeeId,
-                employeeName: employees[selectedEmployeeId].name,
-                absenceType: document.getElementById('absenceType').value,
+                type: document.getElementById('absenceType').value,
                 dateFrom: document.getElementById('dateFrom').value,
                 dateTo: document.getElementById('dateTo').value,
-                hours: document.getElementById('hours').value,
+                hours: parseFloat(document.getElementById('hours').value),
                 notes: document.getElementById('notes').value
             };
 
-            console.log('Absence Submitted:', formData);
-            
-            // Here you would send the data to your backend
-            alert('Absence submitted successfully!\n\n' +
-                  'Employee: ' + formData.employeeName + '\n' +
-                  'Type: ' + formData.absenceType + '\n' +
-                  'From: ' + formData.dateFrom + '\n' +
-                  'To: ' + formData.dateTo + '\n' +
-                  'Hours: ' + formData.hours + '\n' +
-                  'Notes: ' + formData.notes);
+            // Add to absenceData
+            if (!absenceData[selectedEmployeeId].records) absenceData[selectedEmployeeId].records = [];
+            absenceData[selectedEmployeeId].records.push(formData);
 
-            // Reset form
+            alert('Absence submitted successfully!');
             this.reset();
-            
-            // Reload absence data
             loadAbsenceData(selectedEmployeeId);
+            updateGlobalStats(); // Update global totals
         });
 
-        // Update date To minimum when date From changes
         document.getElementById('dateFrom').addEventListener('change', function() {
             document.getElementById('dateTo').setAttribute('min', this.value);
         });
 
-        // Export Modal Functions
-        function showExportModal() {
-            document.getElementById('exportModal').classList.add('active');
+        // Global Stats
+        function updateGlobalStats() {
+            let totalSickness = 0, totalAaup = 0, totalTofd = 0;
+            Object.keys(absenceData).forEach(empId => {
+                (absenceData[empId].records || []).forEach(r => {
+                    if (r.type === 'sickness') totalSickness++;
+                    if (r.type === 'aaup') totalAaup++;
+                    if (r.type === 'tofd') totalTofd++;
+                });
+            });
+            const grandTotal = totalSickness + totalAaup + totalTofd;
+            document.getElementById('totalSicknessIncidents').textContent = totalSickness;
+            document.getElementById('totalAaupIncidents').textContent = totalAaup;
+            document.getElementById('totalTofdIncidents').textContent = totalTofd;
+            document.getElementById('grandTotalIncidents').textContent = grandTotal;
         }
 
-        function closeExportModal() {
-            document.getElementById('exportModal').classList.remove('active');
-            document.getElementById('exportForm').reset();
-        }
+        // Export Modal
+        function showExportModal() { document.getElementById('exportModal').classList.add('active'); }
+        function closeExportModal() { document.getElementById('exportModal').classList.remove('active'); document.getElementById('exportForm').reset(); }
 
         document.getElementById('exportForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            const exportType = document.getElementById('exportType').value;
-            const exportMonth = document.getElementById('exportMonth').value;
+            const type = document.getElementById('exportType').value;
+            const month = document.getElementById('exportMonth').value;
 
-            // Collect all records from all employees
-            let allAbsenceRecords = [];
-            
+            let records = [];
             Object.keys(absenceData).forEach(empId => {
-                const employee = employees[empId];
-                const records = absenceData[empId].records || [];
-                
-                records.forEach(record => {
-                    allAbsenceRecords.push({
-                        employeeId: employee.id,
-                        employeeName: employee.name,
-                        ...record
-                    });
+                const emp = employees[empId];
+                (absenceData[empId].records || []).forEach(r => {
+                    records.push({ employeeId: emp.id, employeeName: emp.name, ...r });
                 });
             });
 
-            // Filter by type
-            if (exportType !== 'all') {
-                allAbsenceRecords = allAbsenceRecords.filter(record => record.type === exportType);
-            }
+            if (type !== 'all') records = records.filter(r => r.type === type);
+            if (month) records = records.filter(r => r.dateFrom.substring(0, 7) === month);
 
-            // Filter by month
-            if (exportMonth) {
-                allAbsenceRecords = allAbsenceRecords.filter(record => {
-                    const recordMonth = record.dateFrom.substring(0, 7);
-                    return recordMonth === exportMonth;
-                });
-            }
-
-            // Generate CSV
-            exportToCSV(allAbsenceRecords, exportType, exportMonth);
-            
+            exportToCSV(records, type, month);
             closeExportModal();
         });
 
         function exportToCSV(records, typeFilter, monthFilter) {
-            if (records.length === 0) {
-                alert('No records found matching your criteria');
-                return;
-            }
+            if (records.length === 0) return alert('No records found');
 
-            // CSV Headers
-            let csv = 'Employee ID,Employee Name,Absence Type,Date From,Date To,Hours,Days,Notes\n';
+            // Summary
+            let totalSickness = records.filter(r => r.type === 'sickness').length;
+            let totalAaup = records.filter(r => r.type === 'aaup').length;
+            let totalTofd = records.filter(r => r.type === 'tofd').length;
+            let grandTotal = records.length;
 
-            // CSV Data
-            records.forEach(record => {
-                const days = Math.ceil(record.hours / 8);
-                const notes = (record.notes || '').replace(/"/g, '""'); // Escape quotes
-                
-                csv += `"${record.employeeId}","${record.employeeName}","${record.type}","${record.dateFrom}","${record.dateTo}",${record.hours},${days},"${notes}"\n`;
+            let csv = `,,,"Summary Totals",,,,\n`;
+            csv += `,,,"Sickness Incidents","${totalSickness}",,,\n`;
+            csv += `,,,"AAUP Incidents","${totalAaup}",,,\n`;
+            csv += `,,,"TOFD Incidents","${totalTofd}",,,\n`;
+            csv += `,,,"Grand Total","${grandTotal}",,,\n\n`;
+            csv += 'Employee ID,Employee Name,Absence Type,Date From,Date To,Hours,Days,Notes\n';
+
+            records.forEach(r => {
+                const days = Math.ceil(r.hours / 8);
+                const notes = (r.notes || '').replace(/"/g, '""');
+                csv += `"${r.employeeId}","${r.employeeName}","${r.type}","${r.dateFrom}","${r.dateTo}",${r.hours},${days},"${notes}"\n`;
             });
 
-            // Create download
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
-            
-            // Generate filename
-            let filename = 'absence_export_';
-            if (typeFilter !== 'all') {
-                filename += typeFilter + '_';
-            }
-            if (monthFilter) {
-                filename += monthFilter + '_';
-            }
-            filename += new Date().toISOString().split('T')[0] + '.csv';
-            
+            let filename = `absence_export_${typeFilter !== 'all' ? typeFilter + '_' : ''}${monthFilter ? monthFilter + '_' : ''}${new Date().toISOString().split('T')[0]}.csv`;
             link.setAttribute('href', url);
             link.setAttribute('download', filename);
             link.style.visibility = 'hidden';
@@ -1043,15 +932,14 @@
             link.click();
             document.body.removeChild(link);
 
-            alert(`Exported ${records.length} absence record(s) to CSV`);
+            alert(`Exported ${records.length} record(s)`);
         }
 
-        // Close modal when clicking outside
-        document.getElementById('exportModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeExportModal();
-            }
-        });
+        // Close modal on outside click
+        document.getElementById('exportModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeExportModal(); });
+
+        // Initialize
+        updateGlobalStats();
     </script>
 </body>
 </html>
