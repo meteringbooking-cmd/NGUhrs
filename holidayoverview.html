@@ -411,7 +411,7 @@
 
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
                         <h3 class="section-title" style="margin: 0;">📋 Holiday History</h3>
-                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
                             <div>
                                 <label for="filterStatus" style="margin-bottom: 5px; font-size: 0.9em;">Filter by Status:</label>
                                 <select id="filterStatus" onchange="filterHolidays()" style="padding: 8px 12px; width: 180px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
@@ -424,6 +424,11 @@
                             <div>
                                 <label for="filterMonth" style="margin-bottom: 5px; font-size: 0.9em;">Filter by Month:</label>
                                 <input type="month" id="filterMonth" onchange="filterHolidays()" style="padding: 8px 12px; width: 180px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;">
+                            </div>
+                            <div>
+                                <button onclick="exportToCSV()" style="padding: 8px 20px; background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.95em; font-weight: 600; transition: all 0.3s;">
+                                    📥 Export to CSV
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -727,6 +732,71 @@
                     item.style.display = 'none';
                 }
             });
+        }
+
+        function exportToCSV() {
+            if (!selectedEmployeeId) {
+                alert('Please select an employee first');
+                return;
+            }
+
+            const employee = employees[selectedEmployeeId];
+            const statusFilter = document.getElementById('filterStatus').value;
+            const monthFilter = document.getElementById('filterMonth').value;
+
+            // Get currently displayed records (respecting filters)
+            let recordsToExport = [...allRecords];
+
+            // Apply filters
+            if (statusFilter !== 'all') {
+                recordsToExport = recordsToExport.filter(record => record.status === statusFilter);
+            }
+
+            if (monthFilter) {
+                recordsToExport = recordsToExport.filter(record => {
+                    const recordMonth = record.dateFrom.substring(0, 7);
+                    return recordMonth === monthFilter;
+                });
+            }
+
+            if (recordsToExport.length === 0) {
+                alert('No records to export');
+                return;
+            }
+
+            // Create CSV content
+            let csv = 'Employee Name,Employee ID,Status,Date From,Date To,Days,Holiday Type,Notes\n';
+
+            recordsToExport.forEach(record => {
+                const row = [
+                    employee.name,
+                    employee.id,
+                    record.status.charAt(0).toUpperCase() + record.status.slice(1),
+                    formatDate(record.dateFrom),
+                    formatDate(record.dateTo),
+                    record.days,
+                    record.type,
+                    record.notes ? record.notes.replace(/,/g, ';') : ''
+                ];
+                csv += row.join(',') + '\n';
+            });
+
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const filterInfo = [];
+            if (statusFilter !== 'all') filterInfo.push(statusFilter);
+            if (monthFilter) filterInfo.push(monthFilter);
+            const filterSuffix = filterInfo.length > 0 ? '_' + filterInfo.join('_') : '';
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Holiday_Report_${employee.id}${filterSuffix}_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
