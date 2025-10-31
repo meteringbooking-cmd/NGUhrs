@@ -33,6 +33,16 @@
                             font-size:1em; transition:border .3s; }
         .search-box input:focus { outline:none; border-color:#667eea; }
 
+        .view-all-buttons {
+            display: flex; gap: 12px; margin-bottom: 15px; flex-wrap: wrap;
+        }
+        .view-all-btn {
+            background: #667eea; color: white; padding: 8px 16px;
+            border: none; border-radius: 8px; cursor: pointer;
+            font-size: 0.9em; font-weight: 600; transition: all 0.3s;
+        }
+        .view-all-btn:hover { background: #5a6fd8; transform: translateY(-1px); }
+
         .tabs { display:flex; gap:5px; margin-bottom:20px; flex-wrap:wrap; }
         .tab-btn { background:#f1f3f5; color:#555; padding:10px 16px;
                    border:none; border-radius:8px; cursor:pointer;
@@ -54,14 +64,14 @@
             margin-bottom:20px; color:#333; font-size:1.4em;
         }
         table {
-            width:100%; border-collapse:collapse; min-width:800px;
+            width:100%; border-collapse:collapse; min-width:1200px;
         }
         th, td {
             padding:14px 12px; text-align:center; border-bottom:1px solid #e0e0e0;
         }
         th {
             background:#f8f9fa; color:#444; font-weight:600;
-            font-size:0.9em; text-transform:uppercase; letter-spacing:0.5px;
+            font-size:0.85em; text-transform:uppercase; letter-spacing:0.5px;
         }
         th:first-child { text-align:left; }
         td:first-child {
@@ -92,8 +102,9 @@
 
         @media (max-width:768px) {
             .tabs { justify-content:center; }
-            table { font-size:0.85em; }
-            th, td { padding:10px 8px; }
+            table { font-size:0.8em; }
+            th, td { padding:10px 6px; }
+            .view-all-buttons { justify-content: center; }
         }
     </style>
 </head>
@@ -119,79 +130,68 @@
             <div id="eligibility" class="tab-content active">
                 <div class="eligibility-table">
                     <h2>Employee Section Eligibility</h2>
+
+                    <!-- VIEW ALL BUTTONS -->
+                    <div class="view-all-buttons">
+                        <button class="view-all-btn" onclick="setViewAllOffice()">View All – Office</button>
+                        <button class="view-all-btn" onclick="setViewAllNoneOffice()">View All – None Office</button>
+                    </div>
+
                     <table id="eligibilityTable">
                         <thead>
                             <tr>
                                 <th>Employee</th>
-                                <th>View all</th>
-                                <th>Employee files</th>
+                                <th>View All</th>
+                                <th>Employee Files</th>
                                 <th>Reports</th>
                                 <th>Management</th>
                                 <th>Mandatory Docs</th>
                                 <th>Application</th>
+                                <th>Cognito Forms</th>
+                                <th>Add'l Payments</th>
+                                <th>Bonus</th>
+                                <th>Absence</th>
+                                <th>Absence Office</th>
+                                <th>Holiday</th>
+                                <th>Holiday Office</th>
                             </tr>
                         </thead>
                         <tbody>
+                            <!-- Sample Employees -->
                             <tr>
-                                <td>
-                                    <div class="employee-name">John Smith</div>
-                                    <div class="employee-id">ID: EMP001</div>
-                                </td>
+                                <td><div class="employee-name">John Smith</div><div class="employee-id">ID: EMP001</div></td>
                                 <td><input type="checkbox" class="view-all" data-emp="1"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="employee-files"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="reports"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="management"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="mandatory-docs"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="application"></td>
+                                <td><input type="checkbox" data-emp="1" data-section="cognito-forms"></td>
+                                <td><input type="checkbox" data-emp="1" data-section="additional-payments"></td>
+                                <td><input type="checkbox" data-emp="1" data-section="bonus"></td>
+                                <td><input type="checkbox" data-emp="1" data-section="absence"></td>
+                                <td><input type="checkbox" data-emp="1" data-section="absence-office"></td>
+                                <td><input type="checkbox" data-emp="1" data-section="holiday"></td>
+                                <td><input type="checkbox" data-emp="1" data-section="holiday-office"></td>
                             </tr>
+                            <!-- Repeat for other employees -->
                             <tr>
-                                <td>
-                                    <div class="employee-name">Sarah Johnson</div>
-                                    <div class="employee-id">ID: EMP002</div>
-                                </td>
+                                <td><div class="employee-name">Sarah Johnson</div><div class="employee-id">ID: EMP002</div></td>
                                 <td><input type="checkbox" class="view-all" data-emp="2"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="employee-files"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="reports"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="management"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="mandatory-docs"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="application"></td>
+                                <td><input type="checkbox" data-emp="2" data-section="cognito-forms"></td>
+                                <td><input type="checkbox" data-emp="2" data-section="additional-payments"></td>
+                                <td><input type="checkbox" data-emp="2" data-section="bonus"></td>
+                                <td><input type="checkbox" data-emp="2" data-section="absence"></td>
+                                <td><input type="checkbox" data-emp="2" data-section="absence-office"></td>
+                                <td><input type="checkbox" data-emp="2" data-section="holiday"></td>
+                                <td><input type="checkbox" data-emp="2" data-section="holiday-office"></td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <div class="employee-name">Michael Brown</div>
-                                    <div class="employee-id">ID: EMP003</div>
-                                </td>
-                                <td><input type="checkbox" class="view-all" data-emp="3"></td>
-                                <td><input type="checkbox" data-emp="3" data-section="employee-files"></td>
-                                <td><input type="checkbox" data-emp="3" data-section="reports"></td>
-                                <td><input type="checkbox" data-emp="3" data-section="management"></td>
-                                <td><input type="checkbox" data-emp="3" data-section="mandatory-docs"></td>
-                                <td><input type="checkbox" data-emp="3" data-section="application"></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="employee-name">Emma Wilson</div>
-                                    <div class="employee-id">ID: EMP004</div>
-                                </td>
-                                <td><input type="checkbox" class="view-all" data-emp="4"></td>
-                                <td><input type="checkbox" data-emp="4" data-section="employee-files"></td>
-                                <td><input type="checkbox" data-emp="4" data-section="reports"></td>
-                                <td><input type="checkbox" data-emp="4" data-section="management"></td>
-                                <td><input type="checkbox" data-emp="4" data-section="mandatory-docs"></td>
-                                <td><input type="checkbox" data-emp="4" data-section="application"></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="employee-name">James Taylor</div>
-                                    <div class="employee-id">ID: EMP005</div>
-                                </td>
-                                <td><input type="checkbox" class="view-all" data-emp="5"></td>
-                                <td><input type="checkbox" data-emp="5" data-section="employee-files"></td>
-                                <td><input type="checkbox" data-emp="5" data-section="reports"></td>
-                                <td><input type="checkbox" data-emp="5" data-section="management"></td>
-                                <td><input type="checkbox" data-emp="5" data-section="mandatory-docs"></td>
-                                <td><input type="checkbox" data-emp="5" data-section="application"></td>
-                            </tr>
+                            <!-- Add more rows as needed -->
                         </tbody>
                     </table>
                     <button class="save-btn" onclick="savePermissions()">Save Permissions</button>
@@ -213,22 +213,23 @@
     </div>
 
     <script>
-        const sections = ['employee-files', 'reports', 'management', 'mandatory-docs', 'application'];
+        // All sections
+        const officeSections = ['employee-files', 'reports', 'management', 'mandatory-docs', 'application', 'absence-office', 'holiday-office'];
+        const noneOfficeSections = ['bonus', 'additional-payments', 'cognito-forms', 'absence', 'holiday'];
 
-        // Load saved permissions
+        // Load permissions
         function loadPermissions() {
             const saved = localStorage.getItem('employeePermissions');
             if (!saved) return;
-
             const perms = JSON.parse(saved);
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 const emp = cb.dataset.emp;
                 const sec = cb.dataset.section;
-                if (sec) {
-                    cb.checked = perms[emp]?.[sec] || false;
+                if (sec && perms[emp]?.[sec] !== undefined) {
+                    cb.checked = perms[emp][sec];
                 }
             });
-            syncViewAllCheckboxes(); // Ensure "View all" reflects current state
+            syncAllViewAllCheckboxes();
         }
 
         // Save permissions
@@ -246,8 +247,8 @@
             alert('Permissions saved successfully!');
         }
 
-        // Sync "View all" checkbox with other checkboxes
-        function syncViewAllCheckboxes() {
+        // Sync per-row "View All"
+        function syncAllViewAllCheckboxes() {
             document.querySelectorAll('.view-all').forEach(viewAll => {
                 const emp = viewAll.dataset.emp;
                 const rowCheckboxes = document.querySelectorAll(`input[data-emp="${emp}"][data-section]`);
@@ -258,7 +259,25 @@
             });
         }
 
-        // Handle "View all" click
+        // "View All – Office"
+        function setViewAllOffice() {
+            document.querySelectorAll('input[data-section]').forEach(cb => {
+                const sec = cb.dataset.section;
+                cb.checked = officeSections.includes(sec);
+            });
+            syncAllViewAllCheckboxes();
+        }
+
+        // "View All – None Office"
+        function setViewAllNoneOffice() {
+            document.querySelectorAll('input[data-section]').forEach(cb => {
+                const sec = cb.dataset.section;
+                cb.checked = noneOfficeSections.includes(sec);
+            });
+            syncAllViewAllCheckboxes();
+        }
+
+        // Handle per-row "View All"
         document.querySelectorAll('.view-all').forEach(viewAll => {
             viewAll.addEventListener('change', function() {
                 const emp = this.dataset.emp;
@@ -269,24 +288,25 @@
             });
         });
 
-        // Any individual checkbox change → update "View all"
+        // Any individual change → update row "View All"
         document.querySelectorAll('input[data-section]').forEach(cb => {
-            cb.addEventListener('change', syncViewAllCheckboxes);
+            cb.addEventListener('change', syncAllViewAllCheckboxes);
         });
 
-        // Check access
-        const currentUserId = '1'; // Change to test different users
+        // Access check
+        const currentUserId = '1'; // Change to test
         function checkAccess(section) {
             const perms = JSON.parse(localStorage.getItem('employeePermissions') || '{}');
             return perms[currentUserId]?.[section] || false;
         }
 
-        // Open tab
+        // Tab logic
         function openTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             const tab = document.getElementById(tabName);
-            const btn = event.target;
+            tab.classList.add('active');
+            if (event && event.target) event.target.classList.add('active');
 
             if (tabName === 'management') {
                 if (checkAccess('management')) {
@@ -297,9 +317,6 @@
                     document.getElementById('accessDenied').style.display = 'block';
                 }
             }
-
-            tab.classList.add('active');
-            btn.classList.add('active');
         }
 
         // Search
