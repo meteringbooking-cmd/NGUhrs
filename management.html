@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Absence Management | NGU-hrs</title>
+    <title>Management | NGU-hrs</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
@@ -43,7 +43,6 @@
 
         .content-area { display:grid; grid-template-columns:1fr; gap:25px; }
 
-        /* Eligibility Table */
         .eligibility-table {
             background:rgba(255,255,255,0.95);
             border-radius:15px;
@@ -116,14 +115,12 @@
             </div>
         </div>
 
-        <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn" onclick="openTab('management')">Management</button>
             <button class="tab-btn active" onclick="openTab('eligibility')">Eligibility Chart</button>
         </div>
 
         <div class="content-area">
-            <!-- Eligibility Chart -->
             <div id="eligibility" class="tab-content active">
                 <div class="eligibility-table">
                     <h2>Employee Section Eligibility</h2>
@@ -145,7 +142,7 @@
                                     <div class="employee-name">John Smith</div>
                                     <div class="employee-id">ID: EMP001</div>
                                 </td>
-                                <td><input type="checkbox" data-emp="1" data-section="view-all"></td>
+                                <td><input type="checkbox" class="view-all" data-emp="1"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="employee-files"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="reports"></td>
                                 <td><input type="checkbox" data-emp="1" data-section="management"></td>
@@ -157,7 +154,7 @@
                                     <div class="employee-name">Sarah Johnson</div>
                                     <div class="employee-id">ID: EMP002</div>
                                 </td>
-                                <td><input type="checkbox" data-emp="2" data-section="view-all"></td>
+                                <td><input type="checkbox" class="view-all" data-emp="2"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="employee-files"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="reports"></td>
                                 <td><input type="checkbox" data-emp="2" data-section="management"></td>
@@ -169,7 +166,7 @@
                                     <div class="employee-name">Michael Brown</div>
                                     <div class="employee-id">ID: EMP003</div>
                                 </td>
-                                <td><input type="checkbox" data-emp="3" data-section="view-all"></td>
+                                <td><input type="checkbox" class="view-all" data-emp="3"></td>
                                 <td><input type="checkbox" data-emp="3" data-section="employee-files"></td>
                                 <td><input type="checkbox" data-emp="3" data-section="reports"></td>
                                 <td><input type="checkbox" data-emp="3" data-section="management"></td>
@@ -181,7 +178,7 @@
                                     <div class="employee-name">Emma Wilson</div>
                                     <div class="employee-id">ID: EMP004</div>
                                 </td>
-                                <td><input type="checkbox" data-emp="4" data-section="view-all"></td>
+                                <td><input type="checkbox" class="view-all" data-emp="4"></td>
                                 <td><input type="checkbox" data-emp="4" data-section="employee-files"></td>
                                 <td><input type="checkbox" data-emp="4" data-section="reports"></td>
                                 <td><input type="checkbox" data-emp="4" data-section="management"></td>
@@ -193,7 +190,7 @@
                                     <div class="employee-name">James Taylor</div>
                                     <div class="employee-id">ID: EMP005</div>
                                 </td>
-                                <td><input type="checkbox" data-emp="5" data-section="view-all"></td>
+                                <td><input type="checkbox" class="view-all" data-emp="5"></td>
                                 <td><input type="checkbox" data-emp="5" data-section="employee-files"></td>
                                 <td><input type="checkbox" data-emp="5" data-section="reports"></td>
                                 <td><input type="checkbox" data-emp="5" data-section="management"></td>
@@ -206,7 +203,6 @@
                 </div>
             </div>
 
-            <!-- Management Tab (Example) -->
             <div id="management" class="tab-content">
                 <div class="no-access" id="accessDenied" style="display:none;">
                     <div class="no-access-icon">Lock</div>
@@ -216,22 +212,13 @@
                 <div id="managementContent" style="display:none;">
                     <h3>Management Dashboard</h3>
                     <p>Only users with <strong>Management</strong> access can view this.</p>
-                    <!-- Add real content here later -->
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const employees = [
-            { id: 1, name: 'John Smith', empId: 'EMP001' },
-            { id: 2, name: 'Sarah Johnson', empId: 'EMP002' },
-            { id: 3, name: 'Michael Brown', empId: 'EMP003' },
-            { id: 4, name: 'Emma Wilson', empId: 'EMP004' },
-            { id: 5, name: 'James Taylor', empId: 'EMP005' }
-        ];
-
-        const sections = ['view-all', 'employee-files', 'reports', 'management', 'mandatory-docs', 'application'];
+        const sections = ['employee-files', 'reports', 'management', 'mandatory-docs', 'application'];
 
         // Load saved permissions
         function loadPermissions() {
@@ -242,8 +229,11 @@
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 const emp = cb.dataset.emp;
                 const sec = cb.dataset.section;
-                cb.checked = perms[emp]?.[sec] || false;
+                if (sec) {
+                    cb.checked = perms[emp]?.[sec] || false;
+                }
             });
+            syncViewAllCheckboxes(); // Ensure "View all" reflects current state
         }
 
         // Save permissions
@@ -252,30 +242,57 @@
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 const emp = cb.dataset.emp;
                 const sec = cb.dataset.section;
-                if (!perms[emp]) perms[emp] = {};
-                perms[emp][sec] = cb.checked;
+                if (sec && emp) {
+                    if (!perms[emp]) perms[emp] = {};
+                    perms[emp][sec] = cb.checked;
+                }
             });
             localStorage.setItem('employeePermissions', JSON.stringify(perms));
             alert('Permissions saved successfully!');
         }
 
-        // Check access (example: current user = EMP001)
-        const currentUserId = '1'; // Change this to simulate different users
+        // Sync "View all" checkbox with other checkboxes
+        function syncViewAllCheckboxes() {
+            document.querySelectorAll('.view-all').forEach(viewAll => {
+                const emp = viewAll.dataset.emp;
+                const rowCheckboxes = document.querySelectorAll(`input[data-emp="${emp}"][data-section]`);
+                const allChecked = Array.from(rowCheckboxes).every(cb => cb.checked);
+                const anyChecked = Array.from(rowCheckboxes).some(cb => cb.checked);
+                viewAll.indeterminate = anyChecked && !allChecked;
+                viewAll.checked = allChecked;
+            });
+        }
 
+        // Handle "View all" click
+        document.querySelectorAll('.view-all').forEach(viewAll => {
+            viewAll.addEventListener('change', function() {
+                const emp = this.dataset.emp;
+                const isChecked = this.checked;
+                document.querySelectorAll(`input[data-emp="${emp}"][data-section]`).forEach(cb => {
+                    cb.checked = isChecked;
+                });
+            });
+        });
+
+        // Any individual checkbox change → update "View all"
+        document.querySelectorAll('input[data-section]').forEach(cb => {
+            cb.addEventListener('change', syncViewAllCheckboxes);
+        });
+
+        // Check access
+        const currentUserId = '1'; // Change to test different users
         function checkAccess(section) {
             const perms = JSON.parse(localStorage.getItem('employeePermissions') || '{}');
             return perms[currentUserId]?.[section] || false;
         }
 
-        // Open tab with access control
+        // Open tab
         function openTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
             const tab = document.getElementById(tabName);
             const btn = event.target;
 
-            // Special: Management tab requires permission
             if (tabName === 'management') {
                 if (checkAccess('management')) {
                     document.getElementById('managementContent').style.display = 'block';
@@ -290,7 +307,7 @@
             btn.classList.add('active');
         }
 
-        // Search filter
+        // Search
         function filterTable() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             document.querySelectorAll('#eligibilityTable tbody tr').forEach(row => {
@@ -302,7 +319,6 @@
         // Initialize
         window.onload = function() {
             loadPermissions();
-            // Default: open eligibility chart
             openTab('eligibility');
         };
     </script>
