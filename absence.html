@@ -336,242 +336,249 @@
 
     <script src="employees.js"></script>
 
-    <script>
-        let selectedEmployeeId = null;
-        const employees = {
-            1:{id:'EMP001',name:'John Smith'},
-            2:{id:'EMP002',name:'Sarah Johnson'},
-            3:{id:'EMP003',name:'Michael Brown'},
-            4:{id:'EMP004',name:'Emma Wilson'},
-            5:{id:'EMP005',name:'James Taylor'}
+<script>
+    let selectedEmployeeId = null;
+
+    // === 1. INIT: Load employees + ensure absence array ===
+    function initEmployees() {
+        EMPLOYEES.init();
+        EMPLOYEES.data.forEach(emp => {
+            if (!emp.absences) emp.absences = [];
+            if (!emp.holidayRemaining) emp.holidayRemaining = 25;
+            if (!emp.holidayTaken) emp.holidayTaken = 0;
+            if (!emp.absenceDays) emp.absenceDays = 0;
+        });
+        EMPLOYEES.save();
+        renderEmployeeList();
+    }
+
+    // === 2. Render Employee List (left sidebar) ===
+    function renderEmployeeList() {
+        const container = document.getElementById('employeeListContainer');
+        container.innerHTML = '';
+        EMPLOYEES.data.forEach(emp => {
+            const item = document.createElement('div');
+            item.className = 'employee-item';
+            item.onclick = () => selectEmployee(emp.id);
+            item.innerHTML = `<strong>${emp.name}</strong><span>ID: ${emp.id}</span>`;
+            container.appendChild(item);
+        });
+    }
+
+    // === 3. Select Employee ===
+    function selectEmployee(id) {
+        selectedEmployeeId = id;
+        const emp = EMPLOYEES.data.find(e => e.id === id);
+        if (!emp) return;
+
+        document.querySelectorAll('.employee-item').forEach(i => i.classList.remove('active'));
+        event.target.closest('.employee-item').classList.add('active');
+
+        document.getElementById('noSelection').style.display = 'none';
+        document.getElementById('employeeAbsence').style.display = 'block';
+        document.getElementById('employeeName').textContent = emp.name;
+        document.getElementById('employeeId').textContent = 'ID: ' + emp.id;
+
+        loadAbsenceData(emp);
+    }
+
+    // === 4. Load & Display Absence Data ===
+    function loadAbsenceData(emp) {
+        const records = emp.absences || [];
+        allRecords = [...records];
+
+        // Stats (lower section)
+        const sicknessHours = records.filter(r => r.type === 'sickness').reduce((s, r) => s + parseFloat(r.hours), 0);
+        const sicknessDays = Math.ceil(sicknessHours / 8);
+        const aaupCount = records.filter(r => r.type === 'aaup').length;
+        const tofdCount = records.filter(r => r.type === 'tofd').length;
+
+        document.getElementById('sicknessDays').textContent = sicknessDays;
+        document.getElementById('sicknessHours').textContent = sicknessHours;
+        document.getElementById('aaupCount').textContent = aaupCount;
+        document.getElementById('tofdCount').textContent = tofdCount;
+        document.getElementById('totalIncidents').textContent = records.length;
+
+        // Summary cards (top)
+        document.getElementById('empSicknessIncidents').textContent = records.filter(r => r.type === 'sickness').length;
+        document.getElementById('empAaupIncidents').textContent = records.filter(r => r.type === 'aaup').length;
+        document.getElementById('empTofdIncidents').textContent = records.filter(r => r.type === 'tofd').length;
+        document.getElementById('empGrandTotalIncidents').textContent = records.length;
+
+        // Reset filters
+        document.getElementById('filterType').value = 'all';
+        document.getElementById('filterMonth').value = '';
+
+        displayAbsenceRecords(records);
+    }
+
+    let allRecords = [];
+
+    function displayAbsenceRecords(records) {
+        const container = document.getElementById('absenceHistory');
+        if (!records.length) {
+            container.innerHTML = '<p style="color:#666;text-align:center;padding:40px;">No absence records found</p>';
+            return;
+        }
+        const labels = { sickness: 'Sickness', aaup: 'AAUP', tofd: 'TOFD' };
+        let html = '';
+        records.forEach(r => {
+            html += `
+                <div class="absence-record ${r.type}">
+                    <div class="record-header">
+                        <span class="record-type">${labels[r.type]}</span>
+                        <span class="record-dates">${formatDate(r.dateFrom)} - ${formatDate(r.dateTo)}</span>
+                    </div>
+                    <div class="record-details">
+                        <div class="record-detail-item"><strong>Hours:</strong> ${r.hours}</div>
+                        <div class="record-detail-item"><strong>Days:</strong> ${Math.ceil(r.hours / 8)}</div>
+                    </div>
+                    ${r.notes ? `<div class="record-notes">Note: ${r.notes}</div>` : ''}
+                </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // === 5. Filters ===
+    function filterAbsences() {
+        const type = document.getElementById('filterType').value;
+        const month = document.getElementById('filterMonth').value;
+        let filtered = [...allRecords];
+        if (type !== 'all') filtered = filtered.filter(r => r.type === type);
+        if (month) filtered = filtered.filter(r => r.dateFrom.substring(0, 7) === month);
+        updateFilteredStats(filtered);
+        displayAbsenceRecords(filtered);
+    }
+
+    function updateFilteredStats(records) {
+        const sicknessHours = records.filter(r => r.type === 'sickness').reduce((s, r) => s + parseFloat(r.hours), 0);
+        const sicknessDays = Math.ceil(sicknessHours / 8);
+        const aaup = records.filter(r => r.type === 'aaup').length;
+        const tofd = records.filter(r => r.type === 'tofd').length;
+        document.getElementById('sicknessDays').textContent = sicknessDays;
+        document.getElementById('sicknessHours').textContent = sicknessHours;
+        document.getElementById('aaupCount').textContent = aaup;
+        document.getElementById('tofdCount').textContent = tofd;
+        document.getElementById('totalIncidents').textContent = records.length;
+    }
+
+    function formatDate(str) {
+        const d = new Date(str);
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    // === 6. Search Employees ===
+    function filterEmployees() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.employee-item').forEach(item => {
+            const text = item.textContent.toLowerCase();
+            item.style.display = text.includes(term) ? 'block' : 'none';
+        });
+    }
+
+    // === 7. Submit Absence ===
+    document.getElementById('absenceForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (!selectedEmployeeId) return alert('Select an employee first');
+
+        const rec = {
+            type: document.getElementById('absenceType').value,
+            dateFrom: document.getElementById('dateFrom').value,
+            dateTo: document.getElementById('dateTo').value,
+            hours: parseFloat(document.getElementById('hours').value),
+            notes: document.getElementById('notes').value,
+            submittedAt: new Date().toISOString()
         };
 
-        // Sample data – replace with real data later
-        const absenceData = {
-            1:{records:[
-                {type:'sickness',dateFrom:'2025-01-15',dateTo:'2025-01-17',hours:24,notes:'Flu symptoms'},
-                {type:'sickness',dateFrom:'2024-12-10',dateTo:'2024-12-11',hours:16,notes:'Stomach bug'},
-                {type:'aaup',dateFrom:'2024-12-20',dateTo:'2024-12-20',hours:8,notes:'Personal appointment'},
-                {type:'tofd',dateFrom:'2024-11-10',dateTo:'2024-11-10',hours:4,notes:'Child care emergency'},
-                {type:'tofd',dateFrom:'2025-01-22',dateTo:'2025-01-22',hours:3,notes:'School meeting'},
-                {type:'aaup',dateFrom:'2024-10-15',dateTo:'2024-10-15',hours:4,notes:'Moving house'}
-            ]},
-            2:{records:[
-                {type:'sickness',dateFrom:'2025-01-20',dateTo:'2025-01-20',hours:8,notes:'Migraine'},
-                {type:'tofd',dateFrom:'2024-12-05',dateTo:'2024-12-05',hours:3,notes:'School emergency'}
-            ]},
-            3:{records:[]}
-        };
+        const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
+        emp.absences.push(rec);
 
-        let allRecords = [];
-
-        /* ---------- Employee Selection ---------- */
-        function selectEmployee(id){
-            selectedEmployeeId = id;
-            const emp = employees[id];
-
-            document.querySelectorAll('.employee-item').forEach(i=>i.classList.remove('active'));
-            event.target.closest('.employee-item').classList.add('active');
-
-            document.getElementById('noSelection').style.display='none';
-            document.getElementById('employeeAbsence').style.display='block';
-            document.getElementById('employeeName').textContent = emp.name;
-            document.getElementById('employeeId').textContent = 'ID: '+emp.id;
-
-            loadAbsenceData(id);
+        // Update absenceDays
+        if (rec.type === 'sickness') {
+            emp.absenceDays = (emp.absenceDays || 0) + Math.ceil(rec.hours / 8);
         }
 
-        /* ---------- Load & Display Data ---------- */
-        function loadAbsenceData(empId){
-            const data = absenceData[empId] || {records:[]};
-            allRecords = data.records;
+        EMPLOYEES.save();
+        alert('Absence submitted!');
+        this.reset();
+        loadAbsenceData(emp);
+    });
 
-            // Employee-level stats (lower section)
-            const sicknessHours = data.records.filter(r=>r.type==='sickness')
-                                            .reduce((s,r)=>s+parseFloat(r.hours),0);
-            const sicknessDays = Math.ceil(sicknessHours/8);
-            const aaupCount = data.records.filter(r=>r.type==='aaup').length;
-            const tofdCount = data.records.filter(r=>r.type==='tofd').length;
+    document.getElementById('dateFrom').addEventListener('change', function () {
+        document.getElementById('dateTo').setAttribute('min', this.value);
+    });
 
-            document.getElementById('sicknessDays').textContent = sicknessDays;
-            document.getElementById('sicknessHours').textContent = sicknessHours;
-            document.getElementById('aaupCount').textContent = aaupCount;
-            document.getElementById('tofdCount').textContent = tofdCount;
-            document.getElementById('totalIncidents').textContent = data.records.length;
+    // === 8. Export Modal ===
+    function showExportModal() { document.getElementById('exportModal').classList.add('active'); }
+    function closeExportModal() {
+        document.getElementById('exportModal').classList.remove('active');
+        document.getElementById('exportForm').reset();
+    }
 
-            // Summary cards at the top (selected employee only)
-            const sicknessInc = data.records.filter(r=>r.type==='sickness').length;
-            const aaupInc     = data.records.filter(r=>r.type==='aaup').length;
-            const tofdInc     = data.records.filter(r=>r.type==='tofd').length;
-            const grandTotal  = data.records.length;
+    document.getElementById('exportForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const type = document.getElementById('exportType').value;
+        const month = document.getElementById('exportMonth').value;
 
-            document.getElementById('empSicknessIncidents').textContent = sicknessInc;
-            document.getElementById('empAaupIncidents').textContent     = aaupInc;
-            document.getElementById('empTofdIncidents').textContent     = tofdInc;
-            document.getElementById('empGrandTotalIncidents').textContent = grandTotal;
-
-            // Reset filters
-            document.getElementById('filterType').value='all';
-            document.getElementById('filterMonth').value='';
-
-            displayAbsenceRecords(allRecords);
-        }
-
-        function displayAbsenceRecords(records){
-            const container = document.getElementById('absenceHistory');
-            if(!records.length){
-                container.innerHTML='<p style="color:#666;text-align:center;padding:40px;">No absence records found</p>';
-                return;
-            }
-            const labels = {sickness:'Sickness',aaup:'AAUP',tofd:'TOFD'};
-            let html = '';
-            records.forEach(r=>{
-                html+=`
-                    <div class="absence-record ${r.type}">
-                        <div class="record-header">
-                            <span class="record-type">${labels[r.type]}</span>
-                            <span class="record-dates">${formatDate(r.dateFrom)} - ${formatDate(r.dateTo)}</span>
-                        </div>
-                        <div class="record-details">
-                            <div class="record-detail-item"><strong>Hours:</strong> ${r.hours}</div>
-                            <div class="record-detail-item"><strong>Days:</strong> ${Math.ceil(r.hours/8)}</div>
-                        </div>
-                        ${r.notes?`<div class="record-notes">Note: ${r.notes}</div>`:''}
-                    </div>`;
+        let records = [];
+        EMPLOYEES.data.forEach(emp => {
+            (emp.absences || []).forEach(r => {
+                records.push({ employeeId: emp.id, employeeName: emp.name, ...r });
             });
-            container.innerHTML=html;
-        }
-
-        /* ---------- Filtering ---------- */
-        function filterAbsences(){
-            const type = document.getElementById('filterType').value;
-            const month = document.getElementById('filterMonth').value;
-            let filtered = [...allRecords];
-            if(type!=='all') filtered = filtered.filter(r=>r.type===type);
-            if(month) filtered = filtered.filter(r=>r.dateFrom.substring(0,7)===month);
-            updateFilteredStats(filtered);
-            displayAbsenceRecords(filtered);
-        }
-        function updateFilteredStats(records){
-            const sicknessHours = records.filter(r=>r.type==='sickness')
-                                         .reduce((s,r)=>s+parseFloat(r.hours),0);
-            const sicknessDays = Math.ceil(sicknessHours/8);
-            const aaup = records.filter(r=>r.type==='aaup').length;
-            const tofd = records.filter(r=>r.type==='tofd').length;
-            document.getElementById('sicknessDays').textContent = sicknessDays;
-            document.getElementById('sicknessHours').textContent = sicknessHours;
-            document.getElementById('aaupCount').textContent = aaup;
-            document.getElementById('tofdCount').textContent = tofd;
-            document.getElementById('totalIncidents').textContent = records.length;
-        }
-
-        function formatDate(str){
-            const d = new Date(str);
-            return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-        }
-
-        /* ---------- Search Employees ---------- */
-        function filterEmployees(){
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('.employee-item').forEach(item=>{
-                item.style.display = item.textContent.toLowerCase().includes(term)?'block':'none';
-            });
-        }
-
-        /* ---------- Submit New Absence ---------- */
-        document.getElementById('absenceForm').addEventListener('submit',function(e){
-            e.preventDefault();
-            if(!selectedEmployeeId) return alert('Select an employee first');
-
-            const rec = {
-                type: document.getElementById('absenceType').value,
-                dateFrom: document.getElementById('dateFrom').value,
-                dateTo: document.getElementById('dateTo').value,
-                hours: parseFloat(document.getElementById('hours').value),
-                notes: document.getElementById('notes').value
-            };
-            if(!absenceData[selectedEmployeeId].records) absenceData[selectedEmployeeId].records=[];
-            absenceData[selectedEmployeeId].records.push(rec);
-
-            alert('Absence submitted!');
-            this.reset();
-            loadAbsenceData(selectedEmployeeId);   // refreshes both sections
         });
 
-        document.getElementById('dateFrom').addEventListener('change',function(){
-            document.getElementById('dateTo').setAttribute('min',this.value);
+        if (type !== 'all') records = records.filter(r => r.type === type);
+        if (month) records = records.filter(r => r.dateFrom.substring(0, 7) === month);
+
+        exportToCSV(records, type, month);
+        closeExportModal();
+    });
+
+    function exportToCSV(records, typeFilter, monthFilter) {
+        if (!records.length) return alert('No records to export');
+
+        const totalSickness = records.filter(r => r.type === 'sickness').length;
+        const totalAaup = records.filter(r => r.type === 'aaup').length;
+        const totalTofd = records.filter(r => r.type === 'tofd').length;
+        const grandTotal = records.length;
+
+        let csv = `,,,"Summary Totals",,,,\n`;
+        csv += `,,,"Sickness Incidents","${totalSickness}",,,\n`;
+        csv += `,,,"AAUP Incidents","${totalAaup}",,,\n`;
+        csv += `,,,"TOFD Incidents","${totalTofd}",,,\n`;
+        csv += `,,,"Grand Total","${grandTotal}",,,\n\n`;
+        csv += 'Employee ID,Employee Name,Absence Type,Date From,Date To,Hours,Days,Notes\n';
+
+        records.forEach(r => {
+            const days = Math.ceil(r.hours / 8);
+            const notes = (r.notes || '').replace(/"/g, '""');
+            csv += `"${r.employeeId}","${r.employeeName}","${r.type}","${r.dateFrom}","${r.dateTo}",${r.hours},${days},"${notes}"\n`;
         });
 
-        /* ---------- Export Modal ---------- */
-        function showExportModal(){ document.getElementById('exportModal').classList.add('active'); }
-        function closeExportModal(){
-            document.getElementById('exportModal').classList.remove('active');
-            document.getElementById('exportForm').reset();
-        }
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const fn = `absence_export_${typeFilter !== 'all' ? typeFilter + '_' : ''}${monthFilter ? monthFilter + '_' : ''}${new Date().toISOString().split('T')[0]}.csv`;
+        link.href = url;
+        link.download = fn;
+        link.click();
+        alert(`Exported ${records.length} record(s)`);
+    }
 
-        document.getElementById('exportForm').addEventListener('submit',function(e){
-            e.preventDefault();
-            const type = document.getElementById('exportType').value;
-            const month = document.getElementById('exportMonth').value;
+    // Close modal on background click
+    document.getElementById('exportModal').addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeExportModal();
+    });
 
-            let records = [];
-            Object.keys(absenceData).forEach(empId=>{
-                const emp = employees[empId];
-                (absenceData[empId].records||[]).forEach(r=>{
-                    records.push({employeeId:emp.id,employeeName:emp.name,...r});
-                });
-            });
-            if(type!=='all') records = records.filter(r=>r.type===type);
-            if(month) records = records.filter(r=>r.dateFrom.substring(0,7)===month);
-
-            exportToCSV(records,type,month);
-            closeExportModal();
-        });
-
-        function exportToCSV(records,typeFilter,monthFilter){
-            if(!records.length) return alert('No records to export');
-
-            // Summary (for the filtered set)
-            const totalSickness = records.filter(r=>r.type==='sickness').length;
-            const totalAaup     = records.filter(r=>r.type==='aaup').length;
-            const totalTofd     = records.filter(r=>r.type==='tofd').length;
-            const grandTotal    = records.length;
-
-            let csv = `,,,"Summary Totals",,,,\n`;
-            csv += `,,,"Sickness Incidents","${totalSickness}",,,\n`;
-            csv += `,,,"AAUP Incidents","${totalAaup}",,,\n`;
-            csv += `,,,"TOFD Incidents","${totalTofd}",,,\n`;
-            csv += `,,,"Grand Total","${grandTotal}",,,\n\n`;
-            csv += 'Employee ID,Employee Name,Absence Type,Date From,Date To,Hours,Days,Notes\n';
-
-            records.forEach(r=>{
-                const days = Math.ceil(r.hours/8);
-                const notes = (r.notes||'').replace(/"/g,'""');
-                csv += `"${r.employeeId}","${r.employeeName}","${r.type}","${r.dateFrom}","${r.dateTo}",${r.hours},${days},"${notes}"\n`;
-            });
-
-            const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const fn = `absence_export_${typeFilter!=='all'?typeFilter+'_':''}${monthFilter?monthFilter+'_':''}${new Date().toISOString().split('T')[0]}.csv`;
-            link.setAttribute('href',url);
-            link.setAttribute('download',fn);
-            link.style.visibility='hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            alert(`Exported ${records.length} record(s)`);
-        }
-
-        document.getElementById('exportModal').addEventListener('click',e=>{
-            if(e.target===e.currentTarget) closeExportModal();
-        });
-
-        // Initial state – no employee selected
+    // === 9. Init on Load ===
+    window.onload = function () {
+        initEmployees();
+        // Default: show "no selection"
         document.getElementById('empSicknessIncidents').textContent = '—';
         document.getElementById('empAaupIncidents').textContent = '—';
         document.getElementById('empTofdIncidents').textContent = '—';
         document.getElementById('empGrandTotalIncidents').textContent = '—';
-    </script>
+    };
+</script>
 </body>
 </html>
