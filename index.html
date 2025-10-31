@@ -226,67 +226,88 @@
 
         <div class="modules-grid">
             <div class="module-card" onclick="navigateToModule('application')">
-                <span class="module-icon">📝</span>
+                <span class="module-icon">Application</span>
                 <h2 class="module-title">Application</h2>
                 <p class="module-description">Manage job applications, track candidates, and streamline the hiring process.</p>
             </div>
 
             <div class="module-card" onclick="navigateToModule('holiday')">
-                <span class="module-icon">🏖️</span>
+                <span class="module-icon">Holiday</span>
                 <h2 class="module-title">Holiday</h2>
                 <p class="module-description">Submit and approve holiday requests with an intuitive calendar interface.</p>
             </div>
 
             <div class="module-card" onclick="navigateToModule('absence')">
-                <span class="module-icon">📅</span>
+                <span class="module-icon">Absence</span>
                 <h2 class="module-title">Absence</h2>
                 <p class="module-description">Track and manage employee absences including sick leave and other leave types.</p>
             </div>
 
             <div class="module-card" onclick="navigateToModule('holidayoverview')">
-                <span class="module-icon">📊</span>
+                <span class="module-icon">Holiday Overview</span>
                 <h2 class="module-title">Holiday Overview</h2>
                 <p class="module-description">View comprehensive holiday statistics and team availability at a glance.</p>
             </div>
 
             <div class="module-card" onclick="navigateToModule('mandatorydocuments')">
-                <span class="module-icon">📄</span>
+                <span class="module-icon">Mandatory Documents</span>
                 <h2 class="module-title">Mandatory Documents</h2>
                 <p class="module-description">Securely store and manage essential HR documents and compliance files.</p>
             </div>
 
             <div class="module-card" id="reports-card" onclick="toggleReportsSubsections(event)">
-                <span class="module-icon">📈</span>
+                <span class="module-icon">Reports</span>
                 <h2 class="module-title">Reports</h2>
                 <p class="module-description">Generate detailed reports and analytics for informed decision-making.</p>
                 
                 <div class="subsections" id="reports-subsections">
                     <div class="subsection-item" onclick="navigateToSubsection('attendancebreakdown')">
-                        <span class="subsection-icon">📊</span>
+                        <span class="subsection-icon">Attendance Breakdown</span>
                         <span>Attendance Breakdown</span>
                     </div>
                     <div class="subsection-item" onclick="navigateToSubsection('staff-details-report')">
-                        <span class="subsection-icon">👥</span>
+                        <span class="subsection-icon">Staff Details Report</span>
                         <span>Staff Details Report</span>
                     </div>
                 </div>
             </div>
 
             <div class="module-card" onclick="navigateToModule('management')">
-                <span class="module-icon">⚙️</span>
+                <span class="module-icon">Management</span>
                 <h2 class="module-title">Management</h2>
                 <p class="module-description">Administrative tools and system settings for HR management.</p>
             </div>
 
             <div class="module-card" onclick="navigateToModule('employeefiles')">
-                <span class="module-icon">🗂️</span>
+                <span class="module-icon">Employee Files</span>
                 <h2 class="module-title">Employee Files</h2>
                 <p class="module-description">Centralised document repository for all employee-related files and records.</p>
             </div>
+
+            <!-- NEW MODULES BELOW -->
+
+            <div class="module-card" onclick="navigateToModule('cognitoforms')">
+                <span class="module-icon">Cognito Forms</span>
+                <h2 class="module-title">Cognito Forms</h2>
+                <p class="module-description">Create and embed powerful online forms for surveys, registrations, and data collection.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('additionalpayments')">
+                <span class="module-icon">Additional Payments</span>
+                <h2 class="module-title">Additional Payments</h2>
+                <p class="module-description">Process overtime, commissions, allowances, and other supplemental payments.</p>
+            </div>
+
+            <div class="module-card" onclick="navigateToModule('bonus')">
+                <span class="module-icon">Bonus</span>
+                <h2 class="module-title">Bonus</h2>
+                <p class="module-description">Manage performance bonuses, incentives, and retention rewards for employees.</p>
+            </div>
+
         </div>
 
         <footer>
-            <p>&copy; 2025 Next Generation Utilies Hub System.</p>
+            <p>© 2025 Next Generation Utilities Hub System.</p>
             <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;"></p>
         </footer>
     </div>
