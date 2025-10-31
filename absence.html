@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Absence Management | NGU-hrs</title>
+    <!-- EMAILJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
@@ -327,6 +329,25 @@
         let selectedEmployeeId = null;
         let allRecords = [];
 
+        // === EMAILJS CONFIG (FREE) ===
+        // 1. Go to https://www.emailjs.com → Sign up
+        // 2. Create Email Service (Gmail, Outlook, etc.)
+        // 3. Create Email Template:
+        //    Subject: New Absence: {{employee_name}} - {{type}}
+        //    Body: 
+        //      Employee: {{employee_name}} ({{employee_id}})
+        //      Type: {{type}}
+        //      From: {{date_from}} → {{date_to}}
+        //      Hours: {{hours}}
+        //      Notes: {{notes}}
+        //      Submitted: {{submitted_at}}
+        // 4. Replace below with your IDs
+        const EMAILJS_SERVICE_ID = 'YOUR_SERVICE_ID';     // e.g. service_abc123
+        const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';   // e.g. template_xyz789
+        const EMAILJS_PUBLIC_KEY = 'YOUR_PUBLIC_KEY';     // e.g. abc123def456
+
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+
         // === 1. Add New Employee ===
         function addNewEmployee() {
             const name = prompt("Enter employee name:");
@@ -335,8 +356,8 @@
             const emp = EMPLOYEES.add(name.trim());
             alert(`Added: ${emp.name} (ID: ${emp.id})`);
 
-            renderEmployeeList();        // Refresh list
-            selectEmployee(emp.id);     // Auto-select new employee
+            renderEmployeeList();
+            selectEmployee(emp.id);
         }
 
         // === 2. INIT ===
@@ -471,10 +492,13 @@
             });
         }
 
-        // === 8. Submit Absence ===
+        // === 8. Submit Absence + EMAIL ===
         document.getElementById('absenceForm').addEventListener('submit', function (e) {
             e.preventDefault();
             if (!selectedEmployeeId) return alert('Select an employee first');
+
+            const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
+            const typeLabel = document.getElementById('absenceType').options[document.getElementById('absenceType').selectedIndex].text;
 
             const rec = {
                 type: document.getElementById('absenceType').value,
@@ -482,18 +506,33 @@
                 dateTo: document.getElementById('dateTo').value,
                 hours: parseFloat(document.getElementById('hours').value),
                 notes: document.getElementById('notes').value,
-                submittedAt: new Date().toISOString()
+                submittedAt: new Date().toLocaleString()
             };
 
-            const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
             emp.absences.push(rec);
-
             if (rec.type === 'sickness') {
                 emp.absenceDays = (emp.absenceDays || 0) + Math.ceil(rec.hours / 8);
             }
-
             EMPLOYEES.save();
-            alert('Absence submitted!');
+
+            // SEND EMAIL
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                to_email: 'barry.dixon@next-gen.uk',
+                employee_name: emp.name,
+                employee_id: emp.id,
+                type: typeLabel,
+                date_from: rec.dateFrom,
+                date_to: rec.dateTo,
+                hours: rec.hours,
+                notes: rec.notes || '—',
+                submitted_at: rec.submittedAt
+            }).then(() => {
+                alert('Absence submitted and emailed to Barry!');
+            }).catch(err => {
+                console.error('Email failed:', err);
+                alert('Absence saved, but email failed. Check console.');
+            });
+
             this.reset();
             loadAbsenceData(emp);
         });
