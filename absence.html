@@ -28,6 +28,32 @@
         .back-btn:hover { transform:translateY(-2px);
                           box-shadow:0 5px 15px rgba(0,0,0,0.2); }
 
+        .controls {
+            background:rgba(255,255,255,0.95); padding:20px; border-radius:15px;
+            box-shadow:0 8px 25px rgba(0,0,0,0.15); margin-bottom:25px;
+            display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;
+        }
+        .toggle-group {
+            display:flex; gap:20px; flex-wrap:wrap;
+        }
+        .toggle-switch {
+            display:flex; align-items:center; gap:10px; font-size:0.95em; color:#333;
+        }
+        .switch {
+            position:relative; display:inline-block; width:50px; height:26px;
+        }
+        .switch input { opacity:0; width:0; height:0; }
+        .slider {
+            position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0;
+            background:#ccc; transition:.4s; border-radius:34px;
+        }
+        .slider:before {
+            position:absolute; content:""; height:18px; width:18px; left:4px; bottom:4px;
+            background:white; transition:.4s; border-radius:50%;
+        }
+        input:checked + .slider { background:#28a745; }
+        input:checked + .slider:before { transform:translateX(24px); }
+
         .search-section { background:rgba(255,255,255,0.95); padding:25px;
                           border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15);
                           margin-bottom:25px; }
@@ -41,10 +67,11 @@
         .employee-list { background:rgba(255,255,255,0.95); padding:25px;
                          border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15);
                          max-height:700px; overflow-y:auto; }
-        .employee-list h2 { color:#333; margin-bottom:20px; font-size:1.3em; display:flex; justify-content:space-between; align-items:center; }
+        .employee-list h2 { color:#333; margin-bottom:20px; font-size:1.3em; }
         .employee-item { background:#f8f9fa; padding:15px 20px; border-radius:8px;
                          margin-bottom:10px; cursor:pointer; transition:all .3s;
                          border-left:4px solid #667eea; }
+        .employee-item.leaver { border-left-color:#dc3545; opacity:0.8; }
         .employee-item:hover { background:#e9ecef; transform:translateX(5px); }
         .employee-item.active { background:linear-gradient(135deg,rgba(102,126,234,.1),rgba(118,75,162,.1));
                                 border-left-color:#764ba2; }
@@ -137,6 +164,7 @@
             header { flex-direction:column; gap:15px; text-align:center; }
             .form-row { grid-template-columns:1fr; }
             .absence-stats { grid-template-columns:1fr; }
+            .controls { flex-direction:column; align-items:stretch; }
         }
     </style>
 </head>
@@ -154,8 +182,28 @@
             <a href="index.html" class="back-btn">Back to Dashboard</a>
         </header>
 
-        <div style="text-align:center; margin:20px 0;">
-            <button onclick="addNewEmployee()" class="btn btn-success">+ Add New Employee</button>
+        <!-- TOGGLES -->
+        <div class="controls">
+            <div class="toggle-group">
+                <div class="toggle-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="showActive" checked onchange="renderEmployeeList()">
+                        <span class="slider"></span>
+                    </label>
+                    <span>Show Active</span>
+                </div>
+                <div class="toggle-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="showLeavers" onchange="renderEmployeeList()">
+                        <span class="slider"></span>
+                    </label>
+                    <span>Show Leavers</span>
+                </div>
+            </div>
+            <div style="color:#666; font-size:0.9em;">
+                Active: <strong id="activeCount">0</strong> | 
+                Leavers: <strong id="leaverCount">0</strong>
+            </div>
         </div>
 
         <div class="search-section">
@@ -192,7 +240,7 @@
 
         <div class="content-area">
             <div class="employee-list">
-                <h2>Active Employees <button onclick="addNewEmployee()" class="btn btn-success" style="font-size:0.8em; padding:6px 12px;">+ Add</button></h2>
+                <h2>Employees</h2>
                 <div id="employeeListContainer">
                     <p style="color:#666; text-align:center;">Loading employees...</p>
                 </div>
@@ -349,40 +397,40 @@
 
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
-        // ────────────────────── 1. Add New Employee ──────────────────────
-        async function addNewEmployee() {
-            const name = prompt("Enter employee name:");
-            if (!name || name.trim() === "") return alert("Name is required");
-            try {
-                const emp = await EMPLOYEES.add(name.trim());
-                alert(`Added: ${emp.name} (ID: ${emp.id})`);
-                renderEmployeeList();
-            } catch (err) {
-                alert("Failed to add employee");
-            }
-        }
-
-        // ────────────────────── 2. Render Employee List (ACTIVE ONLY) ──────────────────────
+        // ────────────────────── 1. Render Employee List with Toggles ──────────────────────
         function renderEmployeeList() {
             const container = document.getElementById('employeeListContainer');
-            const activeEmployees = EMPLOYEES.data.filter(emp => !emp.dateLeft);
+            const showActive = document.getElementById('showActive').checked;
+            const showLeavers = document.getElementById('showLeavers').checked;
 
-            if (!activeEmployees.length) {
-                container.innerHTML = '<p style="color:#666; text-align:center;">No active employees</p>';
+            const active = EMPLOYEES.data.filter(e => !e.dateLeft);
+            const leavers = EMPLOYEES.data.filter(e => e.dateLeft);
+
+            document.getElementById('activeCount').textContent = active.length;
+            document.getElementById('leaverCount').textContent = leavers.length;
+
+            let employeesToShow = [];
+            if (showActive && showLeavers) employeesToShow = EMPLOYEES.data;
+            else if (showActive) employeesToShow = active;
+            else if (showLeavers) employeesToShow = leavers;
+
+            if (!employeesToShow.length) {
+                container.innerHTML = '<p style="color:#666; text-align:center;">No employees to show</p>';
                 return;
             }
 
             container.innerHTML = '';
-            activeEmployees.forEach(emp => {
+            employeesToShow.forEach(emp => {
+                const isLeaver = !!emp.dateLeft;
                 const item = document.createElement('div');
-                item.className = 'employee-item';
+                item.className = `employee-item ${isLeaver ? 'leaver' : ''}`;
                 item.onclick = () => selectEmployee(emp.id);
                 item.innerHTML = `<strong>${emp.name}</strong><span>ID: ${emp.id}</span>`;
                 container.appendChild(item);
             });
         }
 
-        // ────────────────────── 3. Select Employee ──────────────────────
+        // ────────────────────── 2. Select Employee ──────────────────────
         function selectEmployee(id) {
             selectedEmployeeId = id;
             const emp = EMPLOYEES.data.find(e => e.id === id);
@@ -400,7 +448,7 @@
             loadAbsenceData(emp);
         }
 
-        // ────────────────────── 4. Load & Display Absence Data ──────────────────────
+        // ────────────────────── 3. Load & Display Absence Data ──────────────────────
         function loadAbsenceData(emp) {
             const records = emp.absences || [];
             allRecords = [...records];
@@ -452,7 +500,7 @@
             container.innerHTML = html;
         }
 
-        // ────────────────────── 5. Filters ──────────────────────
+        // ────────────────────── 4. Filters ──────────────────────
         function filterAbsences() {
             const type = document.getElementById('filterType').value;
             const month = document.getElementById('filterMonth').value;
@@ -480,7 +528,7 @@
             return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         }
 
-        // ────────────────────── 6. Search ──────────────────────
+        // ────────────────────── 5. Search ──────────────────────
         function filterEmployees() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             document.querySelectorAll('.employee-item').forEach(item => {
@@ -489,7 +537,7 @@
             });
         }
 
-        // ────────────────────── 7. Submit Absence + SAVE TO FIREBASE ──────────────────────
+        // ────────────────────── 6. Submit Absence + SAVE TO FIREBASE ──────────────────────
         document.getElementById('absenceForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             if (!selectedEmployeeId) return alert('Select an employee first');
@@ -553,7 +601,7 @@
             document.getElementById('dateTo').setAttribute('min', this.value);
         });
 
-        // ────────────────────── 8. Export ──────────────────────
+        // ────────────────────── 7. Export ──────────────────────
         function showExportModal() { document.getElementById('exportModal').classList.add('active'); }
         function closeExportModal() {
             document.getElementById('exportModal').classList.remove('active');
@@ -614,9 +662,9 @@
             if (e.target === e.currentTarget) closeExportModal();
         });
 
-        // ────────────────────── 9. LISTEN TO FIREBASE + RENDER ──────────────────────
+        // ────────────────────── 8. LISTEN TO FIREBASE + RENDER ──────────────────────
         EMPLOYEES.onUpdate(() => {
-            console.log("Firebase updated → re-rendering absence list");
+            console.log("Firebase updated → re-rendering");
             renderEmployeeList();
             if (selectedEmployeeId) {
                 const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
@@ -624,7 +672,7 @@
             }
         });
 
-        // ────────────────────── 10. ON LOAD ──────────────────────
+        // ────────────────────── 9. ON LOAD ──────────────────────
         window.onload = function () {
             document.getElementById('employeeListContainer').innerHTML = '<p style="color:#666; text-align:center;">Loading employees...</p>';
             setTimeout(() => {
