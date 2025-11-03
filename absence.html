@@ -57,11 +57,17 @@
         .search-section { background:rgba(255,255,255,0.95); padding:25px;
                           border-radius:15px; box-shadow:0 8px 25px rgba(0,0,0,0.15);
                           margin-bottom:25px; }
-        .search-box { display:flex; gap:15px; align-items:center; flex-wrap:wrap; }
+        .search-box { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
         .search-box input { flex:1; min-width:250px; padding:12px 20px;
                             border:2px solid #e0e0e0; border-radius:8px;
                             font-size:1em; transition:border .3s; }
         .search-box input:focus { outline:none; border-color:#667eea; }
+        .search-btn {
+            background:#667eea; color:white; border:none; padding:12px 20px;
+            border-radius:8px; cursor:pointer; font-size:1em; display:flex;
+            align-items:center; gap:8px; transition:all .3s;
+        }
+        .search-btn:hover { background:#5a6fd8; transform:translateY(-1px); }
 
         .content-area { display:grid; grid-template-columns:350px 1fr; gap:25px; }
         .employee-list { background:rgba(255,255,255,0.95); padding:25px;
@@ -126,30 +132,39 @@
                      box-shadow:0 5px 15px rgba(0,0,0,0.2); }
 
         .absence-history { margin-top:30px; }
-        .absence-record { background:#fff; padding:20px; border-radius:8px;
-                          margin-bottom:15px; border-left:4px solid #667eea; position:relative; }
+        .absence-record {
+            background:#fff; padding:18px 22px; border-radius:10px;
+            margin-bottom:15px; border-left:4px solid #667eea;
+            position:relative; display:flex; justify-content:space-between;
+            align-items:flex-start; gap:15px;
+        }
         .absence-record.sickness { border-left-color:#dc3545; }
         .absence-record.aaup { border-left-color:#ffc107; }
         .absence-record.tofd { border-left-color:#28a745; }
+
+        .record-main { flex:1; }
         .record-header { display:flex; justify-content:space-between;
-                         align-items:center; margin-bottom:10px; }
+                         align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px; }
         .record-type { font-weight:700; font-size:1.1em; color:#333; }
-        .record-dates { color:#666; font-size:0.9em; }
-        .record-details { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-                          gap:15px; margin-top:10px; }
+        .record-dates { color:#666; font-size:0.9em; white-space:nowrap; }
+        .record-details { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+                          gap:10px; margin-top:8px; }
         .record-detail-item { color:#666; font-size:0.9em; }
         .record-detail-item strong { color:#333; }
-        .record-notes { margin-top:10px; padding-top:10px;
+        .record-notes { margin-top:8px; padding-top:8px;
                         border-top:1px solid #e0e0e0; color:#666;
                         font-size:0.9em; font-style:italic; }
+
         .record-actions {
-            position:absolute; top:10px; right:10px; display:flex; gap:5px;
+            display:flex; gap:6px; align-items:center;
         }
         .record-actions button {
-            background:none; border:none; font-size:1.2em; cursor:pointer;
-            padding:4px; border-radius:4px; transition:all .2s;
+            background:none; border:none; font-size:1.1em; cursor:pointer;
+            padding:6px; border-radius:6px; transition:all .2s;
+            width:34px; height:34px; display:flex; align-items:center;
+            justify-content:center;
         }
-        .record-actions button:hover { background:#eee; }
+        .record-actions button:hover { background:#f0f0f0; }
         .record-actions .edit-btn { color:#667eea; }
         .record-actions .delete-btn { color:#dc3545; }
 
@@ -174,6 +189,10 @@
             .form-row { grid-template-columns:1fr; }
             .absence-stats { grid-template-columns:1fr; }
             .controls { flex-direction:column; align-items:stretch; }
+            .search-box { flex-direction:column; }
+            .search-btn { width:100%; justify-content:center; }
+            .record-header { flex-direction:column; align-items:flex-start; }
+            .record-actions { margin-top:10px; }
         }
     </style>
 </head>
@@ -196,7 +215,7 @@
             <div class="toggle-group">
                 <div class="toggle-switch">
                     <label class="switch">
-                        <input type="checkbox" id="showActive" onchange="renderEmployeeList()">
+                        <input type="checkbox" id="showActive" checked onchange="renderEmployeeList()">
                         <span class="slider"></span>
                     </label>
                     <span>Show Active</span>
@@ -217,10 +236,13 @@
 
         <div class="search-section">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;">
-                <div class="search-box" style="flex:1; min-width:250px;">
-                    <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="filterEmployees()">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by employee name or ID..." onkeyup="if(event.key==='Enter') filterEmployees()">
+                    <button class="search-btn" onclick="filterEmployees()">
+                        Search
+                    </button>
                 </div>
-                <button class="back-btn" onclick="showExportModal()" style="background:#28a745; margin:0;">Export to CSV</button>
+                <button class="back-btn" onclick="showExportModal()" style="background:#28a745; margin:0; padding:12px 20px;">Export to CSV</button>
             </div>
         </div>
 
@@ -442,6 +464,11 @@
 
         const MANAGERS = [
             'barry.dixon@next-gen.uk',
+            'Marie.Wall@next-gen.uk',
+            'Carl.Finnigan@next-gen.uk',
+            'ashleigh.ginks@next-gen.uk',
+            'Maia.foster@next-gen.uk',
+            'Rebecca.Salter@next-gen.uk'
         ];
 
         emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -535,15 +562,17 @@
             records.forEach((r, idx) => {
                 html += `
                     <div class="absence-record ${r.type}">
-                        <div class="record-header">
-                            <span class="record-type">${labels[r.type]}</span>
-                            <span class="record-dates">${formatDate(r.dateFrom)} - ${formatDate(r.dateTo)}</span>
+                        <div class="record-main">
+                            <div class="record-header">
+                                <span class="record-type">${labels[r.type]}</span>
+                                <span class="record-dates">${formatDate(r.dateFrom)} - ${formatDate(r.dateTo)}</span>
+                            </div>
+                            <div class="record-details">
+                                <div class="record-detail-item"><strong>Hours:</strong> ${r.hours}</div>
+                                <div class="record-detail-item"><strong>Days:</strong> ${Math.ceil(r.hours / 8)}</div>
+                            </div>
+                            ${r.notes ? `<div class="record-notes">Note: ${r.notes}</div>` : ''}
                         </div>
-                        <div class="record-details">
-                            <div class="record-detail-item"><strong>Hours:</strong> ${r.hours}</div>
-                            <div class="record-detail-item"><strong>Days:</strong> ${Math.ceil(r.hours / 8)}</div>
-                        </div>
-                        ${r.notes ? `<div class="record-notes">Note: ${r.notes}</div>` : ''}
                         <div class="record-actions">
                             <button class="edit-btn" onclick="openEditModal(${idx})" title="Edit">Edit</button>
                             <button class="delete-btn" onclick="deleteRecord(${idx})" title="Delete">Delete</button>
@@ -631,14 +660,9 @@
                 )
             };
 
-            const sendPromises = MANAGERS.map(email =>
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                    ...templateParams,
-                    to_email: email
-                })
-            );
-
-            await Promise.all(sendPromises).catch(() => {});
+            await Promise.all(MANAGERS.map(email =>
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { ...templateParams, to_email: email })
+            )).catch(() => {});
         }
 
         // ────────────────────── 5. Form Handlers ──────────────────────
@@ -697,7 +721,16 @@
             loadAbsenceData(emp);
         });
 
-        // ────────────────────── 7. Other Functions (Filters, Search, Export) ──────────────────────
+        // ────────────────────── 7. Search with Button ──────────────────────
+        function filterEmployees() {
+            const term = document.getElementById('searchInput').value.trim().toLowerCase();
+            document.querySelectorAll('.employee-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(term) ? 'block' : 'none';
+            });
+        }
+
+        // ────────────────────── 8. Other Functions ──────────────────────
         function filterAbsences() {
             const type = document.getElementById('filterType').value;
             const month = document.getElementById('filterMonth').value;
@@ -723,14 +756,6 @@
         function formatDate(str) {
             const d = new Date(str);
             return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        }
-
-        function filterEmployees() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('.employee-item').forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(term) ? 'block' : 'none';
-            });
         }
 
         // Export functions (unchanged)
@@ -790,7 +815,7 @@
             alert(`Exported ${records.length} record(s)`);
         }
 
-        // ────────────────────── 8. ON LOAD ──────────────────────
+        // ────────────────────── 9. ON LOAD ──────────────────────
         EMPLOYEES.onUpdate(() => {
             console.log("Firebase updated → re-rendering");
             renderEmployeeList();
