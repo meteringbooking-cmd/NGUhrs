@@ -494,10 +494,9 @@
                 if (attendanceData[key]) {
                     status = attendanceData[key];
                 } else {
-                    // Check if there's an approved absence for this date
+                    // Check if there's an absence for this date (no approval status check)
                     if (emp.absences && emp.absences.length > 0) {
                         const absence = emp.absences.find(a => 
-                            a.status === 'approved' && 
                             isDateInRange(currentDate, a.dateFrom, a.dateTo)
                         );
                         if (absence) {
@@ -567,10 +566,9 @@
                         }
                     }
 
-                    // Check if there's an approved absence for this date
+                    // Check if there's an absence for this date (no approval needed)
                     if (emp.absences && emp.absences.length > 0) {
                         const absence = emp.absences.find(a => 
-                            a.status === 'approved' && 
                             isDateInRange(currentDate, a.dateFrom, a.dateTo)
                         );
                         if (absence) {
