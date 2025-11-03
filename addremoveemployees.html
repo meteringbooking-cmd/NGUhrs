@@ -34,6 +34,9 @@
             box-shadow:0 8px 25px rgba(0,0,0,0.15); margin-bottom:25px;
             display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;
         }
+        .toggle-group {
+            display:flex; gap:20px; flex-wrap:wrap;
+        }
         .toggle-switch {
             display:flex; align-items:center; gap:10px; font-size:0.95em; color:#333;
         }
@@ -99,6 +102,7 @@
             .form-row { grid-template-columns:1fr; }
             header { flex-direction:column; gap:15px; text-align:center; }
             .controls { flex-direction:column; align-items:stretch; }
+            .toggle-group { justify-content:center; }
         }
     </style>
 </head>
@@ -117,12 +121,21 @@
         </header>
 
         <div class="controls">
-            <div class="toggle-switch">
-                <label class="switch">
-                    <input type="checkbox" id="showLeavers" onchange="renderEmployees()">
-                    <span class="slider"></span>
-                </label>
-                <span>Show Leavers</span>
+            <div class="toggle-group">
+                <div class="toggle-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="showActive" checked onchange="renderEmployees()">
+                        <span class="slider"></span>
+                    </label>
+                    <span>Show Active</span>
+                </div>
+                <div class="toggle-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="showLeavers" onchange="renderEmployees()">
+                        <span class="slider"></span>
+                    </label>
+                    <span>Show Leavers</span>
+                </div>
             </div>
             <div style="color:#666; font-size:0.9em;">
                 Active: <strong id="activeCount">0</strong> | 
@@ -154,112 +167,134 @@
         </div>
     </div>
 
-    <!-- 2. INLINE SCRIPT LAST -->
-    <!-- 2. INLINE SCRIPT LAST -->
-<script>
-    // ADD EMPLOYEE
-    async function addEmployee() {
-        const name = document.getElementById('empName').value.trim();
-        const startDate = document.getElementById('startDate').value;
+    <!-- 2. INLINE SCRIPT -->
+    <script>
+        let isFirstLoad = true;
 
-        if (!name || !startDate) {
-            return alert("Please fill in both name and start date");
-        }
+        // ADD EMPLOYEE
+        async function addEmployee() {
+            const name = document.getElementById('empName').value.trim();
+            const startDate = document.getElementById('startDate').value;
 
-        try {
-            const emp = await EMPLOYEES.add(name);
-            await EMPLOYEES.update(emp.id, { startDate });
-            document.getElementById('empName').value = '';
-            document.getElementById('startDate').value = '';
-            alert(`Added: ${emp.name} (ID: ${emp.id})`);
-            renderEmployees();
-        } catch (err) {
-            console.error("Add failed:", err);
-            alert("Failed to add. Check console (F12).");
-        }
-    }
-
-    // MARK AS LEFT
-    async function markAsLeft(id) {
-        const emp = EMPLOYEES.data.find(e => e.id === id);
-        if (!emp) return;
-
-        const dateLeft = prompt(`Enter Date Left for ${emp.name}:`, new Date().toISOString().split('T')[0]);
-        if (!dateLeft) return;
-
-        try {
-            await EMPLOYEES.update(id, { dateLeft });
-            alert(`${emp.name} marked as left on ${dateLeft}`);
-            renderEmployees();
-        } catch (err) {
-            console.error("Update failed:", err);
-            alert("Failed to update.");
-        }
-    }
-
-    // RENDER LIST
-    function renderEmployees() {
-        const container = document.getElementById('employeeContainer');
-        const showLeavers = document.getElementById('showLeavers').checked;
-
-        const active = EMPLOYEES.data.filter(e => !e.dateLeft);
-        const leavers = EMPLOYEES.data.filter(e => e.dateLeft);
-
-        document.getElementById('activeCount').textContent = active.length;
-        document.getElementById('leaverCount').textContent = leavers.length;
-
-        const employeesToShow = showLeavers ? EMPLOYEES.data : active;
-
-        if (!employeesToShow.length) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">People</div>
-                    <h3>No ${showLeavers ? '' : 'active '}employees</h3>
-                    <p>${showLeavers ? 'No records' : 'Add your first employee'}</p>
-                </div>`;
-            return;
-        }
-
-        let html = '';
-        employeesToShow.forEach(emp => {
-            const isLeaver = !!emp.dateLeft;
-            html += `
-                <div class="employee-item ${isLeaver ? 'leaver' : ''}" onclick="markAsLeft('${emp.id}')">
-                    <div class="employee-info">
-                        <strong>${emp.name}</strong>
-                        <span>ID: ${emp.id} | Start: ${formatDate(emp.startDate)}${isLeaver ? ` | Left: ${formatDate(emp.dateLeft)}` : ''}</span>
-                    </div>
-                    <div class="employee-status ${isLeaver ? '' : 'active'}">
-                        ${isLeaver ? 'Leaver' : 'Active'}
-                    </div>
-                </div>`;
-        });
-        container.innerHTML = html;
-    }
-
-    function formatDate(dateStr) {
-        if (!dateStr) return '—';
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    }
-
-    // LISTEN TO FIREBASE
-    EMPLOYEES.onUpdate(() => {
-        console.log("Firebase sync → re-rendering");
-        renderEmployees();
-    });
-
-    // INITIAL LOAD + AUTO-RENDER
-    window.onload = function () {
-        renderEmployees();
-
-        setTimeout(() => {
-            if (EMPLOYEES.data.length === 0) {
-                console.log("Forcing render...");
-                renderEmployees();
+            if (!name || !startDate) {
+                return alert("Please fill in both name and start date");
             }
-        }, 2000);
-    };
-</script>
+
+            try {
+                const emp = await EMPLOYEES.add(name);
+                await EMPLOYEES.update(emp.id, { startDate });
+                document.getElementById('empName').value = '';
+                document.getElementById('startDate').value = '';
+                alert(`Added: ${emp.name} (ID: ${emp.id})`);
+                renderEmployees();
+            } catch (err) {
+                console.error("Add failed:", err);
+                alert("Failed to add. Check console (F12).");
+            }
+        }
+
+        // MARK AS LEFT
+        async function markAsLeft(id) {
+            const emp = EMPLOYEES.data.find(e => e.id === id);
+            if (!emp) return;
+
+            const dateLeft = prompt(`Enter Date Left for ${emp.name}:`, new Date().toISOString().split('T')[0]);
+            if (!dateLeft) return;
+
+            try {
+                await EMPLOYEES.update(id, { dateLeft });
+                alert(`${emp.name} marked as left on ${dateLeft}`);
+                renderEmployees();
+            } catch (err) {
+                console.error("Update failed:", err);
+                alert("Failed to update.");
+            }
+        }
+
+        // RENDER LIST
+        function renderEmployees() {
+            const container = document.getElementById('employeeContainer');
+            const showActive = document.getElementById('showActive').checked;
+            const showLeavers = document.getElementById('showLeavers').checked;
+
+            const active = EMPLOYEES.data.filter(e => !e.dateLeft);
+            const leavers = EMPLOYEES.data.filter(e => e.dateLeft);
+
+            document.getElementById('activeCount').textContent = active.length;
+            document.getElementById('leaverCount').textContent = leavers.length;
+
+            let employeesToShow = [];
+            if (showActive && showLeavers) {
+                employeesToShow = EMPLOYEES.data;
+            } else if (showActive) {
+                employeesToShow = active;
+            } else if (showLeavers) {
+                employeesToShow = leavers;
+            }
+
+            if (!employeesToShow.length) {
+                const msg = (!showActive && !showLeavers) ? 'both toggles off' :
+                           (!showActive ? 'no active' : 'no leavers');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">People</div>
+                        <h3>No employees to show</h3>
+                        <p>Turn on ${msg}</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+            employeesToShow.forEach(emp => {
+                const isLeaver = !!emp.dateLeft;
+                html += `
+                    <div class="employee-item ${isLeaver ? 'leaver' : ''}" onclick="markAsLeft('${emp.id}')">
+                        <div class="employee-info">
+                            <strong>${emp.name}</strong>
+                            <span>ID: ${emp.id} | Start: ${formatDate(emp.startDate)}${isLeaver ? ` | Left: ${formatDate(emp.dateLeft)}` : ''}</span>
+                        </div>
+                        <div class="employee-status ${isLeaver ? '' : 'active'}">
+                            ${isLeaver ? 'Leaver' : 'Active'}
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        // LISTEN TO FIREBASE
+        EMPLOYEES.onUpdate(() => {
+            console.log("Firebase updated → rendering");
+            renderEmployees();
+            if (isFirstLoad) {
+                isFirstLoad = false;
+                console.log("First load complete");
+            }
+        });
+
+        // INITIAL LOAD
+        window.onload = function () {
+            // Show loading state
+            document.getElementById('employeeContainer').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">Loading...</div>
+                    <h3>Loading employees...</h3>
+                    <p>Please wait</p>
+                </div>`;
+
+            // Force render after 3 sec if no update
+            setTimeout(() => {
+                if (isFirstLoad) {
+                    console.log("Forcing render after timeout");
+                    renderEmployees();
+                }
+            }, 3000);
+        };
+    </script>
 </body>
 </html>
