@@ -148,6 +148,8 @@
             justify-content:center;
         }
         .record-actions button:hover { background:#f0f0f0; }
+        .record-actions .approve-btn { color:#28a745; }
+        .record-actions .reject-btn { color:#dc3545; }
         .record-actions .edit-btn { color:#667eea; }
         .record-actions .delete-btn { color:#dc3545; }
 
@@ -510,6 +512,8 @@
                             ${r.notes ? `<div class="record-notes">${r.notes}</div>` : ''}
                         </div>
                         <div class="record-actions">
+                            <button class="approve-btn" onclick="approveHoliday(${idx})" title="Approve">✓</button>
+                            <button class="reject-btn" onclick="rejectHoliday(${idx})" title="Reject">✗</button>
                             <button class="edit-btn" onclick="openEditModal(${idx})" title="Edit">✏️</button>
                             <button class="delete-btn" onclick="deleteRecord(${idx})" title="Delete">🗑️</button>
                         </div>
@@ -579,6 +583,51 @@
                 loadHolidayData(emp);
             } catch (err) {
                 alert("Delete failed.");
+            }
+        }
+
+        // ────────────────────── Approve/Reject Functions ──────────────────────
+        async function approveHoliday(index) {
+            const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
+            const rec = emp.holidays[index];
+            
+            if (rec.status === 'approved') {
+                alert("This holiday is already approved!");
+                return;
+            }
+
+            rec.status = 'approved';
+            emp.holidays[index] = rec;
+
+            try {
+                await EMPLOYEES.update(emp.id, { holidays: emp.holidays });
+                alert("Holiday approved!");
+                await sendEditEmail(emp, rec, "approved");
+                loadHolidayData(emp);
+            } catch (err) {
+                alert("Approval failed.");
+            }
+        }
+
+        async function rejectHoliday(index) {
+            const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
+            const rec = emp.holidays[index];
+            
+            if (rec.status === 'rejected') {
+                alert("This holiday is already rejected!");
+                return;
+            }
+
+            rec.status = 'rejected';
+            emp.holidays[index] = rec;
+
+            try {
+                await EMPLOYEES.update(emp.id, { holidays: emp.holidays });
+                alert("Holiday rejected!");
+                await sendEditEmail(emp, rec, "rejected");
+                loadHolidayData(emp);
+            } catch (err) {
+                alert("Rejection failed.");
             }
         }
 
