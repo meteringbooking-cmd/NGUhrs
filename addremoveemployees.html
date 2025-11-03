@@ -155,9 +155,8 @@
     </div>
 
     <!-- 2. INLINE SCRIPT LAST -->
-    <script>
-        // ADD EMPLOYEE
-       <script>
+    <!-- 2. INLINE SCRIPT LAST -->
+<script>
     // ADD EMPLOYEE
     async function addEmployee() {
         const name = document.getElementById('empName').value.trim();
@@ -173,7 +172,7 @@
             document.getElementById('empName').value = '';
             document.getElementById('startDate').value = '';
             alert(`Added: ${emp.name} (ID: ${emp.id})`);
-            renderEmployees(); // Force immediate update
+            renderEmployees();
         } catch (err) {
             console.error("Add failed:", err);
             alert("Failed to add. Check console (F12).");
@@ -250,14 +249,13 @@
         renderEmployees();
     });
 
-    // INITIAL LOAD + AUTO-RENDER WHEN READY
+    // INITIAL LOAD + AUTO-RENDER
     window.onload = function () {
-        renderEmployees(); // Try immediately
+        renderEmployees();
 
-        // If still empty after 2 sec, force render
         setTimeout(() => {
             if (EMPLOYEES.data.length === 0) {
-                console.log("Forcing render after delay...");
+                console.log("Forcing render...");
                 renderEmployees();
             }
         }, 2000);
