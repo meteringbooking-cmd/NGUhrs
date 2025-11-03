@@ -479,6 +479,7 @@
             let tofdHours = 0;
 
             const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            const emp = window.EMPLOYEES.data.find(e => e.id === empId);
             
             for (let day = 1; day <= daysInMonth; day++) {
                 const currentDate = new Date(currentYear, currentMonth, day);
@@ -486,7 +487,26 @@
 
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const key = `${empId}_${dateStr}`;
-                const status = attendanceData[key];
+                
+                let status = '';
+
+                // Check manual attendance data first
+                if (attendanceData[key]) {
+                    status = attendanceData[key];
+                } else {
+                    // Check if there's an approved absence for this date
+                    if (emp.absences && emp.absences.length > 0) {
+                        const absence = emp.absences.find(a => 
+                            a.status === 'approved' && 
+                            isDateInRange(currentDate, a.dateFrom, a.dateTo)
+                        );
+                        if (absence) {
+                            if (absence.type === 'Sickness') status = 'Sick';
+                            else if (absence.type === 'AAUP') status = 'AAUP';
+                            else if (absence.type === 'TOFD') status = 'TOFD';
+                        }
+                    }
+                }
 
                 if (status === 'Sick') sickHours += 8;
                 if (status === 'AAUP') aaupHours += 8;
@@ -544,6 +564,33 @@
                         if (holiday) {
                             status = 'H';
                             statusClass = 'status-H';
+                        }
+                    }
+
+                    // Check if there's an approved absence for this date
+                    if (emp.absences && emp.absences.length > 0) {
+                        const absence = emp.absences.find(a => 
+                            a.status === 'approved' && 
+                            isDateInRange(currentDate, a.dateFrom, a.dateTo)
+                        );
+                        if (absence) {
+                            // Map absence type to status code
+                            if (absence.type === 'Sickness') {
+                                status = 'Sick';
+                                statusClass = 'status-Sick';
+                            } else if (absence.type === 'AAUP') {
+                                status = 'AAUP';
+                                statusClass = 'status-AAUP';
+                            } else if (absence.type === 'TOFD') {
+                                status = 'TOFD';
+                                statusClass = 'status-TOFD';
+                            } else if (absence.type === 'AWOL') {
+                                status = 'AWOL';
+                                statusClass = 'status-AWOL';
+                            } else if (absence.type === 'Maternity/Paternity') {
+                                status = 'baby';
+                                statusClass = 'status-baby';
+                            }
                         }
                     }
 
