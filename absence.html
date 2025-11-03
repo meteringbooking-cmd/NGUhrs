@@ -141,6 +141,10 @@
     </style>
 </head>
 <body>
+
+    <!-- 1. FIREBASE FIRST -->
+    <script type="module" src="employees-firebase.js"></script>
+
     <div class="container">
         <header>
             <div class="header-left">
@@ -188,8 +192,10 @@
 
         <div class="content-area">
             <div class="employee-list">
-                <h2>Employees <button onclick="addNewEmployee()" class="btn btn-success" style="font-size:0.8em; padding:6px 12px;">+ Add</button></h2>
-                <div id="employeeListContainer"></div>
+                <h2>Active Employees <button onclick="addNewEmployee()" class="btn btn-success" style="font-size:0.8em; padding:6px 12px;">+ Add</button></h2>
+                <div id="employeeListContainer">
+                    <p style="color:#666; text-align:center;">Loading employees...</p>
+                </div>
             </div>
 
             <div class="absence-area">
@@ -322,6 +328,7 @@
         </div>
     </div>
 
+    <!-- 2. INLINE SCRIPT -->
     <script>
         let selectedEmployeeId = null;
         let allRecords = [];
@@ -343,33 +350,30 @@
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
         // ────────────────────── 1. Add New Employee ──────────────────────
-        function addNewEmployee() {
+        async function addNewEmployee() {
             const name = prompt("Enter employee name:");
             if (!name || name.trim() === "") return alert("Name is required");
-            const emp = EMPLOYEES.add(name.trim());
-            alert(`Added: ${emp.name} (ID: ${emp.id})`);
-            renderEmployeeList();
-            selectEmployee(emp.id);
+            try {
+                const emp = await EMPLOYEES.add(name.trim());
+                alert(`Added: ${emp.name} (ID: ${emp.id})`);
+                renderEmployeeList();
+            } catch (err) {
+                alert("Failed to add employee");
+            }
         }
 
-        // ────────────────────── 2. INIT ──────────────────────
-        function initEmployees() {
-            EMPLOYEES.init();
-            EMPLOYEES.data.forEach(emp => {
-                if (!emp.absences) emp.absences = [];
-                if (!emp.holidayRemaining) emp.holidayRemaining = 25;
-                if (!emp.holidayTaken) emp.holidayTaken = 0;
-                if (!emp.absenceDays) emp.absenceDays = 0;
-            });
-            EMPLOYEES.save();
-            renderEmployeeList();
-        }
-
-        // ────────────────────── 3. Render Employee List ──────────────────────
+        // ────────────────────── 2. Render Employee List (ACTIVE ONLY) ──────────────────────
         function renderEmployeeList() {
             const container = document.getElementById('employeeListContainer');
+            const activeEmployees = EMPLOYEES.data.filter(emp => !emp.dateLeft);
+
+            if (!activeEmployees.length) {
+                container.innerHTML = '<p style="color:#666; text-align:center;">No active employees</p>';
+                return;
+            }
+
             container.innerHTML = '';
-            EMPLOYEES.data.forEach(emp => {
+            activeEmployees.forEach(emp => {
                 const item = document.createElement('div');
                 item.className = 'employee-item';
                 item.onclick = () => selectEmployee(emp.id);
@@ -378,14 +382,15 @@
             });
         }
 
-        // ────────────────────── 4. Select Employee ──────────────────────
+        // ────────────────────── 3. Select Employee ──────────────────────
         function selectEmployee(id) {
             selectedEmployeeId = id;
             const emp = EMPLOYEES.data.find(e => e.id === id);
             if (!emp) return;
 
             document.querySelectorAll('.employee-item').forEach(i => i.classList.remove('active'));
-            document.querySelector(`.employee-item[onclick="selectEmployee('${id}')"]`)?.classList.add('active');
+            const activeItem = document.querySelector(`.employee-item[onclick="selectEmployee('${id}')"]`);
+            if (activeItem) activeItem.classList.add('active');
 
             document.getElementById('noSelection').style.display = 'none';
             document.getElementById('employeeAbsence').style.display = 'block';
@@ -395,7 +400,7 @@
             loadAbsenceData(emp);
         }
 
-        // ────────────────────── 5. Load & Display Absence Data ──────────────────────
+        // ────────────────────── 4. Load & Display Absence Data ──────────────────────
         function loadAbsenceData(emp) {
             const records = emp.absences || [];
             allRecords = [...records];
@@ -447,7 +452,7 @@
             container.innerHTML = html;
         }
 
-        // ────────────────────── 6. Filters ──────────────────────
+        // ────────────────────── 5. Filters ──────────────────────
         function filterAbsences() {
             const type = document.getElementById('filterType').value;
             const month = document.getElementById('filterMonth').value;
@@ -475,7 +480,7 @@
             return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         }
 
-        // ────────────────────── 7. Search ──────────────────────
+        // ────────────────────── 6. Search ──────────────────────
         function filterEmployees() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             document.querySelectorAll('.employee-item').forEach(item => {
@@ -484,8 +489,8 @@
             });
         }
 
-        // ────────────────────── 8. Submit Absence + EMAIL TO ALL MANAGERS ──────────────────────
-        document.getElementById('absenceForm').addEventListener('submit', function (e) {
+        // ────────────────────── 7. Submit Absence + SAVE TO FIREBASE ──────────────────────
+        document.getElementById('absenceForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             if (!selectedEmployeeId) return alert('Select an employee first');
 
@@ -501,48 +506,44 @@
                 submittedAt: new Date().toLocaleString()
             };
 
+            if (!emp.absences) emp.absences = [];
             emp.absences.push(rec);
-            if (rec.type === 'sickness') {
-                emp.absenceDays = (emp.absenceDays || 0) + Math.ceil(rec.hours / 8);
+
+            try {
+                await EMPLOYEES.update(emp.id, { absences: emp.absences });
+                alert("Absence saved!");
+
+                // ── SEND EMAIL TO ALL MANAGERS ──
+                const templateParams = {
+                    employee_name: emp.name,
+                    employee_id: emp.id,
+                    type: typeLabel,
+                    date_from: rec.dateFrom,
+                    date_to: rec.dateTo,
+                    hours: rec.hours,
+                    notes: rec.notes || '—',
+                    submitted_at: rec.submittedAt,
+                    total_sick_days: Math.ceil(
+                        emp.absences.filter(r => r.type === 'sickness').reduce((s, r) => s + parseFloat(r.hours), 0) / 8
+                    ),
+                    total_sickness_incidents: emp.absences.filter(r => r.type === 'sickness').length,
+                    total_aaup_incidents: emp.absences.filter(r => r.type === 'aaup').length,
+                    total_tofd_incidents: emp.absences.filter(r => r.type === 'tofd').length
+                };
+
+                const sendPromises = MANAGERS.map(email =>
+                    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                        ...templateParams,
+                        to_email: email
+                    })
+                );
+
+                await Promise.all(sendPromises);
+                alert(`Absence saved & emailed to ${MANAGERS.length} managers!`);
+            } catch (err) {
+                console.error(err);
+                alert("Saved locally, but failed to sync/email. Check console.");
             }
-            EMPLOYEES.save();
-
-            // ── SEND EMAIL WITH FULL SUMMARY TO ALL MANAGERS ──
-            const templateParams = {
-                employee_name: emp.name,
-                employee_id: emp.id,
-                type: typeLabel,
-                date_from: rec.dateFrom,
-                date_to: rec.dateTo,
-                hours: rec.hours,
-                notes: rec.notes || '—',
-                submitted_at: rec.submittedAt,
-
-                total_sick_days: Math.ceil(
-                    emp.absences
-                        .filter(r => r.type === 'sickness')
-                        .reduce((s, r) => s + parseFloat(r.hours), 0) / 8
-                ),
-                total_sickness_incidents: emp.absences.filter(r => r.type === 'sickness').length,
-                total_aaup_incidents: emp.absences.filter(r => r.type === 'aaup').length,
-                total_tofd_incidents: emp.absences.filter(r => r.type === 'tofd').length
-            };
-
-            const sendPromises = MANAGERS.map(email =>
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                    ...templateParams,
-                    to_email: email
-                })
-            );
-
-            Promise.all(sendPromises)
-                .then(() => {
-                    alert(`Absence saved & emailed to ${MANAGERS.length} managers!`);
-                })
-                .catch(err => {
-                    console.error('Email error:', err);
-                    alert('Absence saved, but email failed. Check console.');
-                });
 
             this.reset();
             loadAbsenceData(emp);
@@ -552,7 +553,7 @@
             document.getElementById('dateTo').setAttribute('min', this.value);
         });
 
-        // ────────────────────── 9. Export ──────────────────────
+        // ────────────────────── 8. Export ──────────────────────
         function showExportModal() { document.getElementById('exportModal').classList.add('active'); }
         function closeExportModal() {
             document.getElementById('exportModal').classList.remove('active');
@@ -613,13 +614,22 @@
             if (e.target === e.currentTarget) closeExportModal();
         });
 
+        // ────────────────────── 9. LISTEN TO FIREBASE + RENDER ──────────────────────
+        EMPLOYEES.onUpdate(() => {
+            console.log("Firebase updated → re-rendering absence list");
+            renderEmployeeList();
+            if (selectedEmployeeId) {
+                const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
+                if (emp) loadAbsenceData(emp);
+            }
+        });
+
         // ────────────────────── 10. ON LOAD ──────────────────────
         window.onload = function () {
-            initEmployees();
-            document.getElementById('empSicknessIncidents').textContent = '—';
-            document.getElementById('empAaupIncidents').textContent = '—';
-            document.getElementById('empTofdIncidents').textContent = '—';
-            document.getElementById('empGrandTotalIncidents').textContent = '—';
+            document.getElementById('employeeListContainer').innerHTML = '<p style="color:#666; text-align:center;">Loading employees...</p>';
+            setTimeout(() => {
+                renderEmployeeList();
+            }, 2000);
         };
     </script>
 </body>
