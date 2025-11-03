@@ -150,17 +150,12 @@
         </div>
     </div>
 
-    <!-- Load shared employees.js -->
-    <script src="employees.js"></script>
+    <!-- Firebase Employee Manager -->
+    <script type="module" src="employees-firebase.js"></script>
 
     <script>
-        // ENSURE EMPLOYEES IS READY
-        if (typeof EMPLOYEES === 'undefined') {
-            alert("Error: employees.js not loaded!");
-        }
-
         // ADD EMPLOYEE
-        function addEmployee() {
+        async function addEmployee() {
             const name = document.getElementById('empName').value.trim();
             const startDate = document.getElementById('startDate').value;
 
@@ -168,35 +163,34 @@
                 return alert("Please fill in both name and start date");
             }
 
-            const existing = EMPLOYEES.data.find(e => 
-                e.name.toLowerCase() === name.toLowerCase() && !e.dateLeft
-            );
-            if (existing) {
-                return alert("This employee is already active");
+            try {
+                const emp = await EMPLOYEES.add(name);
+                emp.startDate = startDate;
+                await EMPLOYEES.update(emp.id, { startDate });
+                document.getElementById('empName').value = '';
+                document.getElementById('startDate').value = '';
+                alert(`Added: ${emp.name} (ID: ${emp.id})`);
+            } catch (err) {
+                console.error(err);
+                alert("Failed to add employee");
             }
-
-            const emp = EMPLOYEES.add(name);
-            emp.startDate = startDate;
-            EMPLOYEES.save();
-
-            document.getElementById('empName').value = '';
-            document.getElementById('startDate').value = '';
-            renderEmployees();
-            alert(`Added: ${emp.name} (ID: ${emp.id})`);
         }
 
         // MARK AS LEFT
-        function markAsLeft(id) {
+        async function markAsLeft(id) {
             const emp = EMPLOYEES.data.find(e => e.id === id);
             if (!emp) return;
 
             const dateLeft = prompt(`Enter Date Left for ${emp.name}:`, new Date().toISOString().split('T')[0]);
             if (!dateLeft) return;
 
-            emp.dateLeft = dateLeft;
-            EMPLOYEES.save();
-            renderEmployees();
-            alert(`${emp.name} marked as left on ${dateLeft}`);
+            try {
+                await EMPLOYEES.update(id, { dateLeft });
+                alert(`${emp.name} marked as left on ${dateLeft}`);
+            } catch (err) {
+                console.error(err);
+                alert("Failed to update");
+            }
         }
 
         // RENDER LIST
@@ -210,14 +204,14 @@
             document.getElementById('activeCount').textContent = active.length;
             document.getElementById('leaverCount').textContent = leavers.length;
 
-            let employeesToShow = showLeavers ? [...active, ...leavers] : active;
+            const employeesToShow = showLeavers ? EMPLOYEES.data : active;
 
             if (!employeesToShow.length) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">People</div>
                         <h3>No ${showLeavers ? '' : 'active '}employees</h3>
-                        <p>${showLeavers ? 'No records at all' : 'Add your first employee above'}</p>
+                        <p>${showLeavers ? 'No records' : 'Add your first employee'}</p>
                     </div>`;
                 return;
             }
@@ -245,9 +239,11 @@
             return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         }
 
+        // LISTEN FOR REAL-TIME UPDATES
+        EMPLOYEES.onUpdate(renderEmployees);
+
         // INIT
-        window.onload = function() {
-            EMPLOYEES.init();
+        window.onload = function () {
             renderEmployees();
         };
     </script>
