@@ -209,6 +209,13 @@
                     </label>
                     <span>Show Leavers</span>
                 </div>
+                <div class="toggle-switch">
+                    <label class="switch">
+                        <input type="checkbox" id="showPendingOnly" onchange="renderEmployeeList()">
+                        <span class="slider"></span>
+                    </label>
+                    <span>Pending Only</span>
+                </div>
             </div>
             <div style="color:#666; font-size:0.9em;">
                 Active: <strong id="activeCount">0</strong> | 
@@ -236,7 +243,7 @@
 
             <div class="holiday-area">
                 <div id="noSelection" class="no-selection">
-                    <div class="no-selection-icon">Holiday</div>
+                    <div class="no-selection-icon">📅</div>
                     <h3>No Employee Selected</h3>
                     <p>Please select an employee from the list to view their holiday records</p>
                 </div>
@@ -297,7 +304,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Edit Holiday Record</h2>
-                    <button class="close-modal" onclick="closeEditModal()">X</button>
+                    <button class="close-modal" onclick="closeEditModal()">✕</button>
                 </div>
                 <form id="editForm">
                     <input type="hidden" id="editIndex">
@@ -367,11 +374,40 @@
 
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
+        // Helper function to check if a holiday is current or past
+        function isCurrentOrPast(dateTo) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const endDate = new Date(dateTo);
+            endDate.setHours(0, 0, 0, 0);
+            return endDate <= today;
+        }
+
+        // Calculate days taken (approved + past/current pending/rejected)
+        function calculateDaysTaken(holidays) {
+            return holidays.filter(r => {
+                if (r.status === 'approved') return true;
+                if (r.status === 'pending' || r.status === 'rejected') {
+                    return isCurrentOrPast(r.dateTo);
+                }
+                return false;
+            }).reduce((sum, r) => sum + parseFloat(r.days), 0);
+        }
+
+        // Calculate days requested (future pending only)
+        function calculateDaysRequested(holidays) {
+            return holidays.filter(r => {
+                if (r.status !== 'pending') return false;
+                return !isCurrentOrPast(r.dateTo);
+            }).reduce((sum, r) => sum + parseFloat(r.days), 0);
+        }
+
         // ────────────────────── 1. Render Employee List with Toggles ──────────────────────
         function renderEmployeeList() {
             const container = document.getElementById('employeeListContainer');
             const showActive = document.getElementById('showActive').checked;
             const showLeavers = document.getElementById('showLeavers').checked;
+            const showPendingOnly = document.getElementById('showPendingOnly').checked;
 
             const active = EMPLOYEES.data.filter(e => !e.dateLeft);
             const leavers = EMPLOYEES.data.filter(e => e.dateLeft);
@@ -384,6 +420,14 @@
             else if (showActive) employeesToShow = active;
             else if (showLeavers) employeesToShow = leavers;
 
+            // Filter for pending holidays only
+            if (showPendingOnly) {
+                employeesToShow = employeesToShow.filter(emp => {
+                    const holidays = emp.holidays || [];
+                    return holidays.some(h => h.status === 'pending');
+                });
+            }
+
             if (!employeesToShow.length) {
                 container.innerHTML = '<p style="color:#666; text-align:center;">No employees to show</p>';
                 return;
@@ -392,10 +436,11 @@
             container.innerHTML = '';
             employeesToShow.forEach(emp => {
                 const isLeaver = !!emp.dateLeft;
+                const pendingCount = (emp.holidays || []).filter(h => h.status === 'pending').length;
                 const item = document.createElement('div');
                 item.className = `employee-item ${isLeaver ? 'leaver' : ''}`;
                 item.onclick = () => selectEmployee(emp.id);
-                item.innerHTML = `<strong>${emp.name}</strong><span>ID: ${emp.id}</span>`;
+                item.innerHTML = `<strong>${emp.name}</strong><span>ID: ${emp.id}${pendingCount > 0 ? ` | ${pendingCount} pending` : ''}</span>`;
                 container.appendChild(item);
             });
         }
@@ -424,8 +469,8 @@
             allRecords = [...records];
 
             const totalEntitlement = emp.holidayEntitlement || 28;
-            const taken = records.filter(r => r.status === 'approved').reduce((s, r) => s + parseFloat(r.days), 0);
-            const requested = records.filter(r => r.status === 'pending').reduce((s, r) => s + parseFloat(r.days), 0);
+            const taken = calculateDaysTaken(records);
+            const requested = calculateDaysRequested(records);
             const remaining = totalEntitlement - taken - requested;
 
             document.getElementById('totalEntitlement').textContent = totalEntitlement;
@@ -465,8 +510,8 @@
                             ${r.notes ? `<div class="record-notes">${r.notes}</div>` : ''}
                         </div>
                         <div class="record-actions">
-                            <button class="edit-btn" onclick="openEditModal(${idx})" title="Edit">Edit</button>
-                            <button class="delete-btn" onclick="deleteRecord(${idx})" title="Delete">Delete</button>
+                            <button class="edit-btn" onclick="openEditModal(${idx})" title="Edit">✏️</button>
+                            <button class="delete-btn" onclick="deleteRecord(${idx})" title="Delete">🗑️</button>
                         </div>
                     </div>`;
             });
@@ -539,6 +584,9 @@
 
         async function sendEditEmail(emp, rec, action) {
             const statusLabel = { approved: 'Approved', pending: 'Pending', rejected: 'Rejected' }[rec.status];
+            const taken = calculateDaysTaken(emp.holidays || []);
+            const requested = calculateDaysRequested(emp.holidays || []);
+
             const templateParams = {
                 employee_name: emp.name,
                 employee_id: emp.id,
@@ -549,9 +597,7 @@
                 status: statusLabel,
                 notes: rec.notes || '—',
                 action: action,
-                remaining_days: (emp.holidayEntitlement || 28) - 
-                    emp.holidays.filter(r => r.status === 'approved').reduce((s, r) => s + parseFloat(r.days), 0) -
-                    emp.holidays.filter(r => r.status === 'pending').reduce((s, r) => s + parseFloat(r.days), 0)
+                remaining_days: (emp.holidayEntitlement || 28) - taken - requested
             };
 
             await Promise.all(MANAGERS.map(email =>
@@ -579,8 +625,8 @@
         function updateFilteredStats(records) {
             const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
             const total = emp.holidayEntitlement || 28;
-            const taken = records.filter(r => r.status === 'approved').reduce((s, r) => s + parseFloat(r.days), 0);
-            const requested = records.filter(r => r.status === 'pending').reduce((s, r) => s + parseFloat(r.days), 0);
+            const taken = calculateDaysTaken(records);
+            const requested = calculateDaysRequested(records);
             const remaining = total - taken - requested;
             document.getElementById('daysTaken').textContent = taken;
             document.getElementById('daysRequested').textContent = requested;
@@ -605,8 +651,8 @@
             let csv = 'Employee ID,Name,Total Entitlement,Days Taken,Days Requested,Days Remaining,Status,Date From,Date To,Days,Type,Notes\n';
             EMPLOYEES.data.forEach(emp => {
                 const total = emp.holidayEntitlement || 28;
-                const taken = (emp.holidays || []).filter(r => r.status === 'approved').reduce((s, r) => s + parseFloat(r.days), 0);
-                const requested = (emp.holidays || []).filter(r => r.status === 'pending').reduce((s, r) => s + parseFloat(r.days), 0);
+                const taken = calculateDaysTaken(emp.holidays || []);
+                const requested = calculateDaysRequested(emp.holidays || []);
                 const remaining = total - taken - requested;
 
                 if (!emp.holidays || emp.holidays.length === 0) {
@@ -624,7 +670,7 @@
         function exportEmployeeToCSV() {
             if (!selectedEmployeeId) return alert('Select an employee');
             const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
-            const records = [...allRecords];
+            let records = [...allRecords];
             const status = document.getElementById('filterStatus').value;
             const month = document.getElementById('filterMonth').value;
             if (status !== 'all') records = records.filter(r => r.status === status);
@@ -632,8 +678,8 @@
             if (!records.length) return alert('No records to export');
 
             const total = emp.holidayEntitlement || 28;
-            const taken = records.filter(r => r.status === 'approved').reduce((s, r) => s + parseFloat(r.days), 0);
-            const requested = records.filter(r => r.status === 'pending').reduce((s, r) => s + parseFloat(r.days), 0);
+            const taken = calculateDaysTaken(records);
+            const requested = calculateDaysRequested(records);
             const remaining = total - taken - requested;
 
             let csv = 'Employee ID,Name,Total Entitlement,Days Taken,Days Requested,Days Remaining,Status,Date From,Date To,Days,Type,Notes\n';
