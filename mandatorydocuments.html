@@ -333,27 +333,27 @@
                     <div id="foldersView" class="folders-view">
                         <div class="folders-grid">
                             <div class="folder-card" onclick="openFolder('disciplinaries')">
-                                <span class="folder-icon">Warning</span>
+                                <span class="folder-icon">⚠️</span>
                                 <div class="folder-name">Disciplinaries</div>
                                 <div class="folder-count" id="count-disciplinaries">0 documents</div>
                             </div>
                             <div class="folder-card" onclick="openFolder('one-to-ones')">
-                                <span class="folder-icon">Chat</span>
+                                <span class="folder-icon">💬</span>
                                 <div class="folder-name">1-2-1's</div>
                                 <div class="folder-count" id="count-one-to-ones">0 documents</div>
                             </div>
                             <div class="folder-card" onclick="openFolder('certificates')">
-                                <span class="folder-icon">Certificate</span>
+                                <span class="folder-icon">🎓</span>
                                 <div class="folder-name">Certificates</div>
                                 <div class="folder-count" id="count-certificates">0 documents</div>
                             </div>
                             <div class="folder-card" onclick="openFolder('dbs-checks')">
-                                <span class="folder-icon">Checkmark</span>
+                                <span class="folder-icon">✅</span>
                                 <div class="folder-name">DBS Checks</div>
                                 <div class="folder-count" id="count-dbs-checks">0 documents</div>
                             </div>
                             <div class="folder-card" onclick="openFolder('miscellaneous')">
-                                <span class="folder-icon">Clipboard</span>
+                                <span class="folder-icon">📋</span>
                                 <div class="folder-name">Miscellaneous</div>
                                 <div class="folder-count" id="count-miscellaneous">0 documents</div>
                             </div>
@@ -362,14 +362,14 @@
 
                     <div id="folderContents" class="folder-contents">
                         <div class="breadcrumb">
-                            <a href="#" onclick="closeFolderView(); return false;">Documents</a>
+                            <a href="#" onclick="closeFolderView(); return false;">📁Documents</a>
                             <span>›</span>
                             <span id="currentFolderName">Folder</span>
                         </div>
 
                         <div class="upload-section">
                             <input type="file" id="fileInput" style="display:none;" onchange="handleFileUpload(event)">
-                            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Upload Document</button>
+                            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📤Upload Document</button>
                         </div>
 
                         <div class="file-list" id="fileListContainer">
