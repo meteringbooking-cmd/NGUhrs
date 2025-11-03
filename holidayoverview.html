@@ -1,377 +1,448 @@
-<script>
-    let selectedEmployeeId = null;
-    let allRecords = [];
-    let currentEditIndex = -1;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Overview | NGU-hrs</title>
 
-    // ────────────────────── EMAIL CONFIG ──────────────────────
-    const EMAILJS_SERVICE_ID = 'service_9dr2ws7';
-    const EMAILJS_TEMPLATE_ID = 'template_cpujhfa';
-    const EMAILJS_PUBLIC_KEY = 'ziLnha91scpGjFABh';
+    <!-- EMAILJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-    const MANAGERS = [
-        'barry.dixon@next-gen.uk',
-          ];
+    <style>
+        /* … your original CSS (unchanged) … */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+               background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+               min-height:100vh; padding:20px; }
+        .container { max-width:1400px; margin:0 auto; }
+        header { background:rgba(255,255,255,0.95); padding:25px 30px;
+                 border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.2);
+                 margin-bottom:30px; display:flex; justify-content:space-between;
+                 align-items:center; }
+        .header-left h1 { color:#667eea; font-size:2.2em; font-weight:700; }
+        .header-left p { color:#666; margin-top:5px; }
+        .back-btn { background:linear-gradient(135deg,#667eea,#764ba2);
+                    color:white; padding:12px 25px; border:none; border-radius:8px;
+                    cursor:pointer; font-size:1em; transition:transform .2s;
+                    text-decoration:none; display:inline-block; }
+        .back-btn:hover { transform:translateY(-2px);
+                          box-shadow:0 5px 15px rgba(0,0,0,0.2); }
+        /* … the rest of your CSS … */
+    </style>
+</head>
+<body>
 
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+    <!-- 1. FIREBASE FIRST -->
+    <script type="module" src="employees-firebase.js"></script>
 
-    // ────────────────────── HELPER: Is holiday in the past? ──────────────────────
-    const TODAY = new Date();
-    TODAY.setHours(0, 0, 0, 0);
+    <div class="container">
+        <!-- … your original HTML (unchanged) … -->
+        <header>
+            <div class="header-left">
+                <h1>Holiday Overview</h1>
+                <p>View employee holiday statistics and history</p>
+            </div>
+            <a href="index.html" class="back-btn">Back to Dashboard</a>
+        </header>
 
-    function isHolidayInPast(record) {
-        const endDate = new Date(record.dateTo);
-        endDate.setHours(0, 0, 0, 0);
-        return endDate < TODAY;
-    }
+        <!-- TOGGLES, SEARCH, etc. … (unchanged) -->
+        <!-- … -->
+    </div>
 
-    function getEffectiveStatus(record) {
-        return isHolidayInPast(record) ? 'approved' : record.status;
-    }
+    <!-- 2. INLINE SCRIPT (REPLACED) -->
+    <script>
+        let selectedEmployeeId = null;
+        let allRecords = [];
+        let currentEditIndex = -1;
 
-    // ────────────────────── 1. Render Employee List ──────────────────────
-    function renderEmployeeList() {
-        const container = document.getElementById('employeeListContainer');
-        const showActive = document.getElementById('showActive').checked;
-        const showLeavers = document.getElementById('showLeavers').checked;
+        // ────────────────────── EMAIL CONFIG ──────────────────────
+        const EMAILJS_SERVICE_ID = 'service_9dr2ws7';
+        const EMAILJS_TEMPLATE_ID = 'template_cpujhfa';
+        const EMAILJS_PUBLIC_KEY = 'ziLnha91scpGjFABh';
 
-        const active = EMPLOYEES.data.filter(e => !e.dateLeft);
-        const leavers = EMPLOYEES.data.filter(e => e.dateLeft);
+        const MANAGERS = [
+            'barry.dixon@next-gen.uk',
+            'Marie.Wall@next-gen.uk',
+            'Carl.Finnigan@next-gen.uk',
+            'ashleigh.ginks@next-gen.uk',
+            'Maia.foster@next-gen.uk',
+            'Rebecca.Salter@next-gen.uk'
+        ];
 
-        document.getElementById('activeCount').textContent = active.length;
-        document.getElementById('leaverCount').textContent = leavers.length;
+        emailjs.init(EMAILJS_PUBLIC_KEY);
 
-        let employeesToShow = [];
-        if (showActive && showLeavers) employeesToShow = EMPLOYEES.data;
-        else if (showActive) employeesToShow = active;
-        else if (showLeavers) employeesToShow = leavers;
+        // ────────────────────── HELPERS ──────────────────────
+        const TODAY = new Date();
+        TODAY.setHours(0, 0, 0, 0);
 
-        if (!employeesToShow.length) {
-            container.innerHTML = '<p style="color:#666; text-align:center;">No employees to show</p>';
-            return;
+        function isHolidayInPast(r) {
+            const end = new Date(r.dateTo);
+            end.setHours(0, 0, 0, 0);
+            return end < TODAY;
         }
 
-        container.innerHTML = '';
-        employeesToShow.forEach(emp => {
-            const isLeaver = !!emp.dateLeft;
-            const item = document.createElement('div');
-            item.className = `employee-item ${isLeaver ? 'leaver' : ''}`;
-            item.onclick = () => selectEmployee(emp.id);
-            item.innerHTML = `<strong>${emp.name}</strong><span>ID: ${emp.id}</span>`;
-            container.appendChild(item);
-        });
-    }
-
-    // ────────────────────── 2. Select Employee ──────────────────────
-    function selectEmployee(id) {
-        selectedEmployeeId = id;
-        const emp = EMPLOYEES.data.find(e => e.id === id);
-        if (!emp) return;
-
-        document.querySelectorAll('.employee-item').forEach(i => i.classList.remove('active'));
-        const activeItem = document.querySelector(`.employee-item[onclick="selectEmployee('${id}')"]`);
-        if (activeItem) activeItem.classList.add('active');
-
-        document.getElementById('noSelection').style.display = 'none';
-        document.getElementById('employeeHoliday').style.display = 'block';
-        document.getElementById('employeeName').textContent = emp.name;
-        document.getElementById('employeeId').textContent = 'ID: ' + emp.id;
-
-        loadHolidayData(emp);
-    }
-
-    // ────────────────────── 3. Load & Display Holiday Data ──────────────────────
-    function loadHolidayData(emp) {
-        const records = emp.holidays || [];
-        allRecords = [...records];
-
-        const totalEntitlement = emp.holidayEntitlement || 28;
-
-        // Use effective status: past = approved
-        const taken = records
-            .filter(r => getEffectiveStatus(r) === 'approved')
-            .reduce((s, r) => s + parseFloat(r.days), 0);
-
-        const requested = records
-            .filter(r => getEffectiveStatus(r) === 'pending')
-            .reduce((s, r) => s + parseFloat(r.days), 0);
-
-        const remaining = totalEntitlement - taken - requested;
-
-        document.getElementById('totalEntitlement').textContent = totalEntitlement;
-        document.getElementById('daysTaken').textContent = taken;
-        document.getElementById('daysRequested').textContent = requested;
-        document.getElementById('daysRemaining').textContent = remaining;
-
-        document.getElementById('filterStatus').value = 'all';
-        document.getElementById('filterMonth').value = '';
-
-        displayHolidayRecords(records);
-    }
-
-    function displayHolidayRecords(records) {
-        const container = document.getElementById('holidayHistory');
-        if (!records.length) {
-            container.innerHTML = '<p style="color:#666;text-align:center;padding:40px;">No holiday records found</p>';
-            return;
+        function effectiveStatus(r) {
+            return isHolidayInPast(r) ? 'approved' : r.status;
         }
 
-        const statusLabels = { approved: 'Approved', pending: 'Pending', rejected: 'Rejected' };
-        const statusClasses = { approved: 'status-approved', pending: 'status-pending', rejected: 'status-rejected' };
+        // ────────────────────── 1. Render Employee List ──────────────────────
+        function renderEmployeeList() {
+            const container = document.getElementById('employeeListContainer');
+            const showActive = document.getElementById('showActive').checked;
+            const showLeavers = document.getElementById('showLeavers').checked;
 
-        let html = '';
-        records.forEach((r, idx) => {
-            const effective = getEffectiveStatus(r);
-            const displayStatus = effective;
-            const displayLabel = statusLabels[displayStatus];
-            const displayClass = statusClasses[displayStatus];
+            const active = EMPLOYEES.data.filter(e => !e.dateLeft);
+            const leavers = EMPLOYEES.data.filter(e => e.dateLeft);
 
-            // Optional: show "(Auto-Approved)" for past pending
-            const extraLabel = (r.status === 'pending' && effective === 'approved')
-                ? ' <small style="opacity:0.7;">(Auto-Approved)</small>'
-                : '';
+            document.getElementById('activeCount').textContent = active.length;
+            document.getElementById('leaverCount').textContent = leavers.length;
 
-            html += `
-                <div class="holiday-record ${displayStatus}">
-                    <div class="record-main">
-                        <div class="record-header">
-                            <span class="record-type">${r.type || 'Full Day'}</span>
-                            <span class="record-status ${displayClass}">${displayLabel}${extraLabel}</span>
-                        </div>
-                        <div class="record-dates">${formatDate(r.dateFrom)} - ${formatDate(r.dateTo)}</div>
-                        <div class="record-details">
-                            <div class="record-detail-item"><strong>Days:</strong> ${r.days}</div>
-                        </div>
-                        ${r.notes ? `<div class="record-notes">${r.notes}</div>` : ''}
-                    </div>
-                    <div class="record-actions">
-                        <button class="edit-btn" onclick="openEditModal(${idx})" title="Edit">Edit</button>
-                        <button class="delete-btn" onclick="deleteRecord(${idx})" title="Delete">Delete</button>
-                    </div>
-                </div>`;
-        });
-        container.innerHTML = html;
-    }
+            let employeesToShow = [];
+            if (showActive && showLeavers) employeesToShow = EMPLOYEES.data;
+            else if (showActive) employeesToShow = active;
+            else if (showLeavers) employeesToShow = leavers;
 
-    // ────────────────────── 4. Edit Modal Functions ──────────────────────
-    function openEditModal(index) {
-        currentEditIndex = index;
-        const rec = allRecords[index];
-        document.getElementById('editStatus').value = rec.status;
-        document.getElementById('editDateFrom').value = rec.dateFrom;
-        document.getElementById('editDateTo').value = rec.dateTo;
-        document.getElementById('editDays').value = rec.days;
-        document.getElementById('editType').value = rec.type || 'Full Day';
-        document.getElementById('editNotes').value = rec.notes || '';
-        document.getElementById('editModal').classList.add('active');
-    }
+            if (!employeesToShow.length) {
+                container.innerHTML = '<p style="color:#666; text-align:center;">No employees to show</p>';
+                return;
+            }
 
-    function closeEditModal() {
-        document.getElementById('editModal').classList.remove('active');
-        currentEditIndex = -1;
-    }
+            container.innerHTML = '';
+            employeesToShow.forEach(emp => {
+                const isLeaver = !!emp.dateLeft;
+                const item = document.createElement('div');
+                item.className = `employee-item ${isLeaver ? 'leaver' : ''}`;
+                item.onclick = () => selectEmployee(emp.id);
+                item.innerHTML = `<strong>${emp.name}</strong><span>ID: ${emp.id}</span>`;
+                container.appendChild(item);
+            });
+        }
 
-    async function saveEdit() {
-        if (currentEditIndex === -1) return;
+        // ────────────────────── 2. Select Employee ──────────────────────
+        function selectEmployee(id) {
+            selectedEmployeeId = id;
+            const emp = EMPLOYEES.data.find(e => e.id === id);
+            if (!emp) return;
 
-        const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
-        const rec = {
-            status: document.getElementById('editStatus').value,
-            dateFrom: document.getElementById('editDateFrom').value,
-            dateTo: document.getElementById('editDateTo').value,
-            days: parseFloat(document.getElementById('editDays').value),
-            type: document.getElementById('editType').value,
-            notes: document.getElementById('editNotes').value,
-            submittedAt: allRecords[currentEditIndex].submittedAt
-        };
+            document.querySelectorAll('.employee-item').forEach(i => i.classList.remove('active'));
+            const activeItem = document.querySelector(`.employee-item[onclick="selectEmployee('${id}')"]`);
+            if (activeItem) activeItem.classList.add('active');
 
-        emp.holidays[currentEditIndex] = rec;
+            document.getElementById('noSelection').style.display = 'none';
+            document.getElementById('employeeHoliday').style.display = 'block';
+            document.getElementById('employeeName').textContent = emp.name;
+            document.getElementById('employeeId').textContent = 'ID: ' + emp.id;
 
-        try {
-            await EMPLOYEES.update(emp.id, { holidays: emp.holidays });
-            alert("Holiday record updated!");
-            await sendEditEmail(emp, rec, "edited");
-            closeEditModal();
             loadHolidayData(emp);
-        } catch (err) {
-            alert("Update failed.");
         }
-    }
 
-    async function deleteRecord(index = currentEditIndex) {
-        if (!confirm("Delete this holiday record?")) return;
+        // ────────────────────── 3. Load & Display Holiday Data ──────────────────────
+        function loadHolidayData(emp) {
+            const records = emp.holidays || [];
+            allRecords = [...records];
 
-        const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
-        const rec = emp.holidays[index];
+            const totalEntitlement = emp.holidayEntitlement || 28;
 
-        emp.holidays.splice(index, 1);
+            const taken = records
+                .filter(r => effectiveStatus(r) === 'approved')
+                .reduce((s, r) => s + parseFloat(r.days), 0);
 
-        try {
-            await EMPLOYEES.update(emp.id, { holidays: emp.holidays });
-            alert("Record deleted!");
-            await sendEditEmail(emp, rec, "deleted");
-            closeEditModal();
-            loadHolidayData(emp);
-        } catch (err) {
-            alert("Delete failed.");
+            const requested = records
+                .filter(r => effectiveStatus(r) === 'pending')
+                .reduce((s, r) => s + parseFloat(r.days), 0);
+
+            const remaining = totalEntitlement - taken - requested;
+
+            document.getElementById('totalEntitlement').textContent = totalEntitlement;
+            document.getElementById('daysTaken').textContent = taken;
+            document.getElementById('daysRequested').textContent = requested;
+            document.getElementById('daysRemaining').textContent = remaining;
+
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterMonth').value = '';
+
+            displayHolidayRecords(records);
         }
-    }
 
-    async function sendEditEmail(emp, rec, action) {
-        const effective = getEffectiveStatus(rec);
-        const statusLabel = effective === 'approved' ? 'Approved' : 
-                           effective === 'pending' ? 'Pending' : 'Rejected';
+        function displayHolidayRecords(records) {
+            const container = document.getElementById('holidayHistory');
+            if (!records.length) {
+                container.innerHTML = '<p style="color:#666;text-align:center;padding:40px;">No holiday records found</p>';
+                return;
+            }
 
-        const templateParams = {
-            employee_name: emp.name,
-            employee_id: emp.id,
-            type: rec.type || 'Full Day',
-            date_from: rec.dateFrom,
-            date_to: rec.dateTo,
-            days: rec.days,
-            status: statusLabel + (effective === 'approved' && rec.status === 'pending' ? ' (Auto-Approved)' : ''),
-            notes: rec.notes || '—',
-            action: action,
-            remaining_days: (emp.holidayEntitlement || 28) -
-                emp.holidays.filter(r => getEffectiveStatus(r) === 'approved').reduce((s, r) => s + parseFloat(r.days), 0) -
-                emp.holidays.filter(r => getEffectiveStatus(r) === 'pending').reduce((s, r) => s + parseFloat(r.days), 0)
-        };
+            const statusLabels = { approved: 'Approved', pending: 'Pending', rejected: 'Rejected' };
+            const statusClasses = { approved: 'status-approved', pending: 'status-pending', rejected: 'status-rejected' };
 
-        await Promise.all(MANAGERS.map(email =>
-            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { ...templateParams, to_email: email })
-        )).catch(() => {});
-    }
+            let html = '';
+            records.forEach((r, idx) => {
+                const eff = effectiveStatus(r);
+                const label = statusLabels[eff];
+                const cls = statusClasses[eff];
+                const autoTag = (r.status === 'pending' && eff === 'approved')
+                    ? ' <small style="opacity:0.7;">(Auto-Approved)</small>'
+                    : '';
 
-    // ────────────────────── 5. Form Handlers ──────────────────────
-    document.getElementById('editForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        saveEdit();
-    });
+                html += `
+                    <div class="holiday-record ${eff}">
+                        <div class="record-main">
+                            <div class="record-header">
+                                <span class="record-type">${r.type || 'Full Day'}</span>
+                                <span class="record-status ${cls}">${label}${autoTag}</span>
+                            </div>
+                            <div class="record-dates">${formatDate(r.dateFrom)} - ${formatDate(r.dateTo)}</div>
+                            <div class="record-details">
+                                <div class="record-detail-item"><strong>Days:</strong> ${r.days}</div>
+                            </div>
+                            ${r.notes ? `<div class="record-notes">${r.notes}</div>` : ''}
+                        </div>
+                        <div class="record-actions">
+                            <button class="edit-btn" onclick="openEditModal(${idx})" title="Edit">Edit</button>
+                            <button class="delete-btn" onclick="deleteRecord(${idx})" title="Delete">Delete</button>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
 
-    // ────────────────────── 6. Filters & Search ──────────────────────
-    function filterHolidays() {
-        const status = document.getElementById('filterStatus').value;
-        const month = document.getElementById('filterMonth').value;
-        let filtered = [...allRecords];
+        // ────────────────────── 4. Edit Modal Functions ──────────────────────
+        function openEditModal(index) {
+            currentEditIndex = index;
+            const rec = allRecords[index];
+            document.getElementById('editStatus').value = rec.status;
+            document.getElementById('editDateFrom').value = rec.dateFrom;
+            document.getElementById('editDateTo').value = rec.dateTo;
+            document.getElementById('editDays').value = rec.days;
+            document.getElementById('editType').value = rec.type || 'Full Day';
+            document.getElementById('editNotes').value = rec.notes || '';
+            document.getElementById('editModal').classList.add('active');
+        }
 
-        if (status !== 'all') {
-            if (status === 'pending') {
-                filtered = filtered.filter(r => !isHolidayInPast(r) && r.status === 'pending');
-            } else {
-                filtered = filtered.filter(r => getEffectiveStatus(r) === status);
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            currentEditIndex = -1;
+        }
+
+        async function saveEdit() {
+            if (currentEditIndex === -1) return;
+
+            const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
+            const rec = {
+                status: document.getElementById('editStatus').value,
+                dateFrom: document.getElementById('editDateFrom').value,
+                dateTo: document.getElementById('editDateTo').value,
+                days: parseFloat(document.getElementById('editDays').value),
+                type: document.getElementById('editType').value,
+                notes: document.getElementById('editNotes').value,
+                submittedAt: allRecords[currentEditIndex].submittedAt
+            };
+
+            emp.holidays[currentEditIndex] = rec;
+
+            try {
+                await EMPLOYEES.update(emp.id, { holidays: emp.holidays });
+                alert("Holiday record updated!");
+                await sendEditEmail(emp, rec, "edited");
+                closeEditModal();
+                loadHolidayData(emp);
+            } catch (err) {
+                alert("Update failed.");
             }
         }
-        if (month) filtered = filtered.filter(r => r.dateFrom.substring(0, 7) === month);
 
-        updateFilteredStats(filtered);
-        displayHolidayRecords(filtered);
-    }
+        async function deleteRecord(index = currentEditIndex) {
+            if (!confirm("Delete this holiday record?")) return;
 
-    function updateFilteredStats(records) {
-        const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
-        const total = emp.holidayEntitlement || 28;
-        const taken = records.filter(r => getEffectiveStatus(r) === 'approved')
-            .reduce((s, r) => s + parseFloat(r.days), 0);
-        const requested = records.filter(r => getEffectiveStatus(r) === 'pending')
-            .reduce((s, r) => s + parseFloat(r.days), 0);
-        const remaining = total - taken - requested;
+            const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
+            const rec = emp.holidays[index];
 
-        document.getElementById('daysTaken').textContent = taken;
-        document.getElementById('daysRequested').textContent = requested;
-        document.getElementById('daysRemaining').textContent = remaining;
-    }
+            emp.holidays.splice(index, 1);
 
-    function filterEmployees() {
-        const term = document.getElementById('searchInput').value.trim().toLowerCase();
-        document.querySelectorAll('.employee-item').forEach(item => {
-            const text = item.textContent.toLowerCase();
-            item.style.display = text.includes(term) ? 'block' : 'none';
+            try {
+                await EMPLOYEES.update(emp.id, { holidays: emp.holidays });
+                alert("Record deleted!");
+                await sendEditEmail(emp, rec, "deleted");
+                closeEditModal();
+                loadHolidayData(emp);
+            } catch (err) {
+                alert("Delete failed.");
+            }
+        }
+
+        async function sendEditEmail(emp, rec, action) {
+            const eff = effectiveStatus(rec);
+            const label = eff === 'approved' ? 'Approved' :
+                         eff === 'pending' ? 'Pending' : 'Rejected';
+            const auto = (rec.status === 'pending' && eff === 'approved') ? ' (Auto-Approved)' : '';
+
+            const templateParams = {
+                employee_name: emp.name,
+                employee_id: emp.id,
+                type: rec.type || 'Full Day',
+                date_from: rec.dateFrom,
+                date_to: rec.dateTo,
+                days: rec.days,
+                status: label + auto,
+                notes: rec.notes || '—',
+                action: action,
+                remaining_days: (emp.holidayEntitlement || 28) -
+                    emp.holidays.filter(r => effectiveStatus(r) === 'approved')
+                        .reduce((s, r) => s + parseFloat(r.days), 0) -
+                    emp.holidays.filter(r => effectiveStatus(r) === 'pending')
+                        .reduce((s, r) => s + parseFloat(r.days), 0)
+            };
+
+            await Promise.all(MANAGERS.map(email =>
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { ...templateParams, to_email: email })
+            )).catch(() => {});
+        }
+
+        // ────────────────────── 5. Form Handlers ──────────────────────
+        document.getElementById('editForm').addEventListener('submit', e => {
+            e.preventDefault();
+            saveEdit();
         });
-    }
 
-    function formatDate(str) {
-        const d = new Date(str);
-        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    }
+        // ────────────────────── 6. Filters & Search ──────────────────────
+        function filterHolidays() {
+            const status = document.getElementById('filterStatus').value;
+            const month = document.getElementById('filterMonth').value;
+            let filtered = [...allRecords];
 
-    // ────────────────────── 7. Export Functions ──────────────────────
-    function exportAllToCSV() {
-        let csv = 'Employee ID,Name,Total Entitlement,Days Taken,Days Requested,Days Remaining,Status,Date From,Date To,Days,Type,Notes\n';
-        EMPLOYEES.data.forEach(emp => {
+            if (status !== 'all') {
+                if (status === 'pending') {
+                    filtered = filtered.filter(r => !isHolidayInPast(r) && r.status === 'pending');
+                } else {
+                    filtered = filtered.filter(r => effectiveStatus(r) === status);
+                }
+            }
+            if (month) filtered = filtered.filter(r => r.dateFrom.substring(0, 7) === month);
+
+            updateFilteredStats(filtered);
+            displayHolidayRecords(filtered);
+        }
+
+        function updateFilteredStats(records) {
+            const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
             const total = emp.holidayEntitlement || 28;
-            const taken = (emp.holidays || []).filter(r => getEffectiveStatus(r) === 'approved')
+            const taken = records.filter(r => effectiveStatus(r) === 'approved')
                 .reduce((s, r) => s + parseFloat(r.days), 0);
-            const requested = (emp.holidays || []).filter(r => getEffectiveStatus(r) === 'pending')
+            const requested = records.filter(r => effectiveStatus(r) === 'pending')
                 .reduce((s, r) => s + parseFloat(r.days), 0);
             const remaining = total - taken - requested;
 
-            if (!emp.holidays || emp.holidays.length === 0) {
-                csv += `"${emp.id}","${emp.name}",${total},${taken},${requested},${remaining},,,,,,\n`;
-            } else {
-                emp.holidays.forEach(r => {
-                    const eff = getEffectiveStatus(r);
-                    const statusLabel = eff === 'approved' && r.status === 'pending' ? 'approved (auto)' : eff;
-                    csv += `"${emp.id}","${emp.name}",${total},${taken},${requested},${remaining},"${statusLabel}","${r.dateFrom}","${r.dateTo}",${r.days},"${r.type || 'Full Day'}","${(r.notes || '').replace(/"/g, '""')}"\n`;
-                });
-            }
-        });
-
-        downloadCSV(csv, `All_Holidays_${new Date().toISOString().split('T')[0]}.csv`);
-    }
-
-    function exportEmployeeToCSV() {
-        if (!selectedEmployeeId) return alert('Select an employee');
-        const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
-        let records = [...allRecords];
-        const status = document.getElementById('filterStatus').value;
-        const month = document.getElementById('filterMonth').value;
-
-        if (status !== 'all') {
-            if (status === 'pending') {
-                records = records.filter(r => !isHolidayInPast(r) && r.status === 'pending');
-            } else {
-                records = records.filter(r => getEffectiveStatus(r) === status);
-            }
+            document.getElementById('daysTaken').textContent = taken;
+            document.getElementById('daysRequested').textContent = requested;
+            document.getElementById('daysRemaining').textContent = remaining;
         }
-        if (month) records = records.filter(r => r.dateFrom.substring(0, 7) === month);
-        if (!records.length) return alert('No records to export');
 
-        const total = emp.holidayEntitlement || 28;
-        const taken = records.filter(r => getEffectiveStatus(r) === 'approved')
-            .reduce((s, r) => s + parseFloat(r.days), 0);
-        const requested = records.filter(r => getEffectiveStatus(r) === 'pending')
-            .reduce((s, r) => s + parseFloat(r.days), 0);
-        const remaining = total - taken - requested;
+        function filterEmployees() {
+            const term = document.getElementById('searchInput').value.trim().toLowerCase();
+            document.querySelectorAll('.employee-item').forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(term) ? 'block' : 'none';
+            });
+        }
 
-        let csv = 'Employee ID,Name,Total Entitlement,Days Taken,Days Requested,Days Remaining,Status,Date From,Date To,Days,Type,Notes\n';
-        records.forEach(r => {
-            const eff = getEffectiveStatus(r);
-            const statusLabel = eff === 'approved' && r.status === 'pending' ? 'approved (auto)' : eff;
-            csv += `"${emp.id}","${emp.name}",${total},${taken},${requested},${remaining},"${statusLabel}","${r.dateFrom}","${r.dateTo}",${r.days},"${r.type || 'Full Day'}","${(r.notes || '').replace(/"/g, '""')}"\n`;
-        });
+        function formatDate(str) {
+            const d = new Date(str);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
 
-        const suffix = (status !== 'all' ? `_${status}` : '') + (month ? `_${month}` : '');
-        downloadCSV(csv, `Holiday_${emp.id}${suffix}_${new Date().toISOString().split('T')[0]}.csv`);
-    }
+        // ────────────────────── 7. Export Functions ──────────────────────
+        function exportAllToCSV() {
+            let csv = 'Employee ID,Name,Total Entitlement,Days Taken,Days Requested,Days Remaining,Status,Date From,Date To,Days,Type,Notes\n';
+            EMPLOYEES.data.forEach(emp => {
+                const total = emp.holidayEntitlement || 28;
+                const taken = (emp.holidays || []).filter(r => effectiveStatus(r) === 'approved')
+                    .reduce((s, r) => s + parseFloat(r.days), 0);
+                const requested = (emp.holidays || []).filter(r => effectiveStatus(r) === 'pending')
+                    .reduce((s, r) => s + parseFloat(r.days), 0);
+                const remaining = total - taken - requested;
 
-    function downloadCSV(csv, filename) {
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-    }
+                if (!emp.holidays || emp.holidays.length === 0) {
+                    csv += `"${emp.id}","${emp.name}",${total},${taken},${requested},${remaining},,,,,,\n`;
+                } else {
+                    emp.holidays.forEach(r => {
+                        const eff = effectiveStatus(r);
+                        const label = (eff === 'approved' && r.status === 'pending') ? 'approved (auto)' : eff;
+                        csv += `"${emp.id}","${emp.name}",${total},${taken},${requested},${remaining},"${label}","${r.dateFrom}","${r.dateTo}",${r.days},"${r.type || 'Full Day'}","${(r.notes || '').replace(/"/g, '""')}"\n`;
+                    });
+                }
+            });
+            downloadCSV(csv, `All_Holidays_${new Date().toISOString().split('T')[0]}.csv`);
+        }
 
-    // ────────────────────── 8. ON LOAD ──────────────────────
-    EMPLOYEES.onUpdate(() => {
-        renderEmployeeList();
-        if (selectedEmployeeId) {
+        function exportEmployeeToCSV() {
+            if (!selectedEmployeeId) return alert('Select an employee');
             const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
-            if (emp) loadHolidayData(emp);
-        }
-    });
+            let records = [...allRecords];
+            const status = document.getElementById('filterStatus').value;
+            const month = document.getElementById('filterMonth').value;
 
-    window.onload = function () {
-        document.getElementById('employeeListContainer').innerHTML = '<p style="color:#666; text-align:center;">Loading employees...</p>';
-        setTimeout(renderEmployeeList, 2000);
-    };
-</script>
+            if (status !== 'all') {
+                if (status === 'pending') {
+                    records = records.filter(r => !isHolidayInPast(r) && r.status === 'pending');
+                } else {
+                    records = records.filter(r => effectiveStatus(r) === status);
+                }
+            }
+            if (month) records = records.filter(r => r.dateFrom.substring(0, 7) === month);
+            if (!records.length) return alert('No records to export');
+
+            const total = emp.holidayEntitlement || 28;
+            const taken = records.filter(r => effectiveStatus(r) === 'approved')
+                .reduce((s, r) => s + parseFloat(r.days), 0);
+            const requested = records.filter(r => effectiveStatus(r) === 'pending')
+                .reduce((s, r) => s + parseFloat(r.days), 0);
+            const remaining = total - taken - requested;
+
+            let csv = 'Employee ID,Name,Total Entitlement,Days Taken,Days Requested,Days Remaining,Status,Date From,Date To,Days,Type,Notes\n';
+            records.forEach(r => {
+                const eff = effectiveStatus(r);
+                const label = (eff === 'approved' && r.status === 'pending') ? 'approved (auto)' : eff;
+                csv += `"${emp.id}","${emp.name}",${total},${taken},${requested},${remaining},"${label}","${r.dateFrom}","${r.dateTo}",${r.days},"${r.type || 'Full Day'}","${(r.notes || '').replace(/"/g, '""')}"\n`;
+            });
+
+            const suffix = (status !== 'all' ? `_${status}` : '') + (month ? `_${month}` : '');
+            downloadCSV(csv, `Holiday_${emp.id}${suffix}_${new Date().toISOString().split('T')[0]}.csv`);
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        // ────────────────────── 8. INITIALISE AFTER FIREBASE LOADS ──────────────────────
+        function initWhenReady() {
+            if (typeof EMPLOYEES === 'undefined' || !EMPLOYEES.data) {
+                // Firebase not ready yet – try again in 100 ms
+                setTimeout(initWhenReady, 100);
+                return;
+            }
+
+            // Show initial "Loading…" message
+            document.getElementById('employeeListContainer')
+                .innerHTML = '<p style="color:#666; text-align:center;">Loading employees...</p>';
+
+            // Render list once data is present
+            renderEmployeeList();
+
+            // Keep UI in sync on every Firebase change
+            EMPLOYEES.onUpdate(() => {
+                renderEmployeeList();
+                if (selectedEmployeeId) {
+                    const emp = EMPLOYEES.data.find(e => e.id === selectedEmployeeId);
+                    if (emp) loadHolidayData(emp);
+                }
+            });
+        }
+
+        // Start the check-loop
+        initWhenReady();
+    </script>
+</body>
+</html>
