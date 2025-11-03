@@ -42,11 +42,26 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
 
         h1 {
             color: #667eea;
             font-size: 2.5em;
+        }
+
+        .month-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .month-selector select {
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
         }
 
         .back-btn,
@@ -106,10 +121,20 @@
             min-width: 50px;
         }
 
+        th.weekend {
+            background: linear-gradient(135deg, #8b9dc3 0%, #8e7ba8 100%);
+        }
+
         td {
             padding: 10px 8px;
             text-align: center;
             border: 1px solid #ddd;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        td:hover:not(.location-cell):not(.name-cell) {
+            background: #e3e7ff;
         }
 
         td.location-cell,
@@ -117,6 +142,7 @@
             text-align: left;
             font-weight: 500;
             background: #f8f9fa;
+            cursor: default;
         }
 
         tr:nth-child(even) {
@@ -168,23 +194,89 @@
             font-size: 0.8em;
         }
 
-        .empty-state {
+        .loading {
             text-align: center;
             padding: 40px;
             color: #666;
+            font-size: 1.2em;
         }
 
-        .empty-state p {
-            font-size: 1.1em;
-            margin-top: 10px;
+        .status-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 1000;
         }
+
+        .status-modal.active {
+            display: block;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .status-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .status-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .status-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-btn.present { background: #d4edda; color: #155724; }
+        .status-btn.holiday { background: #fff3cd; color: #856404; }
+        .status-btn.sick { background: #f8d7da; color: #721c24; }
+        .status-btn.aaup { background: #e2e3e5; color: #383d41; }
+        .status-btn.npt { background: #d1ecf1; color: #0c5460; }
+        .status-btn.awol { background: #f5c6cb; color: #721c24; }
+        .status-btn.baby { background: #e2d9f3; color: #4a148c; }
+        .status-btn.clear { background: #f8f9fa; color: #333; }
     </style>
 </head>
 <body>
+    <!-- Firebase -->
+    <script type="module" src="employees-firebase.js"></script>
+
     <div class="container">
         <div class="header">
             <div class="header-left">
-                <h1>📊 Attendance Breakdown - October 2025</h1>
+                <h1 id="pageTitle">📊 Attendance Breakdown</h1>
+                <div class="month-selector">
+                    <label for="monthSelect">Month:</label>
+                    <select id="monthSelect" onchange="changeMonth()"></select>
+                    <label for="yearSelect">Year:</label>
+                    <select id="yearSelect" onchange="changeMonth()"></select>
+                </div>
             </div>
             <div>
                 <button class="export-btn" onclick="exportToCSV()">📥 Export to CSV</button>
@@ -224,109 +316,260 @@
         </div>
 
         <div class="table-container">
-            <table id="attendanceTable">
-                <thead>
-                    <tr>
-                        <th class="location-header">Location</th>
-                        <th class="name-header">Name</th>
-                        <th class="date-header">01-Oct</th>
-                        <th class="date-header">02-Oct</th>
-                        <th class="date-header">03-Oct</th>
-                        <th class="date-header">04-Oct</th>
-                        <th class="date-header">05-Oct</th>
-                        <th class="date-header">06-Oct</th>
-                        <th class="date-header">07-Oct</th>
-                        <th class="date-header">08-Oct</th>
-                        <th class="date-header">09-Oct</th>
-                        <th class="date-header">10-Oct</th>
-                        <th class="date-header">11-Oct</th>
-                        <th class="date-header">12-Oct</th>
-                        <th class="date-header">13-Oct</th>
-                        <th class="date-header">14-Oct</th>
-                        <th class="date-header">15-Oct</th>
-                        <th class="date-header">16-Oct</th>
-                        <th class="date-header">17-Oct</th>
-                        <th class="date-header">18-Oct</th>
-                        <th class="date-header">19-Oct</th>
-                        <th class="date-header">20-Oct</th>
-                        <th class="date-header">21-Oct</th>
-                        <th class="date-header">22-Oct</th>
-                        <th class="date-header">23-Oct</th>
-                        <th class="date-header">24-Oct</th>
-                        <th class="date-header">25-Oct</th>
-                        <th class="date-header">26-Oct</th>
-                        <th class="date-header">27-Oct</th>
-                        <th class="date-header">28-Oct</th>
-                        <th class="date-header">29-Oct</th>
-                        <th class="date-header">30-Oct</th>
-                        <th class="date-header">31-Oct</th>
-                    </tr>
-                    <tr class="day-row">
-                        <td></td>
-                        <td></td>
-                        <td>Wed</td><td>Thu</td><td>Fri</td><td>Sat</td><td>Sun</td><td>Mon</td><td>Tue</td><td>Wed</td><td>Thu</td><td>Fri</td><td>Sat</td><td>Sun</td><td>Mon</td><td>Tue</td><td>Wed</td><td>Thu</td><td>Fri</td><td>Sat</td><td>Sun</td><td>Mon</td><td>Tue</td><td>Wed</td><td>Thu</td><td>Fri</td><td>Sat</td><td>Sun</td><td>Mon</td><td>Tue</td><td>Wed</td><td>Thu</td><td>Fri</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Your existing table rows go here (unchanged) -->
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Aaron Shepherd</td><td class="status-H">H</td><td class="status-Sick">Sick</td><td class="status-Sick">Sick</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Alesandro Cilia</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-Sick">Sick</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Auther Bumhira</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-H">H</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td></td><td></td><td class="status-H">H</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Billy McDonough</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Bryan McCabe</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-NPT">NPT</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-Sick">Sick</td><td></td><td></td><td class="status-Sick">Sick</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-H">H</td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Calum Ballingal</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-NPT">NPT</td><td class="status-NPT">NPT</td><td class="status-NPT">NPT</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-Sick">Sick</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Chris Stein</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Chris Timm</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-H">H</td><td></td><td></td><td class="status-H">H</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Clayton Spinks</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-H">H</td><td class="status-X">X</td><td class="status-Sick">Sick</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Daniel Sanders</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-AAUP">AAUP</td><td class="status-AAUP">AAUP</td><td></td><td></td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">David Flint</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-Sick">Sick</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">David Wilson</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-NPT">NPT</td><td class="status-X">X</td><td class="status-Sick">Sick</td><td></td><td class="status-Sick">Sick</td><td></td><td></td><td class="status-X">X</td><td class="status-AAUP">AAUP</td><td class="status-AAUP">AAUP</td><td></td><td class="status-AAUP">AAUP</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-Sick">Sick</td><td class="status-X">X</td><td></td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Dinis Cruz</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-Sick">Sick</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Gary Cuthbertson</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-Sick">Sick</td><td class="status-AWOL">AWOL</td><td class="status-AAUP">AAUP</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Geoff Pymm</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-H">H</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">George Chapman</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-H">H</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Hamza Safwaan</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-AAUP">AAUP</td><td></td><td></td><td class="status-H">H</td><td class="status-X">X</td><td class="status-H">H</td><td class="status-H">H</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Herve Ntwali</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td>H/H</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Ivan Rivers</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-H">H</td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">James Mclean</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Jamie Longland</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Johnson Allepot</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-H">H</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Jordan Gray</td><td class="status-X">X</td><td class="status-H">H</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td></td><td></td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Jordan Morrison</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td class="status-H">H</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td></tr>
-                    <tr><td class="location-cell">OES</td><td class="name-cell">Lee Robinson</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-Sick">Sick</td><td></td><td></td><td class="status-Sick">Sick</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-H">H</td><td></td><td></td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td></td><td></td><td class="status-H">H</td><td class="status-X">X</td><td class="status-X">X</td><td class="status-X">X</td><td>
-                </tbody>
+            <div id="loadingMessage" class="loading">Loading attendance data...</div>
+            <table id="attendanceTable" style="display:none;">
+                <thead id="tableHeader"></thead>
+                <tbody id="tableBody"></tbody>
             </table>
         </div>
     </div>
 
+    <!-- Status Selection Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeStatusModal()"></div>
+    <div class="status-modal" id="statusModal">
+        <h3 id="modalTitle">Set Attendance Status</h3>
+        <div class="status-buttons">
+            <button class="status-btn present" onclick="setStatus('X')">Present (X)</button>
+            <button class="status-btn holiday" onclick="setStatus('H')">Holiday (H)</button>
+            <button class="status-btn sick" onclick="setStatus('Sick')">Sick</button>
+            <button class="status-btn aaup" onclick="setStatus('AAUP')">AAUP</button>
+            <button class="status-btn npt" onclick="setStatus('NPT')">NPT</button>
+            <button class="status-btn awol" onclick="setStatus('AWOL')">AWOL</button>
+            <button class="status-btn baby" onclick="setStatus('baby')">Maternity/Paternity</button>
+            <button class="status-btn clear" onclick="setStatus('')">Clear</button>
+        </div>
+    </div>
+
     <script>
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let attendanceData = {};
+        let currentCell = null;
+
+        // Initialize month and year selectors
+        function initializeSelectors() {
+            const monthSelect = document.getElementById('monthSelect');
+            const yearSelect = document.getElementById('yearSelect');
+            
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                if (index === currentMonth) option.selected = true;
+                monthSelect.appendChild(option);
+            });
+
+            for (let year = 2024; year <= 2030; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) option.selected = true;
+                yearSelect.appendChild(option);
+            }
+        }
+
+        function changeMonth() {
+            currentMonth = parseInt(document.getElementById('monthSelect').value);
+            currentYear = parseInt(document.getElementById('yearSelect').value);
+            loadAttendanceData();
+        }
+
+        function getDaysInMonth(month, year) {
+            return new Date(year, month + 1, 0).getDate();
+        }
+
+        function getDayName(date) {
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            return days[date.getDay()];
+        }
+
+        function isWeekend(date) {
+            const day = date.getDay();
+            return day === 0 || day === 6;
+        }
+
+        function generateTableHeaders() {
+            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
+            
+            document.getElementById('pageTitle').textContent = `📊 Attendance Breakdown - ${monthName} ${currentYear}`;
+
+            let headerHTML = '<tr>';
+            headerHTML += '<th class="location-header">Location</th>';
+            headerHTML += '<th class="name-header">Name</th>';
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(currentYear, currentMonth, day);
+                const isWeekendDay = isWeekend(date);
+                headerHTML += `<th class="date-header ${isWeekendDay ? 'weekend' : ''}">${String(day).padStart(2, '0')}-${monthName.substring(0, 3)}</th>`;
+            }
+            headerHTML += '</tr>';
+
+            // Day names row
+            headerHTML += '<tr class="day-row">';
+            headerHTML += '<td></td><td></td>';
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(currentYear, currentMonth, day);
+                headerHTML += `<td>${getDayName(date)}</td>`;
+            }
+            headerHTML += '</tr>';
+
+            document.getElementById('tableHeader').innerHTML = headerHTML;
+        }
+
+        function isDateInRange(checkDate, startDate, endDate) {
+            const check = new Date(checkDate);
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            check.setHours(0, 0, 0, 0);
+            start.setHours(0, 0, 0, 0);
+            end.setHours(0, 0, 0, 0);
+            return check >= start && check <= end;
+        }
+
+        async function loadAttendanceData() {
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('attendanceTable').style.display = 'none';
+
+            // Wait for EMPLOYEES data to be available
+            if (!window.EMPLOYEES || !window.EMPLOYEES.data || window.EMPLOYEES.data.length === 0) {
+                setTimeout(loadAttendanceData, 500);
+                return;
+            }
+
+            const activeEmployees = window.EMPLOYEES.data.filter(emp => !emp.dateLeft);
+            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+
+            generateTableHeaders();
+
+            let bodyHTML = '';
+            activeEmployees.forEach(emp => {
+                bodyHTML += '<tr>';
+                bodyHTML += `<td class="location-cell">${emp.location || 'OES'}</td>`;
+                bodyHTML += `<td class="name-cell">${emp.name}</td>`;
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const currentDate = new Date(currentYear, currentMonth, day);
+                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    
+                    let status = '';
+                    let statusClass = '';
+
+                    // Check if there's an approved holiday for this date
+                    if (emp.holidays && emp.holidays.length > 0) {
+                        const holiday = emp.holidays.find(h => 
+                            h.status === 'approved' && 
+                            isDateInRange(currentDate, h.dateFrom, h.dateTo)
+                        );
+                        if (holiday) {
+                            status = 'H';
+                            statusClass = 'status-H';
+                        }
+                    }
+
+                    // Check if there's manual attendance data
+                    const key = `${emp.id}_${dateStr}`;
+                    if (attendanceData[key]) {
+                        status = attendanceData[key];
+                        statusClass = `status-${status}`;
+                    }
+
+                    bodyHTML += `<td class="${statusClass}" onclick="openStatusModal('${emp.id}', '${dateStr}', this)">${status}</td>`;
+                }
+
+                bodyHTML += '</tr>';
+            });
+
+            document.getElementById('tableBody').innerHTML = bodyHTML;
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('attendanceTable').style.display = 'table';
+        }
+
+        function openStatusModal(empId, date, cell) {
+            currentCell = { empId, date, cell };
+            const emp = window.EMPLOYEES.data.find(e => e.id === empId);
+            const dateObj = new Date(date);
+            const dateStr = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            
+            document.getElementById('modalTitle').textContent = `${emp.name} - ${dateStr}`;
+            document.getElementById('statusModal').classList.add('active');
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').classList.remove('active');
+            document.getElementById('modalOverlay').classList.remove('active');
+            currentCell = null;
+        }
+
+        function setStatus(status) {
+            if (!currentCell) return;
+
+            const { empId, date, cell } = currentCell;
+            const key = `${empId}_${date}`;
+            
+            if (status === '') {
+                delete attendanceData[key];
+                cell.textContent = '';
+                cell.className = '';
+            } else {
+                attendanceData[key] = status;
+                cell.textContent = status;
+                cell.className = `status-${status}`;
+            }
+
+            // Save to localStorage
+            localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+            
+            closeStatusModal();
+        }
+
         function exportToCSV() {
             const table = document.getElementById('attendanceTable');
             let csv = [];
             
-            // Get all rows
             const rows = table.querySelectorAll('tr');
             rows.forEach(row => {
                 const cols = row.querySelectorAll('td, th');
                 const rowData = Array.from(cols).map(col => {
-                    // Clean text: remove HTML and trim
                     return '"' + (col.innerText || '').replace(/"/g, '""') + '"';
                 });
                 csv.push(rowData.join(','));
             });
 
-            // Create downloadable file
+            const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
             const csvContent = csv.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
-            link.setAttribute('download', 'attendance_breakdown_october_2025.csv');
+            link.setAttribute('download', `attendance_${monthName}_${currentYear}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
+
+        // Initialize on load
+        window.onload = function() {
+            initializeSelectors();
+            
+            // Load saved attendance data
+            const saved = localStorage.getItem('attendanceData');
+            if (saved) {
+                attendanceData = JSON.parse(saved);
+            }
+
+            // Wait for EMPLOYEES to be ready
+            if (window.EMPLOYEES) {
+                window.EMPLOYEES.onUpdate(loadAttendanceData);
+            }
+            
+            setTimeout(loadAttendanceData, 1000);
+        };
     </script>
 </body>
 </html>
