@@ -1,57 +1,64 @@
-// employees.js — SHARED ACROSS ALL PAGES
+// employees-firebase.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// YOUR CONFIG — PASTE IT HERE
+const firebaseConfig = {
+  apiKey: "AIzaSyBN8KY0Rw4_oBUHOmZet_qOa-R8hSy3qqU",
+  authDomain: "ngu-hub.firebaseapp.com",
+  projectId: "ngu-hub",
+  storageBucket: "ngu-hub.firebasestorage.app",
+  messagingSenderId: "1019944923005",
+  appId: "1:1019944923005:web:9f4a9c81ae711f7e91a614",
+  measurementId: "G-4HP20442DM"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 window.EMPLOYEES = {
     data: [],
-    STORAGE_KEY: 'ngu_employees',
+    listeners: [],
 
     init() {
-        const saved = localStorage.getItem(this.STORAGE_KEY);
-        this.data = saved ? JSON.parse(saved) : [];
-        this.ensureStructure();
-        this.save();
+        this.loadFromFirebase();
     },
 
-    ensureStructure() {
-        this.data.forEach(emp => {
-            if (!emp.id) emp.id = this.generateId();
-            if (!emp.name) emp.name = 'Unknown';
-            if (!Array.isArray(emp.absences)) emp.absences = [];
-            if (!emp.startDate) emp.startDate = null;
-            if (!emp.dateLeft) emp.dateLeft = null;
-            if (emp.holidayRemaining === undefined) emp.holidayRemaining = 25;
-            if (emp.holidayTaken === undefined) emp.holidayTaken = 0;
-            if (emp.absenceDays === undefined) emp.absenceDays = 0;
+    loadFromFirebase() {
+        onSnapshot(collection(db, "employees"), (snapshot) => {
+            this.data = [];
+            snapshot.forEach(doc => {
+                this.data.push({ id: doc.id, ...doc.data() });
+            });
+            this.notifyListeners();
         });
     },
 
-    generateId() {
-        const next = this.data.length + 1;
-        return `EMP${String(next).padStart(3, '0')}`;
-    },
-
-    save() {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.data));
-    },
-
-    add(name) {
-        const id = this.generateId();
+    async add(name) {
+        const id = `EMP${String(this.data.length + 1).padStart(3, '0')}`;
         const emp = {
-            id,
-            name: name.trim(),
-            absences: [],
-            startDate: null,
-            dateLeft: null,
-            holidayRemaining: 25,
-            holidayTaken: 0,
-            absenceDays: 0
+            id, name: name.trim(),
+            absences: [], startDate: null, dateLeft: null,
+            holidayRemaining: 25, holidayTaken: 0, absenceDays: 0
         };
-        this.data.push(emp);
-        this.save();
+        await setDoc(doc(db, "employees", id), emp);
         return emp;
     },
 
-    remove(id) {
-        this.data = this.data.filter(e => e.id !== id);
-        this.save();
+    async remove(id) {
+        await deleteDoc(doc(db, "employees", id));
+    },
+
+    async update(id, updates) {
+        await setDoc(doc(db, "employees", id), updates, { merge: true });
+    },
+
+    onUpdate(callback) {
+        this.listeners.push(callback);
+    },
+
+    notifyListeners() {
+        this.listeners.forEach(cb => cb());
     }
 };
 
