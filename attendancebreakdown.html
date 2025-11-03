@@ -500,9 +500,9 @@
                             isDateInRange(currentDate, a.dateFrom, a.dateTo)
                         );
                         if (absence) {
-                            if (absence.type === 'Sickness') status = 'Sick';
-                            else if (absence.type === 'AAUP') status = 'AAUP';
-                            else if (absence.type === 'TOFD') status = 'TOFD';
+                            if (absence.type === 'sickness') status = 'Sick';
+                            else if (absence.type === 'aaup') status = 'AAUP';
+                            else if (absence.type === 'tofd') status = 'TOFD';
                         }
                     }
                 }
@@ -572,22 +572,16 @@
                             isDateInRange(currentDate, a.dateFrom, a.dateTo)
                         );
                         if (absence) {
-                            // Map absence type to status code
-                            if (absence.type === 'Sickness') {
+                            // Map absence type to status code (lowercase from system)
+                            if (absence.type === 'sickness') {
                                 status = 'Sick';
                                 statusClass = 'status-Sick';
-                            } else if (absence.type === 'AAUP') {
+                            } else if (absence.type === 'aaup') {
                                 status = 'AAUP';
                                 statusClass = 'status-AAUP';
-                            } else if (absence.type === 'TOFD') {
+                            } else if (absence.type === 'tofd') {
                                 status = 'TOFD';
                                 statusClass = 'status-TOFD';
-                            } else if (absence.type === 'AWOL') {
-                                status = 'AWOL';
-                                statusClass = 'status-AWOL';
-                            } else if (absence.type === 'Maternity/Paternity') {
-                                status = 'baby';
-                                statusClass = 'status-baby';
                             }
                         }
                     }
