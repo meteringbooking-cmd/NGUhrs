@@ -112,9 +112,14 @@
         }
 
         th.location-header,
-        th.name-header {
+        th.name-header,
+        th.cost-header {
             text-align: left;
             min-width: 150px;
+        }
+
+        th.cost-header {
+            min-width: 120px;
         }
 
         th.date-header {
@@ -133,7 +138,7 @@
             transition: background 0.2s;
         }
 
-        td:hover:not(.location-cell):not(.name-cell) {
+        td:hover:not(.location-cell):not(.name-cell):not(.cost-cell):not(.weekend-cell) {
             background: #e3e7ff;
         }
 
@@ -142,6 +147,19 @@
             text-align: left;
             font-weight: 500;
             background: #f8f9fa;
+            cursor: default;
+        }
+
+        td.cost-cell {
+            text-align: right;
+            font-weight: bold;
+            background: #fff3cd;
+            color: #856404;
+            cursor: default;
+        }
+
+        td.weekend-cell {
+            background: #e9ecef;
             cursor: default;
         }
 
@@ -160,6 +178,7 @@
         .status-NPT { color: #17a2b8; font-weight: bold; }
         .status-AWOL { color: #e83e8c; font-weight: bold; }
         .status-baby { color: #9c27b0; font-weight: bold; }
+        .status-TOFD { color: #fd7e14; font-weight: bold; }
 
         .day-row {
             background: #e3e7ff !important;
@@ -260,6 +279,7 @@
         .status-btn.npt { background: #d1ecf1; color: #0c5460; }
         .status-btn.awol { background: #f5c6cb; color: #721c24; }
         .status-btn.baby { background: #e2d9f3; color: #4a148c; }
+        .status-btn.tofd { background: #ffe5cc; color: #8b4513; }
         .status-btn.clear { background: #f8f9fa; color: #333; }
     </style>
 </head>
@@ -313,6 +333,10 @@
                 <div class="legend-color status-baby">baby</div>
                 <span>Maternity/Paternity</span>
             </div>
+            <div class="legend-item">
+                <div class="legend-color status-TOFD">TOFD</div>
+                <span>Time Off For Dependents</span>
+            </div>
         </div>
 
         <div class="table-container">
@@ -336,6 +360,7 @@
             <button class="status-btn npt" onclick="setStatus('NPT')">NPT</button>
             <button class="status-btn awol" onclick="setStatus('AWOL')">AWOL</button>
             <button class="status-btn baby" onclick="setStatus('baby')">Maternity/Paternity</button>
+            <button class="status-btn tofd" onclick="setStatus('TOFD')">TOFD</button>
             <button class="status-btn clear" onclick="setStatus('')">Clear</button>
         </div>
     </div>
@@ -345,6 +370,7 @@
         let currentYear = new Date().getFullYear();
         let attendanceData = {};
         let currentCell = null;
+        const HOURLY_RATE = 153.84;
 
         // Initialize month and year selectors
         function initializeSelectors() {
@@ -391,6 +417,18 @@
             return day === 0 || day === 6;
         }
 
+        function isWorkingDay(date) {
+            return !isWeekend(date);
+        }
+
+        function isPastOrToday(date) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const checkDate = new Date(date);
+            checkDate.setHours(0, 0, 0, 0);
+            return checkDate <= today;
+        }
+
         function generateTableHeaders() {
             const daysInMonth = getDaysInMonth(currentMonth, currentYear);
             const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
@@ -400,20 +438,25 @@
             let headerHTML = '<tr>';
             headerHTML += '<th class="location-header">Location</th>';
             headerHTML += '<th class="name-header">Name</th>';
+            headerHTML += '<th class="cost-header">Absence Cost</th>';
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(currentYear, currentMonth, day);
                 const isWeekendDay = isWeekend(date);
-                headerHTML += `<th class="date-header ${isWeekendDay ? 'weekend' : ''}">${String(day).padStart(2, '0')}-${monthName.substring(0, 3)}</th>`;
+                if (!isWeekendDay) {
+                    headerHTML += `<th class="date-header">${String(day).padStart(2, '0')}-${monthName.substring(0, 3)}</th>`;
+                }
             }
             headerHTML += '</tr>';
 
             // Day names row
             headerHTML += '<tr class="day-row">';
-            headerHTML += '<td></td><td></td>';
+            headerHTML += '<td></td><td></td><td></td>';
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(currentYear, currentMonth, day);
-                headerHTML += `<td>${getDayName(date)}</td>`;
+                if (!isWeekend(date)) {
+                    headerHTML += `<td>${getDayName(date)}</td>`;
+                }
             }
             headerHTML += '</tr>';
 
@@ -428,6 +471,30 @@
             start.setHours(0, 0, 0, 0);
             end.setHours(0, 0, 0, 0);
             return check >= start && check <= end;
+        }
+
+        function calculateAbsenceCost(empId) {
+            let sickHours = 0;
+            let aaupHours = 0;
+            let tofdHours = 0;
+
+            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const currentDate = new Date(currentYear, currentMonth, day);
+                if (isWeekend(currentDate)) continue;
+
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const key = `${empId}_${dateStr}`;
+                const status = attendanceData[key];
+
+                if (status === 'Sick') sickHours += 8;
+                if (status === 'AAUP') aaupHours += 8;
+                if (status === 'TOFD') tofdHours += 8;
+            }
+
+            const totalHours = sickHours + aaupHours + tofdHours;
+            return totalHours * HOURLY_RATE;
         }
 
         async function loadAttendanceData() {
@@ -450,9 +517,19 @@
                 bodyHTML += '<tr>';
                 bodyHTML += `<td class="location-cell">${emp.location || 'OES'}</td>`;
                 bodyHTML += `<td class="name-cell">${emp.name}</td>`;
+                
+                // Calculate and display cost
+                const cost = calculateAbsenceCost(emp.id);
+                bodyHTML += `<td class="cost-cell">£${cost.toFixed(2)}</td>`;
 
                 for (let day = 1; day <= daysInMonth; day++) {
                     const currentDate = new Date(currentYear, currentMonth, day);
+                    
+                    // Skip weekends
+                    if (isWeekend(currentDate)) {
+                        continue;
+                    }
+
                     const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     
                     let status = '';
@@ -475,6 +552,12 @@
                     if (attendanceData[key]) {
                         status = attendanceData[key];
                         statusClass = `status-${status}`;
+                    }
+
+                    // Auto-populate with "X" for working days that are past or today, if no other status
+                    if (!status && isWorkingDay(currentDate) && isPastOrToday(currentDate)) {
+                        status = 'X';
+                        statusClass = 'status-X';
                     }
 
                     bodyHTML += `<td class="${statusClass}" onclick="openStatusModal('${emp.id}', '${dateStr}', this)">${status}</td>`;
@@ -513,8 +596,15 @@
             
             if (status === '') {
                 delete attendanceData[key];
-                cell.textContent = '';
-                cell.className = '';
+                // Check if should auto-populate with X
+                const dateObj = new Date(date);
+                if (isWorkingDay(dateObj) && isPastOrToday(dateObj)) {
+                    cell.textContent = 'X';
+                    cell.className = 'status-X';
+                } else {
+                    cell.textContent = '';
+                    cell.className = '';
+                }
             } else {
                 attendanceData[key] = status;
                 cell.textContent = status;
@@ -523,6 +613,12 @@
 
             // Save to localStorage
             localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+            
+            // Update cost column
+            const cost = calculateAbsenceCost(empId);
+            const row = cell.parentElement;
+            const costCell = row.cells[2]; // Third column is the cost column
+            costCell.textContent = `£${cost.toFixed(2)}`;
             
             closeStatusModal();
         }
