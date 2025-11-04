@@ -1,8 +1,8 @@
 // employees-firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// YOUR CONFIG — PASTE IT HERE
+// YOUR CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyBN8KY0Rw4_oBUHOmZet_qOa-R8hSy3qqU",
   authDomain: "ngu-hub.firebaseapp.com",
@@ -19,11 +19,11 @@ const db = getFirestore(app);
 window.EMPLOYEES = {
     data: [],
     listeners: [],
-
+    
     init() {
         this.loadFromFirebase();
     },
-
+    
     loadFromFirebase() {
         onSnapshot(collection(db, "employees"), (snapshot) => {
             this.data = [];
@@ -33,30 +33,55 @@ window.EMPLOYEES = {
             this.notifyListeners();
         });
     },
-
+    
     async add(name) {
-        const id = `EMP${String(this.data.length + 1).padStart(3, '0')}`;
+        // Get the highest employee number from existing IDs
+        const snapshot = await getDocs(collection(db, "employees"));
+        let maxNumber = 0;
+        
+        snapshot.forEach(doc => {
+            const idMatch = doc.id.match(/^EMP(\d+)$/);
+            if (idMatch) {
+                const num = parseInt(idMatch[1]);
+                if (num > maxNumber) {
+                    maxNumber = num;
+                }
+            }
+        });
+        
+        // Generate new ID with next number
+        const id = `EMP${String(maxNumber + 1).padStart(3, '0')}`;
+        
         const emp = {
-            id, name: name.trim(),
-            absences: [], startDate: null, dateLeft: null,
-            holidayRemaining: 25, holidayTaken: 0, absenceDays: 0
+            id,
+            name: name.trim(),
+            absences: [],
+            holidays: [],
+            startDate: null,
+            dateLeft: null,
+            holidayEntitlement: 28,
+            holidayRemaining: 28,
+            holidayTaken: 0,
+            absenceDays: 0,
+            location: 'OES'
         };
+        
         await setDoc(doc(db, "employees", id), emp);
         return emp;
     },
-
+    
     async remove(id) {
         await deleteDoc(doc(db, "employees", id));
     },
-
+    
     async update(id, updates) {
         await setDoc(doc(db, "employees", id), updates, { merge: true });
     },
-
+    
     onUpdate(callback) {
         this.listeners.push(callback);
     },
-
+    
     notifyListeners() {
         this.listeners.forEach(cb => cb());
     }
