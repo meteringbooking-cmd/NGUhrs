@@ -338,6 +338,11 @@
                 container.innerHTML = '<p style="color:#666; text-align:center;">No employees to show</p>';
                 return;
             }
+            employeesToShow.sort((a, b) => {
+    const nameA = (a.name || '').toLowerCase();
+    const nameB = (b.name || '').toLowerCase();
+    return nameA.localeCompare(nameB);
+});
 
             container.innerHTML = '';
             employeesToShow.forEach(emp => {
