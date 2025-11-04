@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NGU-hrs | HR Management Platform</title>
-    <!-- ADD THIS BUTTON ANYWHERE (e.g. in header or controls) -->
-<div style="margin-bottom:20px; text-align:center;">
-    </div>
     <style>
         * {
             margin: 0;
@@ -227,6 +224,9 @@
     </style>
 </head>
 <body>
+    <!-- Firebase -->
+    <script type="module" src="employees-firebase.js"></script>
+
     <div class="container">
         <header>
             <h1>Next Generation Utilities Hub</h1>
@@ -235,11 +235,11 @@
 
         <div class="quick-stats">
             <div class="stat-card">
-                <span class="stat-number">0</span>
+                <span class="stat-number" id="activeEmployeeCount">0</span>
                 <span class="stat-label">Active Employees</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number">0</span>
+                <span class="stat-number" id="pendingAppsCount">0</span>
                 <span class="stat-label">Pending Applications</span>
             </div>
         </div>
@@ -357,19 +357,13 @@
     </div>
 
     <script>
-        function addNewEmployee() {
-    const name = prompt("Enter employee name:");
-    if (!name || name.trim() === "") return alert("Name is required");
+        function updateEmployeeCount() {
+            if (window.EMPLOYEES && window.EMPLOYEES.data) {
+                const activeEmployees = window.EMPLOYEES.data.filter(emp => !emp.dateLeft);
+                document.getElementById('activeEmployeeCount').textContent = activeEmployees.length;
+            }
+        }
 
-    const emp = EMPLOYEES.add(name.trim());
-    alert(`Employee added!\nName: ${emp.name}\nID: ${emp.id}`);
-
-    // Refresh list
-    renderEmployeeList();
-
-    // Optional: auto-select new employee
-    selectEmployee(emp.id);
-}
         function navigateToModule(module) {
             console.log('Navigating to: ' + module + '.html');
             window.location.href = module + '.html';
@@ -424,6 +418,23 @@
                 });
             }
         });
+
+        // Initialize employee count when data is ready
+        if (window.EMPLOYEES) {
+            window.EMPLOYEES.onUpdate(updateEmployeeCount);
+        }
+
+        // Try to update count on load with delay for Firebase
+        window.onload = function() {
+            setTimeout(updateEmployeeCount, 1000);
+            // Keep trying every second for first 5 seconds
+            let attempts = 0;
+            const interval = setInterval(() => {
+                updateEmployeeCount();
+                attempts++;
+                if (attempts >= 5) clearInterval(interval);
+            }, 1000);
+        };
     </script>
 </body>
 </html>
