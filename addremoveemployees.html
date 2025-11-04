@@ -232,6 +232,13 @@
                 employeesToShow = leavers;
             }
 
+            // Sort alphabetically by name
+            employeesToShow.sort((a, b) => {
+                const nameA = (a.name || '').toLowerCase();
+                const nameB = (b.name || '').toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+
             if (!employeesToShow.length) {
                 const msg = (!showActive && !showLeavers) ? 'both toggles off' :
                            (!showActive ? 'no active' : 'no leavers');
