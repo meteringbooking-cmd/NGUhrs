@@ -424,6 +424,11 @@
                     return holidays.some(h => h.status === 'pending');
                 });
             }
+            employeesToShow.sort((a, b) => {
+    const nameA = (a.name || '').toLowerCase();
+    const nameB = (b.name || '').toLowerCase();
+    return nameA.localeCompare(nameB);
+});
 
             if (!employeesToShow.length) {
                 container.innerHTML = '<p style="color:#666; text-align:center;">No employees to show</p>';
