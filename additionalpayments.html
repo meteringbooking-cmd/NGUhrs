@@ -13,7 +13,8 @@
             padding: 20px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
-        
+
+        /* Header */
         header {
             background: rgba(255,255,255,0.95);
             padding: 25px 30px;
@@ -42,6 +43,7 @@
         }
         .back-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
+        /* Form Section */
         .form-section {
             background: rgba(255,255,255,0.95);
             padding: 30px;
@@ -51,10 +53,7 @@
         }
         .form-section h2 { color: #333; margin-bottom: 25px; font-size: 1.5em; }
 
-        .search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
+        .search-box { position: relative; margin-bottom: 20px; }
         .search-box input {
             width: 100%;
             padding: 12px 20px;
@@ -63,11 +62,10 @@
             font-size: 1em;
         }
         .search-box input:focus { outline: none; border-color: #667eea; }
+
         .search-results {
             position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
+            top: 100%; left: 0; right: 0;
             background: white;
             border: 2px solid #667eea;
             border-radius: 8px;
@@ -137,39 +135,19 @@
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-        .toggle-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
-        }
+        .toggle-item { display: flex; align-items: center; gap: 10px; }
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #ccc;
-            transition: 0.4s;
-            border-radius: 34px;
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #ccc; transition: 0.4s; border-radius: 34px;
         }
         .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background: white;
-            transition: 0.4s;
-            border-radius: 50%;
+            position: absolute; content: "";
+            height: 18px; width: 18px;
+            left: 4px; bottom: 4px;
+            background: white; transition: 0.4s; border-radius: 50%;
         }
         input:checked + .toggle-slider { background: #28a745; }
         input:checked + .toggle-slider:before { transform: translateX(24px); }
@@ -188,6 +166,7 @@
         }
         .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(40,167,69,0.4); }
 
+        /* Table Section */
         .table-section {
             background: rgba(255,255,255,0.95);
             padding: 30px;
@@ -211,54 +190,70 @@
             cursor: pointer;
         }
 
+        /* Responsive Table Wrapper */
+        .claims-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
         .claims-table {
             width: 100%;
+            min-width: 900px;
             border-collapse: collapse;
-            overflow-x: auto;
-            display: block;
+            table-layout: fixed;
+            white-space: nowrap;
         }
+
+        .claims-table th,
+        .claims-table td {
+            padding: 12px;
+            text-align: left;
+            font-size: 0.9em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Column Widths */
+        .claims-table th:nth-child(1), .claims-table td:nth-child(1) { width: 15%; } /* Name */
+        .claims-table th:nth-child(2), .claims-table td:nth-child(2) { width: 12%; } /* Date */
+        .claims-table th:nth-child(3), .claims-table td:nth-child(3) { width: 9%; }  /* Start */
+        .claims-table th:nth-child(4), .claims-table td:nth-child(4) { width: 9%; }  /* End */
+        .claims-table th:nth-child(5), .claims-table td:nth-child(5) { width: 9%; }  /* Standby */
+        .claims-table th:nth-child(6), .claims-table td:nth-child(6) { width: 11%; } /* Working Away */
+        .claims-table th:nth-child(7), .claims-table td:nth-child(7) { width: 10%; } /* Standby £ */
+        .claims-table th:nth-child(8), .claims-table td:nth-child(8) { width: 11%; } /* Overtime £ */
+        .claims-table th:nth-child(9), .claims-table td:nth-child(9) { width: 14%; } /* Actions */
+
         .claims-table thead {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
-        .claims-table th {
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-        .claims-table td {
-            padding: 12px;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 0.9em;
-        }
+        .claims-table th { font-weight: 600; }
         .claims-table tbody tr:hover { background: #f8f9fa; }
-        .claims-table tbody { display: table; width: 100%; }
-        .claims-table thead { display: table; width: 100%; }
+        .claims-table td { border-bottom: 1px solid #e0e0e0; }
 
-        .action-btns {
-            display: flex;
-            gap: 8px;
-        }
+        .action-btns { display: flex; gap: 6px; flex-wrap: nowrap; }
         .action-btn {
-            padding: 6px 12px;
+            padding: 6px 10px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 0.8em;
             transition: all 0.2s;
+            white-space: nowrap;
         }
         .edit-btn { background: #667eea; color: white; }
         .delete-btn { background: #dc3545; color: white; }
         .action-btn:hover { transform: translateY(-1px); }
 
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
             z-index: 1000;
             justify-content: center;
@@ -285,14 +280,9 @@
         }
         .modal-header h2 { color: #667eea; font-size: 1.5em; margin: 0; }
         .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #666;
-            padding: 0;
-            width: 30px;
-            height: 30px;
+            background: none; border: none;
+            font-size: 1.5em; cursor: pointer;
+            color: #666; width: 30px; height: 30px;
         }
         .close-modal:hover { color: #dc3545; }
 
@@ -303,13 +293,16 @@
         }
         .empty-icon { font-size: 4em; margin-bottom: 20px; }
 
+        /* Responsive */
         @media (max-width: 768px) {
             header { flex-direction: column; text-align: center; }
             .form-grid { grid-template-columns: 1fr; }
             .toggle-group { flex-direction: column; gap: 15px; }
             .table-header { flex-direction: column; align-items: stretch; }
-            .claims-table { font-size: 0.8em; }
-            .claims-table th, .claims-table td { padding: 8px; }
+            .claims-table th,
+            .claims-table td { padding: 8px; font-size: 0.8em; }
+            .action-btn { padding: 5px 8px; font-size: 0.7em; }
+            .claims-table { min-width: 700px; }
         }
     </style>
 </head>
