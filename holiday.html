@@ -585,6 +585,11 @@
             if (showActive && showLeavers) employeesToShow = EMPLOYEES.data;
             else if (showActive) employeesToShow = active;
             else if (showLeavers) employeesToShow = leavers;
+            employeesToShow.sort((a, b) => {
+    const nameA = (a.name || '').toLowerCase();
+    const nameB = (b.name || '').toLowerCase();
+    return nameA.localeCompare(nameB);
+});
 
             if (!employeesToShow.length) {
                 container.innerHTML = '<p style="color:#666; text-align:center;">No employees</p>';
