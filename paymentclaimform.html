@@ -1,0 +1,590 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Payment Claim | NGU-hrs</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group input[type="time"],
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .time-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .helper-text {
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .toggle-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .toggle-section h3 {
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .toggle-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-label {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 32px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: #28a745;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(28px);
+        }
+
+        .job-section {
+            margin-bottom: 25px;
+        }
+
+        .job-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .job-card h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        .job-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 1.6em;
+            }
+
+            .time-group,
+            .job-fields {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script type="module" src="employees-firebase.js"></script>
+
+    <div class="form-container">
+        <div class="header">
+            <h1>💰 Payment Claim Form</h1>
+            <p>Submit your additional payment claim</p>
+        </div>
+
+        <div id="successMessage" class="success-message">
+            ✓ Claim submitted successfully!
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            ✕ <span id="errorText">Failed to submit claim. Please try again.</span>
+        </div>
+
+        <form id="claimForm">
+            <div class="form-group">
+                <label for="employeeName">Your Name *</label>
+                <input 
+                    type="text" 
+                    id="employeeName" 
+                    placeholder="Enter your full name"
+                    required>
+                <div class="helper-text">Enter your name exactly as it appears in the system</div>
+            </div>
+
+            <div class="form-group">
+                <label for="claimDate">Date *</label>
+                <input 
+                    type="date" 
+                    id="claimDate" 
+                    required>
+            </div>
+
+            <div class="time-group">
+                <div class="form-group">
+                    <label for="startTime">Overtime Start Time</label>
+                    <input 
+                        type="time" 
+                        id="startTime">
+                    <div class="helper-text">Leave blank if not claiming overtime</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="endTime">Overtime End Time</label>
+                    <input 
+                        type="time" 
+                        id="endTime">
+                    <div class="helper-text">Leave blank if not claiming overtime</div>
+                </div>
+            </div>
+
+            <div class="toggle-section">
+                <h3>Additional Payments</h3>
+                
+                <div class="toggle-item">
+                    <span class="toggle-label">Standby Payment</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="standbyToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-item">
+                    <span class="toggle-label">Working Away</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="workingAwayToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-item">
+                    <span class="toggle-label">Price Per Job</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="pricePerJobToggle" onchange="toggleJobSection()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="jobSection" class="job-section" style="display:none;">
+                <div class="form-group">
+                    <label for="jobCount">Number of Jobs</label>
+                    <select id="jobCount" onchange="generateJobFields()">
+                        <option value="">Select number of jobs</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+
+                <div id="jobFieldsContainer"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Submit Claim
+            </button>
+        </form>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        // UK Bank Holidays 2025
+        const bankHolidays2025 = [
+            '2025-01-01', '2025-04-18', '2025-04-21', '2025-05-05',
+            '2025-05-26', '2025-08-25', '2025-12-25', '2025-12-26'
+        ];
+
+        function isWeekend(dateStr) {
+            const date = new Date(dateStr);
+            const day = date.getDay();
+            return day === 0 || day === 6;
+        }
+
+        function isBankHoliday(dateStr) {
+            return bankHolidays2025.includes(dateStr);
+        }
+
+        function isSpecialDay(dateStr) {
+            return ['2025-12-25', '2025-12-26', '2025-01-01'].includes(dateStr);
+        }
+
+        function calculateStandby(dateStr) {
+            if (isSpecialDay(dateStr)) return 100;
+            if (isWeekend(dateStr) || isBankHoliday(dateStr)) return 50;
+            return 20;
+        }
+
+        function calculateOvertime(dateStr, startTime, endTime) {
+            if (!startTime || !endTime) return 0;
+
+            const start = new Date(`${dateStr}T${startTime}`);
+            const end = new Date(`${dateStr}T${endTime}`);
+            const hours = (end - start) / (1000 * 60 * 60);
+
+            if (hours <= 0) return 0;
+
+            const date = new Date(dateStr);
+            const day = date.getDay();
+
+            if (day === 0 || isBankHoliday(dateStr) || isSpecialDay(dateStr)) {
+                return hours * 37.50;
+            }
+            if (day === 6) {
+                return hours * 28.13;
+            }
+            return hours * 24.40;
+        }
+
+        function showSuccess() {
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 5000);
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            setTimeout(() => {
+                document.getElementById('errorMessage').style.display = 'none';
+            }, 5000);
+        }
+
+        function toggleJobSection() {
+            const isChecked = document.getElementById('pricePerJobToggle').checked;
+            const jobSection = document.getElementById('jobSection');
+            
+            if (isChecked) {
+                jobSection.style.display = 'block';
+            } else {
+                jobSection.style.display = 'none';
+                document.getElementById('jobCount').value = '';
+                document.getElementById('jobFieldsContainer').innerHTML = '';
+            }
+        }
+
+        function generateJobFields() {
+            const count = parseInt(document.getElementById('jobCount').value);
+            const container = document.getElementById('jobFieldsContainer');
+            
+            if (!count) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (let i = 1; i <= count; i++) {
+                html += `
+                    <div class="job-card">
+                        <h4>Job ${i}</h4>
+                        <div class="job-fields">
+                            <div class="form-group">
+                                <label for="jobNumber${i}">Job Number</label>
+                                <input type="text" id="jobNumber${i}" placeholder="e.g. JOB-001">
+                            </div>
+                            <div class="form-group">
+                                <label for="jobType${i}">Job Type</label>
+                                <input type="text" id="jobType${i}" placeholder="e.g. Installation">
+                            </div>
+                            <div class="form-group">
+                                <label for="jobValue${i}">Value (£)</label>
+                                <input type="number" id="jobValue${i}" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        document.getElementById('claimForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            // Get form values
+            const employeeName = document.getElementById('employeeName').value.trim();
+            const claimDate = document.getElementById('claimDate').value;
+            const startTime = document.getElementById('startTime').value || null;
+            const endTime = document.getElementById('endTime').value || null;
+            const standby = document.getElementById('standbyToggle').checked;
+            const workingAway = document.getElementById('workingAwayToggle').checked;
+            const pricePerJob = document.getElementById('pricePerJobToggle').checked;
+
+            // Wait for EMPLOYEES to be available
+            if (!window.EMPLOYEES || !window.EMPLOYEES.data) {
+                showError('System not ready. Please refresh and try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Claim';
+                return;
+            }
+
+            // Find employee by name (case-insensitive)
+            const employee = window.EMPLOYEES.data.find(emp => 
+                emp.name.toLowerCase() === employeeName.toLowerCase()
+            );
+
+            if (!employee) {
+                showError('Employee name not found. Please check spelling and try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Claim';
+                return;
+            }
+
+            // Create claim object
+            const claim = {
+                id: Date.now().toString(),
+                date: claimDate,
+                startTime: startTime,
+                endTime: endTime,
+                standby: standby,
+                workingAway: workingAway,
+                pricePerJob: pricePerJob,
+                submittedAt: new Date().toISOString()
+            };
+
+            // Calculate values
+            claim.standbyValue = standby ? calculateStandby(claimDate) : 0;
+            claim.overtimeValue = calculateOvertime(claimDate, startTime, endTime);
+
+            // Get job data if price per job is enabled
+            if (pricePerJob) {
+                const jobCount = parseInt(document.getElementById('jobCount').value);
+                if (jobCount) {
+                    claim.jobs = [];
+                    let totalJobValue = 0;
+                    
+                    for (let i = 1; i <= jobCount; i++) {
+                        const jobNumber = document.getElementById(`jobNumber${i}`).value.trim();
+                        const jobType = document.getElementById(`jobType${i}`).value.trim();
+                        const jobValue = parseFloat(document.getElementById(`jobValue${i}`).value) || 0;
+                        
+                        claim.jobs.push({
+                            jobNumber: jobNumber,
+                            jobType: jobType,
+                            value: jobValue
+                        });
+                        
+                        totalJobValue += jobValue;
+                    }
+                    
+                    claim.totalJobValue = totalJobValue;
+                }
+            }
+
+            // Add claim to employee
+            if (!employee.paymentClaims) {
+                employee.paymentClaims = [];
+            }
+            employee.paymentClaims.push(claim);
+
+            try {
+                await EMPLOYEES.update(employee.id, { paymentClaims: employee.paymentClaims });
+                showSuccess();
+                
+                // Reset form
+                document.getElementById('claimForm').reset();
+                document.getElementById('jobSection').style.display = 'none';
+                document.getElementById('jobFieldsContainer').innerHTML = '';
+                
+            } catch (err) {
+                console.error('Failed to submit claim:', err);
+                showError('Failed to submit claim. Please try again.');
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Claim';
+        });
+
+        // Set max date to today
+        document.getElementById('claimDate').max = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+</html>
