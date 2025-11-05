@@ -124,7 +124,6 @@
         let attendanceData = {};
         let currentCell = null;
         const HOURLY_RATE = 19.23;
-        const FULL_DAY_HOURS = 8;
 
         function initializeSelectors() {
             const monthSelect = document.getElementById('monthSelect');
@@ -206,7 +205,7 @@
             return count;
         }
 
-        // CRITICAL: Uses actual hours from absence record
+        // ONLY USES HOURS FROM ABSENCE MODULE — NO DEFAULT TO 8
         function calculateAbsenceCost(empId){
             let totalHours = 0;
             const days = getDaysInMonth(currentMonth,currentYear);
@@ -219,22 +218,21 @@
                 const key = `${empId}_${dateStr}`;
                 let status = attendanceData[key] || '';
 
-                // Manual override in attendance table
+                // Manual override in table → assume full day
                 if(status && ['Sick','AAUP','TOFD'].includes(status)){
-                    totalHours += FULL_DAY_HOURS;
+                    totalHours += 8;
                     continue;
                 }
 
-                // Read from Absence module
+                // Read from Absence module — use hours field only
                 if(emp.absences && emp.absences.length > 0){
                     const abs = emp.absences.find(a => isDateInRange(date, a.dateFrom, a.dateTo));
                     if(abs && ['sickness','aaup','tofd'].includes(abs.type)){
                         const hours = parseFloat(abs.hours);
                         if(!isNaN(hours) && hours > 0){
                             totalHours += hours;
-                        } else {
-                            totalHours += FULL_DAY_HOURS; // fallback
                         }
+                        // No fallback — if hours missing → 0
                     }
                 }
             }
@@ -251,7 +249,7 @@
 
             const activeEmployees = window.EMPLOYEES.data
                 .filter(e=>!e.dateLeft)
-                .sort((a,b)=>a.name.localeCompare(b.name));  // Alphabetical sort
+                .sort((a,b)=>a.name.localeCompare(b.name));  // Alphabetical
 
             const days = getDaysInMonth(currentMonth,currentYear);
             generateTableHeaders();
@@ -275,13 +273,11 @@
                     let status = '';
                     let statusClass = '';
 
-                    // Approved holiday
                     if(emp.holidays){
                         const hol = emp.holidays.find(h=>h.status==='approved' && isDateInRange(date,h.dateFrom,h.dateTo));
                         if(hol){ status='H'; statusClass='status-H'; }
                     }
 
-                    // Absence from module
                     if(!status && emp.absences){
                         const abs = emp.absences.find(a=>isDateInRange(date,a.dateFrom,a.dateTo));
                         if(abs){
@@ -291,14 +287,12 @@
                         }
                     }
 
-                    // Manual override
                     const key = `${emp.id}_${dateStr}`;
                     if(attendanceData[key]){
                         status = attendanceData[key];
                         statusClass = `status-${status}`;
                     }
 
-                    // Auto-X
                     if(!status && isWorkingDay(date) && isPastOrToday(date)){
                         status='X';
                         statusClass='status-X';
