@@ -619,7 +619,37 @@
             const workingAway = document.getElementById('workingAwayToggle').checked;
             const pricePerJob = document.getElementById('pricePerJobToggle').checked;
 
-            // Create claim object
+            // Collect job data
+            let jobs = null;
+            let jobsTotalValue = 0;
+            
+            if (pricePerJob) {
+                const jobCount = parseInt(document.getElementById('jobCount').value);
+                if (jobCount) {
+                    jobs = [];
+                    
+                    for (let i = 1; i <= jobCount; i++) {
+                        const jobNumber = document.getElementById(`jobNumber${i}`).value.trim();
+                        const jobType = document.getElementById(`jobType${i}`).value.trim();
+                        const jobValue = parseFloat(document.getElementById(`jobValue${i}`).value) || 0;
+                        
+                        if (jobNumber || jobType || jobValue > 0) {
+                            jobs.push({
+                                jobNumber: jobNumber,
+                                jobType: jobType,
+                                value: jobValue
+                            });
+                            jobsTotalValue += jobValue;
+                        }
+                    }
+                }
+            }
+
+            // Calculate values
+            const standbyValue = standby ? calculateStandby(claimDate) : 0;
+            const overtimeValue = calculateOvertime(claimDate, startTime, endTime);
+
+            // Create claim object in EXACT same format as admin form
             const claim = {
                 employeeId: selectedEmployee.id,
                 employeeName: selectedEmployee.name,
@@ -628,48 +658,23 @@
                 endTime: endTime,
                 standby: standby,
                 workingAway: workingAway,
-                pricePerJob: pricePerJob,
+                pricePerJob: pricePerJob || false,
+                jobs: jobs,
+                standbyValue: standbyValue,
+                overtimeValue: overtimeValue,
+                jobsTotalValue: jobsTotalValue,
                 submittedAt: new Date().toISOString()
             };
 
-            // Calculate values
-            claim.standbyValue = standby ? calculateStandby(claimDate) : 0;
-            claim.overtimeValue = calculateOvertime(claimDate, startTime, endTime);
-
-            // Get job data if price per job is enabled
-            if (pricePerJob) {
-                const jobCount = parseInt(document.getElementById('jobCount').value);
-                if (jobCount) {
-                    claim.jobs = [];
-                    let totalJobValue = 0;
-                    
-                    for (let i = 1; i <= jobCount; i++) {
-                        const jobNumber = document.getElementById(`jobNumber${i}`).value.trim();
-                        const jobType = document.getElementById(`jobType${i}`).value.trim();
-                        const jobValue = parseFloat(document.getElementById(`jobValue${i}`).value) || 0;
-                        
-                        if (jobNumber || jobType || jobValue > 0) {
-                            claim.jobs.push({
-                                jobNumber: jobNumber,
-                                jobType: jobType,
-                                value: jobValue
-                            });
-                            totalJobValue += jobValue;
-                        }
-                    }
-                    
-                    claim.jobsTotalValue = totalJobValue;
-                }
-            }
-
             try {
-                // Submit to Firebase
+                // Submit to Firebase - same collection as admin form
                 const { getFirestore, collection, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
                 const db = getFirestore();
                 
                 const claimId = `CLAIM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 await setDoc(doc(db, 'additionalPaymentClaims', claimId), claim);
                 
+                console.log('Claim submitted successfully:', claim);
                 showSuccess();
                 
                 // Reset form
