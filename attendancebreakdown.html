@@ -5,300 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Breakdown | NGU-hrs</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #667eea;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        h1 {
-            color: #667eea;
-            font-size: 2.5em;
-        }
-
-        .month-selector {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .month-selector select {
-            padding: 8px 12px;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-        }
-
-        .back-btn,
-        .export-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .back-btn:hover,
-        .export-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .export-btn {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85em;
-        }
-
-        th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 8px;
-            text-align: center;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            border: 1px solid #5568d3;
-        }
-
-        th.location-header,
-        th.name-header,
-        th.cost-header {
-            text-align: left;
-            min-width: 150px;
-        }
-
-        th.cost-header {
-            min-width: 120px;
-        }
-
-        th.date-header {
-            min-width: 50px;
-        }
-
-        th.weekend {
-            background: linear-gradient(135deg, #8b9dc3 0%, #8e7ba8 100%);
-        }
-
-        td {
-            padding: 10px 8px;
-            text-align: center;
-            border: 1px solid #ddd;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        td:hover:not(.location-cell):not(.name-cell):not(.cost-cell):not(.holiday-cell):not(.weekend-cell) {
-            background: #e3e7ff;
-        }
-
-        td.location-cell,
-        td.name-cell {
-            text-align: left;
-            font-weight: 500;
-            background: #f8f9fa;
-            cursor: default;
-        }
-
-        td.cost-cell {
-            text-align: right;
-            font-weight: bold;
-            background: #fff3cd;
-            color: #856404;
-            cursor: default;
-        }
-
-        td.holiday-cell {
-            text-align: center;
-            font-weight: bold;
-            background: #d1ecf1;
-            color: #0c5460;
-            cursor: default;
-        }
-
-        td.weekend-cell {
-            background: #e9ecef;
-            cursor: default;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tr:hover {
-            background-color: #f0f0f0;
-        }
-
-        .status-X { color: #28a745; font-weight: bold; }
-        .status-H { color: #ff9800; font-weight: bold; }
-        .status-Sick { color: #dc3545; font-weight: bold; }
-        .status-AAUP { color: #6c757d; font-weight: bold; }
-        .status-NPT { color: #17a2b8; font-weight: bold; }
-        .status-AWOL { color: #e83e8c; font-weight: bold; }
-        .status-baby { color: #9c27b0; font-weight: bold; }
-        .status-TOFD { color: #fd7e14; font-weight: bold; }
-
-        .day-row {
-            background: #e3e7ff !important;
-            font-weight: 600;
-            font-size: 0.8em;
-        }
-
-        .legend {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8em;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 1.2em;
-        }
-
-        .status-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            z-index: 1000;
-        }
-
-        .status-modal.active {
-            display: block;
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-        }
-
-        .modal-overlay.active {
-            display: block;
-        }
-
-        .status-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .status-btn {
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .status-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .status-btn.present { background: #d4edda; color: #155724; }
-        .status-btn.holiday { background: #fff3cd; color: #856404; }
-        .status-btn.sick { background: #f8d7da; color: #721c24; }
-        .status-btn.aaup { background: #e2e3e5; color: #383d41; }
-        .status-btn.npt { background: #d1ecf1; color: #0c5460; }
-        .status-btn.awol { background: #f5c6cb; color: #721c24; }
-        .status-btn.baby { background: #e2d9f3; color: #4a148c; }
-        .status-btn.tofd { background: #ffe5cc; color: #8b4513; }
-        .status-btn.clear { background: #f8f9fa; color: #333; }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;}
+        .container{max-width:100%;margin:0 auto;background:white;border-radius:15px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,.2);}
+        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;padding-bottom:20px;border-bottom:3px solid #667eea;flex-wrap:wrap;gap:10px;}
+        .header-left{display:flex;align-items:center;gap:15px;flex-wrap:wrap;}
+        h1{color:#667eea;font-size:2.5em;}
+        .month-selector{display:flex;gap:10px;align-items:center;}
+        .month-selector select{padding:8px 12px;border:2px solid #667eea;border-radius:8px;font-size:1em;cursor:pointer;}
+        .back-btn,.export-btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:12px 24px;border:none;border-radius:8px;cursor:pointer;font-size:1em;transition:all .3s ease;text-decoration:none;display:inline-block;}
+        .back-btn:hover,.export-btn:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(102,126,234,.4);}
+        .export-btn{background:linear-gradient(135deg,#28a745 0%,#20c997 100%);}
+        .table-container{overflow-x:auto;margin-top:20px;}
+        table{width:100%;border-collapse:collapse;font-size:.85em;}
+        th{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:12px 8px;text-align:center;font-weight:600;position:sticky;top:0;z-index:10;border:1px solid #5568d3;}
+        th.name-header,th.cost-header{text-align:left;min-width:150px;}
+        th.cost-header{min-width:120px;}
+        th.date-header{min-width:50px;}
+        th.weekend{background:linear-gradient(135deg,#8b9dc3 0%,#8e7ba8 100%);}
+        td{padding:10px 8px;text-align:center;border:1px solid #ddd;cursor:pointer;transition:background .2s;}
+        td:hover:not(.name-cell):not(.cost-cell):not(.holiday-cell):not(.weekend-cell){background:#e3e7ff;}
+        td.name-cell,td.cost-cell{font-weight:500;background:#f8f9fa;cursor:default;}
+        td.cost-cell{text-align:right;font-weight:bold;background:#fff3cd;color:#856404;}
+        td.holiday-cell{text-align:center;font-weight:bold;background:#d1ecf1;color:#0c5460;cursor:default;}
+        td.weekend-cell{background:#e9ecef;cursor:default;}
+        tr:nth-child(even){background-color:#f9f9f9;}
+        tr:hover{background-color:#f0f0f0;}
+        .status-X{color:#28a745;font-weight:bold;}
+        .status-H{color:#ff9800;font-weight:bold;}
+        .status-Sick{color:#dc3545;font-weight:bold;}
+        .status-AAUP{color:#6c757d;font-weight:bold;}
+        .status-NPT{color:#17a2b8;font-weight:bold;}
+        .status-AWOL{color:#e83e8c;font-weight:bold;}
+        .status-baby{color:#9c27b0;font-weight:bold;}
+        .status-TOFD{color:#fd7e14;font-weight:bold;}
+        .day-row{background:#e3e7ff !important;font-weight:600;font-size:.8em;}
+        .legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:20px;padding:15px;background:#f8f9fa;border-radius:8px;}
+        .legend-item{display:flex;align-items:center;gap:8px;}
+        .legend-color{width:20px;height:20px;border-radius:4px;font-weight:bold;display:flex;align-items:center;justify-content:center;font-size:.8em;}
+        .loading{text-align:center;padding:40px;color:#666;font-size:1.2em;}
+        .status-modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.3);z-index:1000;}
+        .status-modal.active{display:block;}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:999;}
+        .modal-overlay.active{display:block;}
+        .status-buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px;}
+        .status-btn{padding:10px;border:none;border-radius:6px;cursor:pointer;font-weight:600;transition:all .2s;}
+        .status-btn:hover{transform:translateY(-2px);}
+        .status-btn.present{background:#d4edda;color:#155724;}
+        .status-btn.holiday{background:#fff3cd;color:#856404;}
+        .status-btn.sick{background:#f8d7da;color:#721c24;}
+        .status-btn.aaup{background:#e2e3e5;color:#383d41;}
+        .status-btn.npt{background:#d1ecf1;color:#0c5460;}
+        .status-btn.awol{background:#f5c6cb;color:#721c24;}
+        .status-btn.baby{background:#e2d9f3;color:#4a148c;}
+        .status-btn.tofd{background:#ffe5cc;color:#8b4513;}
+        .status-btn.clear{background:#f8f9fa;color:#333;}
     </style>
 </head>
 <body>
-    <!-- Firebase -->
     <script type="module" src="employees-firebase.js"></script>
-
     <div class="container">
         <div class="header">
             <div class="header-left">
-                <h1 id="pageTitle">📊 Attendance Breakdown</h1>
+                <h1 id="pageTitle">Attendance Breakdown</h1>
                 <div class="month-selector">
                     <label for="monthSelect">Month:</label>
                     <select id="monthSelect" onchange="changeMonth()"></select>
@@ -307,44 +76,20 @@
                 </div>
             </div>
             <div>
-                <button class="export-btn" onclick="exportToCSV()">📥 Export to CSV</button>
-                <a href="index.html" class="back-btn">← Back to Dashboard</a>
+                <button class="export-btn" onclick="exportToCSV()">Export to CSV</button>
+                <a href="index.html" class="back-btn">Back to Dashboard</a>
             </div>
         </div>
 
         <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color status-X">X</div>
-                <span>Present</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-H">H</div>
-                <span>Holiday</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-Sick">Sick</div>
-                <span>Sick Leave</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-AAUP">AAUP</div>
-                <span>Authorized Absence Unpaid</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-NPT">NPT</div>
-                <span>None Productive Time</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-AWOL">AWOL</div>
-                <span>Absent Without Leave</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-baby">baby</div>
-                <span>Maternity/Paternity</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-TOFD">TOFD</div>
-                <span>Time Off For Dependents</span>
-            </div>
+            <div class="legend-item"><div class="legend-color status-X">X</div><span>Present</span></div>
+            <div class="legend-item"><div class="legend-color status-H">H</div><span>Holiday</span></div>
+            <div class="legend-item"><div class="legend-color status-Sick">Sick</div><span>Sick Leave</span></div>
+            <div class="legend-item"><div class="legend-color status-AAUP">AAUP</div><span>Authorized Absence Unpaid</span></div>
+            <div class="legend-item"><div class="legend-color status-NPT">NPT</div><span>None Productive Time</span></div>
+            <div class="legend-item"><div class="legend-color status-AWOL">AWOL</div><span>Absent Without Leave</span></div>
+            <div class="legend-item"><div class="legend-color status-baby">baby</div><span>Maternity/Paternity</span></div>
+            <div class="legend-item"><div class="legend-color status-TOFD">TOFD</div><span>Time Off For Dependents</span></div>
         </div>
 
         <div class="table-container">
@@ -356,409 +101,292 @@
         </div>
     </div>
 
-    <!-- Status Selection Modal -->
+    <!-- Status Modal -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeStatusModal()"></div>
     <div class="status-modal" id="statusModal">
         <h3 id="modalTitle">Set Attendance Status</h3>
         <div class="status-buttons">
-            <button class="status-btn present" onclick="setStatus('X')">Present (X)</button>
-            <button class="status-btn holiday" onclick="setStatus('H')">Holiday (H)</button>
-            <button class="status-btn sick" onclick="setStatus('Sick')">Sick</button>
-            <button class="status-btn aaup" onclick="setStatus('AAUP')">AAUP</button>
-            <button class="status-btn npt" onclick="setStatus('NPT')">NPT</button>
-            <button class="status-btn awol" onclick="setStatus('AWOL')">AWOL</button>
-            <button class="status-btn baby" onclick="setStatus('baby')">Maternity/Paternity</button>
-            <button class="status-btn tofd" onclick="setStatus('TOFD')">TOFD</button>
-            <button class="status-btn clear" onclick="setStatus('')">Clear</button>
+            <button class="status-btn present"   onclick="setStatus('X')">Present (X)</button>
+            <button class="status-btn holiday"   onclick="setStatus('H')">Holiday (H)</button>
+            <button class="status-btn sick"      onclick="setStatus('Sick')">Sick</button>
+            <button class="status-btn aaup"      onclick="setStatus('AAUP')">AAUP</button>
+            <button class="status-btn npt"       onclick="setStatus('NPT')">NPT</button>
+            <button class="status-btn awol"      onclick="setStatus('AWOL')">AWOL</button>
+            <button class="status-btn baby"      onclick="setStatus('baby')">Maternity/Paternity</button>
+            <button class="status-btn tofd"      onclick="setStatus('TOFD')">TOFD</button>
+            <button class="status-btn clear"     onclick="setStatus('')">Clear</button>
         </div>
     </div>
 
     <script>
         let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
+        let currentYear  = new Date().getFullYear();
         let attendanceData = {};
         let currentCell = null;
         const HOURLY_RATE = 19.23;
+        const FULL_DAY_HOURS = 8;
 
-        // Initialize month and year selectors
         function initializeSelectors() {
             const monthSelect = document.getElementById('monthSelect');
-            const yearSelect = document.getElementById('yearSelect');
-            
-            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                          'July', 'August', 'September', 'October', 'November', 'December'];
-            
-            months.forEach((month, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = month;
-                if (index === currentMonth) option.selected = true;
-                monthSelect.appendChild(option);
-            });
+            const yearSelect  = document.getElementById('yearSelect');
+            const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-            for (let year = 2024; year <= 2030; year++) {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                if (year === currentYear) option.selected = true;
-                yearSelect.appendChild(option);
-            }
+            months.forEach((m,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=m;
+                                    if(i===currentMonth) o.selected=true; monthSelect.appendChild(o); });
+
+            for(let y=2024;y<=2030;y++){ const o=document.createElement('option'); o.value=y; o.textContent=y;
+                                         if(y===currentYear) o.selected=true; yearSelect.appendChild(o); }
         }
 
         function changeMonth() {
-            currentMonth = parseInt(document.getElementById('monthSelect').value);
-            currentYear = parseInt(document.getElementById('yearSelect').value);
+            currentMonth = +document.getElementById('monthSelect').value;
+            currentYear  = +document.getElementById('yearSelect').value;
             loadAttendanceData();
         }
 
-        function getDaysInMonth(month, year) {
-            return new Date(year, month + 1, 0).getDate();
+        function getDaysInMonth(m,y){ return new Date(y,m+1,0).getDate(); }
+        function getDayName(d){ return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; }
+        function isWeekend(d){ return d.getDay()===0||d.getDay()===6; }
+        function isWorkingDay(d){ return !isWeekend(d); }
+        function isPastOrToday(d){
+            const today = new Date(); today.setHours(0,0,0,0);
+            const check = new Date(d); check.setHours(0,0,0,0);
+            return check<=today;
+        }
+        function isDateInRange(check,start,end){
+            const c=new Date(check), s=new Date(start), e=new Date(end);
+            [c,s,e].forEach(x=>x.setHours(0,0,0,0));
+            return c>=s && c<=e;
         }
 
-        function getDayName(date) {
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            return days[date.getDay()];
-        }
+        function generateTableHeaders(){
+            const days = getDaysInMonth(currentMonth,currentYear);
+            const monthName = new Date(currentYear,currentMonth).toLocaleString('default',{month:'long'});
+            document.getElementById('pageTitle').textContent = `Attendance Breakdown - ${monthName} ${currentYear}`;
 
-        function isWeekend(date) {
-            const day = date.getDay();
-            return day === 0 || day === 6;
-        }
+            let html = `<tr>
+                <th class="name-header">Name</th>
+                <th class="cost-header">Absence Cost</th>
+                <th class="cost-header">Holiday Days</th>`;
 
-        function isWorkingDay(date) {
-            return !isWeekend(date);
-        }
-
-        function isPastOrToday(date) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const checkDate = new Date(date);
-            checkDate.setHours(0, 0, 0, 0);
-            return checkDate <= today;
-        }
-
-        function generateTableHeaders() {
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
-            const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
-            
-            document.getElementById('pageTitle').textContent = `📊 Attendance Breakdown - ${monthName} ${currentYear}`;
-
-            let headerHTML = '<tr>';
-            headerHTML += '<th class="location-header">Location</th>';
-            headerHTML += '<th class="name-header">Name</th>';
-            headerHTML += '<th class="cost-header">Absence Cost</th>';
-            headerHTML += '<th class="cost-header">Holiday Days</th>';
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(currentYear, currentMonth, day);
-                const isWeekendDay = isWeekend(date);
-                if (!isWeekendDay) {
-                    headerHTML += `<th class="date-header">${String(day).padStart(2, '0')}-${monthName.substring(0, 3)}</th>`;
-                }
+            for(let d=1;d<=days;d++){
+                const date = new Date(currentYear,currentMonth,d);
+                if(!isWeekend(date)) html += `<th class="date-header">${String(d).padStart(2,'0')}-${monthName.substring(0,3)}</th>`;
             }
-            headerHTML += '</tr>';
+            html += `</tr>`;
 
-            // Day names row
-            headerHTML += '<tr class="day-row">';
-            headerHTML += '<td></td><td></td><td></td><td></td>';
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(currentYear, currentMonth, day);
-                if (!isWeekend(date)) {
-                    headerHTML += `<td>${getDayName(date)}</td>`;
-                }
+            html += `<tr class="day-row"><td></td><td></td><td></td>`;
+            for(let d=1;d<=days;d++){
+                const date = new Date(currentYear,currentMonth,d);
+                if(!isWeekend(date)) html += `<td>${getDayName(date)}</td>`;
             }
-            headerHTML += '</tr>';
+            html += `</tr>`;
 
-            document.getElementById('tableHeader').innerHTML = headerHTML;
+            document.getElementById('tableHeader').innerHTML = html;
         }
 
-        function isDateInRange(checkDate, startDate, endDate) {
-            const check = new Date(checkDate);
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            check.setHours(0, 0, 0, 0);
-            start.setHours(0, 0, 0, 0);
-            end.setHours(0, 0, 0, 0);
-            return check >= start && check <= end;
-        }
+        function calculateHolidayDays(empId){
+            let count = 0;
+            const days = getDaysInMonth(currentMonth,currentYear);
+            const emp = window.EMPLOYEES.data.find(e=>e.id===empId);
 
-        function calculateHolidayDays(empId) {
-            let holidayCount = 0;
-
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
-            const emp = window.EMPLOYEES.data.find(e => e.id === empId);
-            
-            for (let day = 1; day <= daysInMonth; day++) {
-                const currentDate = new Date(currentYear, currentMonth, day);
-                if (isWeekend(currentDate)) continue;
-
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            for(let d=1;d<=days;d++){
+                const date = new Date(currentYear,currentMonth,d);
+                if(isWeekend(date)) continue;
+                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const key = `${empId}_${dateStr}`;
-                
-                let status = '';
+                let status = attendanceData[key] || '';
 
-                // Check manual attendance data first
-                if (attendanceData[key]) {
-                    status = attendanceData[key];
-                } else {
-                    // Check if there's an approved holiday for this date
-                    if (emp.holidays && emp.holidays.length > 0) {
-                        const holiday = emp.holidays.find(h => 
-                            h.status === 'approved' && 
-                            isDateInRange(currentDate, h.dateFrom, h.dateTo)
-                        );
-                        if (holiday) {
-                            status = 'H';
+                if(!status && emp.holidays){
+                    const hol = emp.holidays.find(h=>h.status==='approved' && isDateInRange(date,h.dateFrom,h.dateTo));
+                    if(hol) status='H';
+                }
+                if(status==='H') count++;
+            }
+            return count;
+        }
+
+        // CRITICAL: Uses actual hours from absence record
+        function calculateAbsenceCost(empId){
+            let totalHours = 0;
+            const days = getDaysInMonth(currentMonth,currentYear);
+            const emp = window.EMPLOYEES.data.find(e=>e.id===empId);
+
+            for(let d=1;d<=days;d++){
+                const date = new Date(currentYear,currentMonth,d);
+                if(isWeekend(date)) continue;
+                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const key = `${empId}_${dateStr}`;
+                let status = attendanceData[key] || '';
+
+                // Manual override in attendance table
+                if(status && ['Sick','AAUP','TOFD'].includes(status)){
+                    totalHours += FULL_DAY_HOURS;
+                    continue;
+                }
+
+                // Read from Absence module
+                if(emp.absences && emp.absences.length > 0){
+                    const abs = emp.absences.find(a => isDateInRange(date, a.dateFrom, a.dateTo));
+                    if(abs && ['sickness','aaup','tofd'].includes(abs.type)){
+                        const hours = parseFloat(abs.hours);
+                        if(!isNaN(hours) && hours > 0){
+                            totalHours += hours;
+                        } else {
+                            totalHours += FULL_DAY_HOURS; // fallback
                         }
                     }
                 }
-
-                if (status === 'H') holidayCount++;
             }
-
-            return holidayCount;
-        }
-
-        function calculateAbsenceCost(empId) {
-            let sickHours = 0;
-            let aaupHours = 0;
-            let tofdHours = 0;
-
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
-            const emp = window.EMPLOYEES.data.find(e => e.id === empId);
-            
-            for (let day = 1; day <= daysInMonth; day++) {
-                const currentDate = new Date(currentYear, currentMonth, day);
-                if (isWeekend(currentDate)) continue;
-
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const key = `${empId}_${dateStr}`;
-                
-                let status = '';
-
-                // Check manual attendance data first
-                if (attendanceData[key]) {
-                    status = attendanceData[key];
-                } else {
-                    // Check if there's an absence for this date (no approval status check)
-                    if (emp.absences && emp.absences.length > 0) {
-                        const absence = emp.absences.find(a => 
-                            isDateInRange(currentDate, a.dateFrom, a.dateTo)
-                        );
-                        if (absence) {
-                            if (absence.type === 'sickness') status = 'Sick';
-                            else if (absence.type === 'aaup') status = 'AAUP';
-                            else if (absence.type === 'tofd') status = 'TOFD';
-                        }
-                    }
-                }
-
-                if (status === 'Sick') sickHours += 8;
-                if (status === 'AAUP') aaupHours += 8;
-                if (status === 'TOFD') tofdHours += 8;
-            }
-
-            const totalHours = sickHours + aaupHours + tofdHours;
             return totalHours * HOURLY_RATE;
         }
 
-        async function loadAttendanceData() {
-            document.getElementById('loadingMessage').style.display = 'block';
-            document.getElementById('attendanceTable').style.display = 'none';
+        async function loadAttendanceData(){
+            document.getElementById('loadingMessage').style.display='block';
+            document.getElementById('attendanceTable').style.display='none';
 
-            // Wait for EMPLOYEES data to be available
-            if (!window.EMPLOYEES || !window.EMPLOYEES.data || window.EMPLOYEES.data.length === 0) {
-                setTimeout(loadAttendanceData, 500);
-                return;
+            if(!window.EMPLOYEES||!window.EMPLOYEES.data||window.EMPLOYEES.data.length===0){
+                setTimeout(loadAttendanceData,500); return;
             }
 
-            const activeEmployees = window.EMPLOYEES.data.filter(emp => !emp.dateLeft);
-            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            const activeEmployees = window.EMPLOYEES.data
+                .filter(e=>!e.dateLeft)
+                .sort((a,b)=>a.name.localeCompare(b.name));  // Alphabetical sort
 
+            const days = getDaysInMonth(currentMonth,currentYear);
             generateTableHeaders();
 
             let bodyHTML = '';
-            activeEmployees.forEach(emp => {
-                bodyHTML += '<tr>';
-                bodyHTML += `<td class="location-cell">${emp.location || 'OES'}</td>`;
-                bodyHTML += `<td class="name-cell">${emp.name}</td>`;
-                
-                // Calculate and display cost
+            activeEmployees.forEach(emp=>{
+                bodyHTML += `<tr>
+                    <td class="name-cell">${emp.name}</td>`;
+
                 const cost = calculateAbsenceCost(emp.id);
                 bodyHTML += `<td class="cost-cell">£${cost.toFixed(2)}</td>`;
-                
-                // Calculate and display holiday days
+
                 const holidayDays = calculateHolidayDays(emp.id);
                 bodyHTML += `<td class="holiday-cell">${holidayDays}</td>`;
 
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const currentDate = new Date(currentYear, currentMonth, day);
-                    
-                    // Skip weekends
-                    if (isWeekend(currentDate)) {
-                        continue;
-                    }
+                for(let d=1;d<=days;d++){
+                    const date = new Date(currentYear,currentMonth,d);
+                    if(isWeekend(date)) continue;
 
-                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    
+                    const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                     let status = '';
                     let statusClass = '';
 
-                    // Check if there's an approved holiday for this date
-                    if (emp.holidays && emp.holidays.length > 0) {
-                        const holiday = emp.holidays.find(h => 
-                            h.status === 'approved' && 
-                            isDateInRange(currentDate, h.dateFrom, h.dateTo)
-                        );
-                        if (holiday) {
-                            status = 'H';
-                            statusClass = 'status-H';
+                    // Approved holiday
+                    if(emp.holidays){
+                        const hol = emp.holidays.find(h=>h.status==='approved' && isDateInRange(date,h.dateFrom,h.dateTo));
+                        if(hol){ status='H'; statusClass='status-H'; }
+                    }
+
+                    // Absence from module
+                    if(!status && emp.absences){
+                        const abs = emp.absences.find(a=>isDateInRange(date,a.dateFrom,a.dateTo));
+                        if(abs){
+                            if(abs.type==='sickness'){ status='Sick'; statusClass='status-Sick'; }
+                            else if(abs.type==='aaup'){ status='AAUP'; statusClass='status-AAUP'; }
+                            else if(abs.type==='tofd'){ status='TOFD'; statusClass='status-TOFD'; }
                         }
                     }
 
-                    // Check if there's an absence for this date (no approval needed)
-                    if (emp.absences && emp.absences.length > 0) {
-                        const absence = emp.absences.find(a => 
-                            isDateInRange(currentDate, a.dateFrom, a.dateTo)
-                        );
-                        if (absence) {
-                            // Map absence type to status code (lowercase from system)
-                            if (absence.type === 'sickness') {
-                                status = 'Sick';
-                                statusClass = 'status-Sick';
-                            } else if (absence.type === 'aaup') {
-                                status = 'AAUP';
-                                statusClass = 'status-AAUP';
-                            } else if (absence.type === 'tofd') {
-                                status = 'TOFD';
-                                statusClass = 'status-TOFD';
-                            }
-                        }
-                    }
-
-                    // Check if there's manual attendance data
+                    // Manual override
                     const key = `${emp.id}_${dateStr}`;
-                    if (attendanceData[key]) {
+                    if(attendanceData[key]){
                         status = attendanceData[key];
                         statusClass = `status-${status}`;
                     }
 
-                    // Auto-populate with "X" for working days that are past or today, if no other status
-                    if (!status && isWorkingDay(currentDate) && isPastOrToday(currentDate)) {
-                        status = 'X';
-                        statusClass = 'status-X';
+                    // Auto-X
+                    if(!status && isWorkingDay(date) && isPastOrToday(date)){
+                        status='X';
+                        statusClass='status-X';
                     }
 
-                    bodyHTML += `<td class="${statusClass}" onclick="openStatusModal('${emp.id}', '${dateStr}', this)">${status}</td>`;
+                    bodyHTML += `<td class="${statusClass}" onclick="openStatusModal('${emp.id}','${dateStr}',this)">${status}</td>`;
                 }
-
-                bodyHTML += '</tr>';
+                bodyHTML += `</tr>`;
             });
 
             document.getElementById('tableBody').innerHTML = bodyHTML;
-            document.getElementById('loadingMessage').style.display = 'none';
-            document.getElementById('attendanceTable').style.display = 'table';
+            document.getElementById('loadingMessage').style.display='none';
+            document.getElementById('attendanceTable').style.display='table';
         }
 
-        function openStatusModal(empId, date, cell) {
-            currentCell = { empId, date, cell };
-            const emp = window.EMPLOYEES.data.find(e => e.id === empId);
-            const dateObj = new Date(date);
-            const dateStr = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-            
+        function openStatusModal(empId,date,cell){
+            currentCell = {empId, date, cell};
+            const emp = window.EMPLOYEES.data.find(e=>e.id===empId);
+            const d = new Date(date);
+            const dateStr = d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
             document.getElementById('modalTitle').textContent = `${emp.name} - ${dateStr}`;
             document.getElementById('statusModal').classList.add('active');
             document.getElementById('modalOverlay').classList.add('active');
         }
 
-        function closeStatusModal() {
+        function closeStatusModal(){
             document.getElementById('statusModal').classList.remove('active');
             document.getElementById('modalOverlay').classList.remove('active');
             currentCell = null;
         }
 
-        function setStatus(status) {
-            if (!currentCell) return;
-
-            const { empId, date, cell } = currentCell;
+        function setStatus(status){
+            if(!currentCell) return;
+            const {empId,date,cell} = currentCell;
             const key = `${empId}_${date}`;
-            
-            if (status === '') {
+
+            if(status===''){
                 delete attendanceData[key];
-                // Check if should auto-populate with X
-                const dateObj = new Date(date);
-                if (isWorkingDay(dateObj) && isPastOrToday(dateObj)) {
-                    cell.textContent = 'X';
-                    cell.className = 'status-X';
-                } else {
-                    cell.textContent = '';
-                    cell.className = '';
+                const d = new Date(date);
+                if(isWorkingDay(d) && isPastOrToday(d)){
+                    cell.textContent='X'; cell.className='status-X';
+                }else{
+                    cell.textContent=''; cell.className='';
                 }
-            } else {
-                attendanceData[key] = status;
-                cell.textContent = status;
-                cell.className = `status-${status}`;
+            }else{
+                attendanceData[key]=status;
+                cell.textContent=status;
+                cell.className=`status-${status}`;
             }
 
-            // Save to localStorage
-            localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
-            
-            // Update cost column
-            const cost = calculateAbsenceCost(empId);
+            localStorage.setItem('attendanceData',JSON.stringify(attendanceData));
+
             const row = cell.parentElement;
-            const costCell = row.cells[2];
-            costCell.textContent = `£${cost.toFixed(2)}`;
-            
-            // Update holiday count column
+            const cost = calculateAbsenceCost(empId);
+            row.cells[1].textContent = `£${cost.toFixed(2)}`;
             const holidayDays = calculateHolidayDays(empId);
-            const holidayCell = row.cells[3];
-            holidayCell.textContent = holidayDays;
-            
+            row.cells[2].textContent = holidayDays;
+
             closeStatusModal();
         }
 
-        function exportToCSV() {
+        function exportToCSV(){
             const table = document.getElementById('attendanceTable');
-            let csv = [];
-            
             const rows = table.querySelectorAll('tr');
-            rows.forEach(row => {
-                const cols = row.querySelectorAll('td, th');
-                const rowData = Array.from(cols).map(col => {
-                    return '"' + (col.innerText || '').replace(/"/g, '""') + '"';
-                });
-                csv.push(rowData.join(','));
+            const csv = [];
+
+            rows.forEach(r=>{
+                const cols = r.querySelectorAll('td, th');
+                const line = Array.from(cols).map(c=>`"${(c.innerText||'').replace(/"/g,'""')}"`).join(',');
+                csv.push(line);
             });
 
-            const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
-            const csvContent = csv.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `attendance_${monthName}_${currentYear}.csv`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const monthName = new Date(currentYear,currentMonth).toLocaleString('default',{month:'long'});
+            const blob = new Blob([csv.join('\n')],{type:'text/csv;charset=utf-8;'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `attendance_${monthName}_${currentYear}.csv`;
+            a.style.display='none';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
-        // Initialize on load
-        window.onload = function() {
+        window.onload = ()=>{
             initializeSelectors();
-            
-            // Load saved attendance data
             const saved = localStorage.getItem('attendanceData');
-            if (saved) {
-                attendanceData = JSON.parse(saved);
-            }
+            if(saved) attendanceData = JSON.parse(saved);
 
-            // Wait for EMPLOYEES to be ready
-            if (window.EMPLOYEES) {
-                window.EMPLOYEES.onUpdate(loadAttendanceData);
-            }
-            
-            setTimeout(loadAttendanceData, 1000);
+            if(window.EMPLOYEES) window.EMPLOYEES.onUpdate(loadAttendanceData);
+            setTimeout(loadAttendanceData,1000);
         };
     </script>
 </body>
