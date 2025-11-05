@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submit Payment Claim | NGU-hrs</title>
-    <!-- EMAILJS SDK -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -72,7 +70,6 @@
             border-color: #667eea;
         }
 
-        /* Autocomplete dropdown styles */
         .autocomplete-results {
             position: absolute;
             top: 100%;
@@ -115,10 +112,6 @@
             color: #666;
             font-size: 0.85em;
             margin-top: 3px;
-        }
-
-        .autocomplete-item:last-child {
-            border-bottom: none;
         }
 
         .time-group {
@@ -428,13 +421,6 @@
     <script>
         let selectedEmployee = null;
 
-        // EmailJS Configuration
-        const EMAILJS_SERVICE_ID = 'service_9dr2ws7';
-        const EMAILJS_TEMPLATE_ID = 'template_claim_confirmation'; // You'll need to create this template
-        const EMAILJS_PUBLIC_KEY = 'ziLnha91scpGjFABh';
-
-        emailjs.init(EMAILJS_PUBLIC_KEY);
-
         // UK Bank Holidays 2025
         const bankHolidays2025 = [
             '2025-01-01', '2025-04-18', '2025-04-21', '2025-05-05',
@@ -482,7 +468,6 @@
             return hours * 24.40;
         }
 
-        // Employee search with autocomplete
         function searchEmployees() {
             const query = document.getElementById('employeeName').value.trim().toLowerCase();
             const resultsDiv = document.getElementById('autocompleteResults');
@@ -499,7 +484,6 @@
                 return;
             }
 
-            // Filter active employees only
             const activeEmployees = window.EMPLOYEES.data.filter(e => !e.dateLeft);
             const matches = activeEmployees.filter(emp => 
                 emp.name.toLowerCase().includes(query) || 
@@ -534,7 +518,6 @@
             document.getElementById('autocompleteResults').classList.remove('active');
         }
 
-        // Close autocomplete when clicking outside
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.form-group')) {
                 document.getElementById('autocompleteResults').classList.remove('active');
@@ -612,7 +595,6 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
 
-            // Check if employee is selected
             if (!selectedEmployee) {
                 showError('Please select a valid employee from the dropdown.');
                 submitBtn.disabled = false;
@@ -620,7 +602,6 @@
                 return;
             }
 
-            // Get form values
             const claimDate = document.getElementById('claimDate').value;
             const startTime = document.getElementById('startTime').value || null;
             const endTime = document.getElementById('endTime').value || null;
@@ -628,67 +609,59 @@
             const workingAway = document.getElementById('workingAwayToggle').checked;
             const pricePerJob = document.getElementById('pricePerJobToggle').checked;
 
-            // Collect job data
-            let jobs = null;
-            let jobsTotalValue = 0;
-            
+            // Create claim object - MATCHING THE EXACT STRUCTURE FROM additionalpayments.html
+            const claim = {
+                id: Date.now().toString(),
+                date: claimDate,
+                startTime: startTime,
+                endTime: endTime,
+                standby: standby,
+                workingAway: workingAway,
+                pricePerJob: pricePerJob,
+                submittedAt: new Date().toISOString()
+            };
+
+            // Calculate values
+            claim.standbyValue = standby ? calculateStandby(claimDate) : 0;
+            claim.overtimeValue = calculateOvertime(claimDate, startTime, endTime);
+
+            // Get job data if enabled
             if (pricePerJob) {
                 const jobCount = parseInt(document.getElementById('jobCount').value);
                 if (jobCount) {
-                    jobs = [];
+                    claim.jobs = [];
+                    let totalJobValue = 0;
                     
                     for (let i = 1; i <= jobCount; i++) {
                         const jobNumber = document.getElementById(`jobNumber${i}`).value.trim();
                         const jobType = document.getElementById(`jobType${i}`).value.trim();
                         const jobValue = parseFloat(document.getElementById(`jobValue${i}`).value) || 0;
                         
-                        if (jobNumber || jobType || jobValue > 0) {
-                            jobs.push({
-                                jobNumber: jobNumber,
-                                jobType: jobType,
-                                value: jobValue
-                            });
-                            jobsTotalValue += jobValue;
-                        }
+                        claim.jobs.push({
+                            jobNumber: jobNumber,
+                            jobType: jobType,
+                            value: jobValue
+                        });
+                        
+                        totalJobValue += jobValue;
                     }
+                    
+                    claim.totalJobValue = totalJobValue;
                 }
             }
 
-            // Calculate values
-            const standbyValue = standby ? calculateStandby(claimDate) : 0;
-            const overtimeValue = calculateOvertime(claimDate, startTime, endTime);
-
-            // Create claim object in EXACT same format as admin form
-            const claim = {
-                employeeId: selectedEmployee.id,
-                employeeName: selectedEmployee.name,
-                employeeEmail: document.getElementById('employeeEmail').value.trim(),
-                date: claimDate,
-                startTime: startTime,
-                endTime: endTime,
-                standby: standby,
-                workingAway: workingAway,
-                pricePerJob: pricePerJob || false,
-                jobs: jobs,
-                standbyValue: standbyValue,
-                overtimeValue: overtimeValue,
-                jobsTotalValue: jobsTotalValue,
-                submittedAt: new Date().toISOString()
-            };
-
             try {
-                // Submit to Firebase - same collection as admin form
-                const { getFirestore, collection, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
-                const db = getFirestore();
-                
-                const claimId = `CLAIM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                await setDoc(doc(db, 'additionalPaymentClaims', claimId), claim);
-                
-                console.log('Claim submitted successfully:', claim);
-                
-                // Send confirmation email
-                await sendConfirmationEmail(claim);
-                
+                // Add to employee's paymentClaims array - SAME AS ADMIN FORM
+                if (!selectedEmployee.paymentClaims) {
+                    selectedEmployee.paymentClaims = [];
+                }
+                selectedEmployee.paymentClaims.push(claim);
+
+                // Update in Firebase
+                await EMPLOYEES.update(selectedEmployee.id, { 
+                    paymentClaims: selectedEmployee.paymentClaims 
+                });
+
                 showSuccess();
                 
                 // Reset form
@@ -705,53 +678,6 @@
             submitBtn.disabled = false;
             submitBtn.textContent = 'Submit Claim';
         });
-
-        // Send confirmation email to employee
-        async function sendConfirmationEmail(claim) {
-            try {
-                // Format date
-                const dateFormatted = new Date(claim.date).toLocaleDateString('en-GB', { 
-                    day: '2-digit', 
-                    month: 'long', 
-                    year: 'numeric' 
-                });
-
-                // Build job details
-                let jobDetails = 'N/A';
-                if (claim.jobs && claim.jobs.length > 0) {
-                    jobDetails = claim.jobs.map(job => 
-                        `${job.jobNumber} - ${job.jobType}: £${job.value.toFixed(2)}`
-                    ).join('\n');
-                }
-
-                // Calculate total payment
-                const totalPayment = claim.standbyValue + claim.overtimeValue + claim.jobsTotalValue;
-
-                const templateParams = {
-                    to_email: claim.employeeEmail,
-                    employee_name: claim.employeeName,
-                    employee_id: claim.employeeId,
-                    claim_date: dateFormatted,
-                    start_time: claim.startTime || 'N/A',
-                    end_time: claim.endTime || 'N/A',
-                    standby: claim.standby ? 'Yes' : 'No',
-                    standby_value: `£${claim.standbyValue.toFixed(2)}`,
-                    working_away: claim.workingAway ? 'Yes' : 'No',
-                    overtime_value: `£${claim.overtimeValue.toFixed(2)}`,
-                    price_per_job: claim.pricePerJob ? 'Yes' : 'No',
-                    job_details: jobDetails,
-                    jobs_value: `£${claim.jobsTotalValue.toFixed(2)}`,
-                    total_payment: `£${totalPayment.toFixed(2)}`,
-                    submitted_at: new Date(claim.submittedAt).toLocaleString('en-GB')
-                };
-
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-                console.log('Confirmation email sent successfully');
-            } catch (error) {
-                console.error('Failed to send confirmation email:', error);
-                // Don't show error to user - claim was still submitted successfully
-            }
-        }
 
         // Set max date to today
         document.getElementById('claimDate').max = new Date().toISOString().split('T')[0];
