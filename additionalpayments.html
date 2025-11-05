@@ -13,315 +13,6 @@
             padding: 20px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
-
-        /* Header */
-        header {
-            background: rgba(255,255,255,0.95);
-            padding: 25px 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .header-left h1 { color: #667eea; font-size: 2.2em; font-weight: 700; }
-        .header-left p { color: #666; margin-top: 5px; }
-        .back-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: transform 0.2s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .back-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-
-        /* Form Section */
-        .form-section {
-            background: rgba(255,255,255,0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            margin-bottom: 30px;
-        }
-        .form-section h2 { color: #333; margin-bottom: 25px; font-size: 1.5em; }
-
-        .search-box { position: relative; margin-bottom: 20px; }
-        .search-box input {
-            width: 100%;
-            padding: 12px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-        }
-        .search-box input:focus { outline: none; border-color: #667eea; }
-
-        .search-results {
-            position: absolute;
-            top: 100%; left: 0; right: 0;
-            background: white;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .search-results.active { display: block; }
-        .search-result-item {
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        .search-result-item:hover { background: #f8f9fa; }
-        .search-result-item strong { display: block; color: #333; }
-        .search-result-item span { color: #666; font-size: 0.9em; }
-
-        .selected-employee {
-            background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1));
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .selected-employee strong { color: #667eea; font-size: 1.1em; }
-        .clear-btn {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 0.95em;
-        }
-        .form-group input[type="date"],
-        .form-group input[type="time"] {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-        }
-        .form-group input:focus { outline: none; border-color: #667eea; }
-
-        .toggle-group {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .toggle-item { display: flex; align-items: center; gap: 10px; }
-        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider {
-            position: absolute; cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #ccc; transition: 0.4s; border-radius: 34px;
-        }
-        .toggle-slider:before {
-            position: absolute; content: "";
-            height: 18px; width: 18px;
-            left: 4px; bottom: 4px;
-            background: white; transition: 0.4s; border-radius: 50%;
-        }
-        input:checked + .toggle-slider { background: #28a745; }
-        input:checked + .toggle-slider:before { transform: translateX(24px); }
-
-        .submit-btn {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 14px 30px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: 600;
-            width: 100%;
-            transition: all 0.3s;
-        }
-        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(40,167,69,0.4); }
-
-        /* Table Section */
-        .table-section {
-            background: rgba(255,255,255,0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .table-header h2 { color: #333; font-size: 1.5em; }
-        .month-filter select {
-            padding: 10px 15px;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            font-size: 1em;
-            cursor: pointer;
-        }
-
-        /* Responsive Table Wrapper */
-        .claims-table-wrapper {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .claims-table {
-            width: 100%;
-            min-width: 900px;
-            border-collapse: collapse;
-            table-layout: fixed;
-            white-space: nowrap;
-        }
-
-        .claims-table th,
-        .claims-table td {
-            padding: 12px;
-            text-align: left;
-            font-size: 0.9em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Column Widths */
-        .claims-table th:nth-child(1), .claims-table td:nth-child(1) { width: 15%; } /* Name */
-        .claims-table th:nth-child(2), .claims-table td:nth-child(2) { width: 12%; } /* Date */
-        .claims-table th:nth-child(3), .claims-table td:nth-child(3) { width: 9%; }  /* Start */
-        .claims-table th:nth-child(4), .claims-table td:nth-child(4) { width: 9%; }  /* End */
-        .claims-table th:nth-child(5), .claims-table td:nth-child(5) { width: 9%; }  /* Standby */
-        .claims-table th:nth-child(6), .claims-table td:nth-child(6) { width: 11%; } /* Working Away */
-        .claims-table th:nth-child(7), .claims-table td:nth-child(7) { width: 10%; } /* Standby £ */
-        .claims-table th:nth-child(8), .claims-table td:nth-child(8) { width: 11%; } /* Overtime £ */
-        .claims-table th:nth-child(9), .claims-table td:nth-child(9) { width: 14%; } /* Actions */
-
-        .claims-table thead {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        .claims-table th { font-weight: 600; }
-        .claims-table tbody tr:hover { background: #f8f9fa; }
-        .claims-table td { border-bottom: 1px solid #e0e0e0; }
-
-        .action-btns { display: flex; gap: 6px; flex-wrap: nowrap; }
-        .action-btn {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8em;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-        .edit-btn { background: #667eea; color: white; }
-        .delete-btn { background: #dc3545; color: white; }
-        .action-btn:hover { transform: translateY(-1px); }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        .modal-header h2 { color: #667eea; font-size: 1.5em; margin: 0; }
-        .close-modal {
-            background: none; border: none;
-            font-size: 1.5em; cursor: pointer;
-            color: #666; width: 30px; height: 30px;
-        }
-        .close-modal:hover { color: #dc3545; }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #666;
-        }
-        .empty-icon { font-size: 4em; margin-bottom: 20px; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            header { flex-direction: column; text-align: center; }
-            .form-grid { grid-template-columns: 1fr; }
-            .toggle-group { flex-direction: column; gap: 15px; }
-            .table-header { flex-direction: column; align-items: stretch; }
-            .claims-table th,
-            .claims-table td { padding: 8px; font-size: 0.8em; }
-            .action-btn { padding: 5px 8px; font-size: 0.7em; }
-            .claims-table { min-width: 700px; }
-        }
-    </style>
-</head>
-<body>
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Additional Payment Claim Form | NGU-hrs</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { max-width: 1400px; margin: 0 auto; }
         
         header {
             background: rgba(255,255,255,0.95);
@@ -431,14 +122,18 @@
             font-size: 0.95em;
         }
         .form-group input[type="date"],
-        .form-group input[type="time"] {
+        .form-group input[type="time"],
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select {
             width: 100%;
             padding: 10px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1em;
         }
-        .form-group input:focus { outline: none; border-color: #667eea; }
+        .form-group input:focus,
+        .form-group select:focus { outline: none; border-color: #667eea; }
 
         .toggle-group {
             display: flex;
@@ -483,6 +178,24 @@
         input:checked + .toggle-slider { background: #28a745; }
         input:checked + .toggle-slider:before { transform: translateX(24px); }
 
+        .job-entry {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        .job-entry h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .job-fields-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
         .submit-btn {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
@@ -520,11 +233,15 @@
             cursor: pointer;
         }
 
+        .claims-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         .claims-table {
             width: 100%;
+            min-width: 1000px;
             border-collapse: collapse;
-            overflow-x: auto;
-            display: block;
         }
         .claims-table thead {
             background: linear-gradient(135deg, #667eea, #764ba2);
@@ -542,8 +259,16 @@
             font-size: 0.9em;
         }
         .claims-table tbody tr:hover { background: #f8f9fa; }
-        .claims-table tbody { display: table; width: 100%; }
-        .claims-table thead { display: table; width: 100%; }
+
+        .jobs-cell {
+            max-width: 200px;
+            font-size: 0.85em;
+        }
+        .job-item {
+            padding: 4px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .job-item:last-child { border-bottom: none; }
 
         .action-btns {
             display: flex;
@@ -578,7 +303,7 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            max-width: 600px;
+            max-width: 700px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
@@ -685,6 +410,33 @@
                         </label>
                         <span>Working Away</span>
                     </div>
+                    <div class="toggle-item">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pricePerJobToggle" onchange="toggleJobFields()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span>Price Per Job</span>
+                    </div>
+                </div>
+
+                <!-- Job Fields -->
+                <div id="jobFieldsContainer" style="display:none; margin-bottom:20px;">
+                    <div class="form-group" style="margin-bottom:15px;">
+                        <label for="jobCount">Number of Jobs</label>
+                        <select id="jobCount" onchange="generateJobFields()">
+                            <option value="1">1 Job</option>
+                            <option value="2">2 Jobs</option>
+                            <option value="3">3 Jobs</option>
+                            <option value="4">4 Jobs</option>
+                            <option value="5">5 Jobs</option>
+                            <option value="6">6 Jobs</option>
+                            <option value="7">7 Jobs</option>
+                            <option value="8">8 Jobs</option>
+                            <option value="9">9 Jobs</option>
+                            <option value="10">10 Jobs</option>
+                        </select>
+                    </div>
+                    <div id="jobInputsContainer"></div>
                 </div>
 
                 <button type="submit" class="submit-btn">Submit Claim</button>
@@ -748,7 +500,35 @@
                         </label>
                         <span>Working Away</span>
                     </div>
+                    <div class="toggle-item">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="editPricePerJob" onchange="toggleEditJobFields()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span>Price Per Job</span>
+                    </div>
                 </div>
+
+                <!-- Edit Job Fields -->
+                <div id="editJobFieldsContainer" style="display:none; margin-bottom:20px;">
+                    <div class="form-group" style="margin-bottom:15px;">
+                        <label for="editJobCount">Number of Jobs</label>
+                        <select id="editJobCount" onchange="generateEditJobFields()">
+                            <option value="1">1 Job</option>
+                            <option value="2">2 Jobs</option>
+                            <option value="3">3 Jobs</option>
+                            <option value="4">4 Jobs</option>
+                            <option value="5">5 Jobs</option>
+                            <option value="6">6 Jobs</option>
+                            <option value="7">7 Jobs</option>
+                            <option value="8">8 Jobs</option>
+                            <option value="9">9 Jobs</option>
+                            <option value="10">10 Jobs</option>
+                        </select>
+                    </div>
+                    <div id="editJobInputsContainer"></div>
+                </div>
+
                 <button type="submit" class="submit-btn" style="margin-top:20px;">Save Changes</button>
             </form>
         </div>
@@ -762,26 +542,16 @@
 
         // UK Bank Holidays 2025
         const bankHolidays2025 = [
-            '2025-01-01', // New Year's Day
-            '2025-04-18', // Good Friday
-            '2025-04-21', // Easter Monday
-            '2025-05-05', // Early May Bank Holiday
-            '2025-05-26', // Spring Bank Holiday
-            '2025-08-25', // Summer Bank Holiday
-            '2025-12-25', // Christmas Day
-            '2025-12-26'  // Boxing Day
+            '2025-01-01', '2025-04-18', '2025-04-21', '2025-05-05',
+            '2025-05-26', '2025-08-25', '2025-12-25', '2025-12-26'
         ];
 
         // Initialize Firebase for claims
         async function initializeClaims() {
-            // Import Firebase functions
-            const { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
-            
-            // Get Firestore instance (already initialized in employees-firebase.js)
+            const { getFirestore, collection, onSnapshot } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
             const db = getFirestore();
             claimsCollection = collection(db, 'additionalPaymentClaims');
 
-            // Listen to real-time updates
             onSnapshot(claimsCollection, (snapshot) => {
                 claims = [];
                 snapshot.forEach(doc => {
@@ -806,13 +576,123 @@
                 saveEdit();
             });
 
-            // Wait for EMPLOYEES data
             if (window.EMPLOYEES) {
                 window.EMPLOYEES.onUpdate(() => {
                     console.log("Employee data updated");
                 });
             }
         };
+
+        // Toggle job fields
+        function toggleJobFields() {
+            const toggle = document.getElementById('pricePerJobToggle').checked;
+            const container = document.getElementById('jobFieldsContainer');
+            container.style.display = toggle ? 'block' : 'none';
+            if (toggle) generateJobFields();
+        }
+
+        function toggleEditJobFields() {
+            const toggle = document.getElementById('editPricePerJob').checked;
+            const container = document.getElementById('editJobFieldsContainer');
+            container.style.display = toggle ? 'block' : 'none';
+            if (toggle) generateEditJobFields();
+        }
+
+        // Generate job input fields
+        function generateJobFields() {
+            const count = parseInt(document.getElementById('jobCount').value);
+            const container = document.getElementById('jobInputsContainer');
+            let html = '';
+
+            for (let i = 1; i <= count; i++) {
+                html += `
+                    <div class="job-entry">
+                        <h4>Job ${i}</h4>
+                        <div class="job-fields-grid">
+                            <div class="form-group">
+                                <label>Job Number</label>
+                                <input type="text" id="jobNumber${i}" placeholder="e.g. J001">
+                            </div>
+                            <div class="form-group">
+                                <label>Job Type</label>
+                                <input type="text" id="jobType${i}" placeholder="e.g. Installation">
+                            </div>
+                            <div class="form-group">
+                                <label>Value (£)</label>
+                                <input type="number" id="jobValue${i}" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function generateEditJobFields() {
+            const count = parseInt(document.getElementById('editJobCount').value);
+            const container = document.getElementById('editJobInputsContainer');
+            let html = '';
+
+            for (let i = 1; i <= count; i++) {
+                html += `
+                    <div class="job-entry">
+                        <h4>Job ${i}</h4>
+                        <div class="job-fields-grid">
+                            <div class="form-group">
+                                <label>Job Number</label>
+                                <input type="text" id="editJobNumber${i}" placeholder="e.g. J001">
+                            </div>
+                            <div class="form-group">
+                                <label>Job Type</label>
+                                <input type="text" id="editJobType${i}" placeholder="e.g. Installation">
+                            </div>
+                            <div class="form-group">
+                                <label>Value (£)</label>
+                                <input type="number" id="editJobValue${i}" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+                    </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        // Collect job data
+        function collectJobData() {
+            if (!document.getElementById('pricePerJobToggle').checked) return null;
+            
+            const count = parseInt(document.getElementById('jobCount').value);
+            const jobs = [];
+
+            for (let i = 1; i <= count; i++) {
+                const jobNumber = document.getElementById(`jobNumber${i}`).value;
+                const jobType = document.getElementById(`jobType${i}`).value;
+                const jobValue = parseFloat(document.getElementById(`jobValue${i}`).value) || 0;
+
+                if (jobNumber || jobType || jobValue > 0) {
+                    jobs.push({ jobNumber, jobType, value: jobValue });
+                }
+            }
+
+            return jobs.length > 0 ? jobs : null;
+        }
+
+        function collectEditJobData() {
+            if (!document.getElementById('editPricePerJob').checked) return null;
+            
+            const count = parseInt(document.getElementById('editJobCount').value);
+            const jobs = [];
+
+            for (let i = 1; i <= count; i++) {
+                const jobNumber = document.getElementById(`editJobNumber${i}`).value;
+                const jobType = document.getElementById(`editJobType${i}`).value;
+                const jobValue = parseFloat(document.getElementById(`editJobValue${i}`).value) || 0;
+
+                if (jobNumber || jobType || jobValue > 0) {
+                    jobs.push({ jobNumber, jobType, value: jobValue });
+                }
+            }
+
+            return jobs.length > 0 ? jobs : null;
+        }
 
         // Employee Search
         function searchEmployees() {
@@ -881,13 +761,13 @@
             document.getElementById('selectedEmployeeDisplay').style.display = 'none';
             document.getElementById('claimForm').style.display = 'none';
             document.getElementById('claimForm').reset();
+            document.getElementById('jobFieldsContainer').style.display = 'none';
         }
 
         // Date utilities
         function isWeekend(dateStr) {
             const date = new Date(dateStr);
-            const day = date.getDay();
-            return day === 0 || day === 6;
+            return date.getDay() === 0 || date.getDay() === 6;
         }
 
         function isBankHoliday(dateStr) {
@@ -898,14 +778,12 @@
             return ['2025-12-25', '2025-12-26', '2025-01-01'].includes(dateStr);
         }
 
-        // Calculate standby value
         function calculateStandby(dateStr) {
             if (isSpecialDay(dateStr)) return 100;
             if (isWeekend(dateStr) || isBankHoliday(dateStr)) return 50;
             return 20;
         }
 
-        // Calculate overtime payment
         function calculateOvertime(dateStr, startTime, endTime) {
             if (!startTime || !endTime) return 0;
 
@@ -918,15 +796,12 @@
             const date = new Date(dateStr);
             const day = date.getDay();
 
-            // Sunday or special days
             if (day === 0 || isBankHoliday(dateStr) || isSpecialDay(dateStr)) {
                 return hours * 37.50;
             }
-            // Saturday
             if (day === 6) {
                 return hours * 28.13;
             }
-            // Weekday
             return hours * 24.40;
         }
 
@@ -934,6 +809,7 @@
         async function submitClaim() {
             if (!selectedEmployee) return alert('Please select an employee');
 
+            const jobs = collectJobData();
             const claim = {
                 employeeId: selectedEmployee.id,
                 employeeName: selectedEmployee.name,
@@ -942,17 +818,19 @@
                 endTime: document.getElementById('endTime').value || null,
                 standby: document.getElementById('standbyToggle').checked,
                 workingAway: document.getElementById('workingAwayToggle').checked,
+                pricePerJob: document.getElementById('pricePerJobToggle').checked,
+                jobs: jobs,
                 submittedAt: new Date().toISOString()
             };
 
             claim.standbyValue = claim.standby ? calculateStandby(claim.date) : 0;
             claim.overtimeValue = calculateOvertime(claim.date, claim.startTime, claim.endTime);
+            claim.jobsTotalValue = jobs ? jobs.reduce((sum, job) => sum + job.value, 0) : 0;
 
             try {
-                const { getFirestore, collection, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
+                const { getFirestore, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
                 const db = getFirestore();
                 
-                // Generate unique ID
                 const claimId = `CLAIM_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 await setDoc(doc(db, 'additionalPaymentClaims', claimId), claim);
                 
@@ -1008,28 +886,40 @@
                 return;
             }
 
-            // Sort by date (newest first)
             filteredClaims.sort((a, b) => new Date(b.date) - new Date(a.date));
 
             let html = `
-                <table class="claims-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Date</th>
-                            <th>Start</th>
-                            <th>End</th>
-                            <th>Standby</th>
-                            <th>Working Away</th>
-                            <th>Standby £</th>
-                            <th>Overtime £</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
+                <div class="claims-table-wrapper">
+                    <table class="claims-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Standby</th>
+                                <th>Working Away</th>
+                                <th>Jobs</th>
+                                <th>Standby £</th>
+                                <th>Overtime £</th>
+                                <th>Jobs £</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
 
             filteredClaims.forEach((claim) => {
                 const claimIndex = claims.findIndex(c => c.firestoreId === claim.firestoreId);
+                
+                let jobsDisplay = '—';
+                if (claim.jobs && claim.jobs.length > 0) {
+                    jobsDisplay = '<div class="jobs-cell">';
+                    claim.jobs.forEach(job => {
+                        jobsDisplay += `<div class="job-item"><strong>${job.jobNumber}</strong> - ${job.jobType}: £${job.value.toFixed(2)}</div>`;
+                    });
+                    jobsDisplay += '</div>';
+                }
+
                 html += `
                     <tr>
                         <td>${claim.employeeName}</td>
@@ -1038,8 +928,10 @@
                         <td>${claim.endTime || '—'}</td>
                         <td>${claim.standby ? 'Yes' : 'No'}</td>
                         <td>${claim.workingAway ? 'Yes' : 'No'}</td>
+                        <td>${jobsDisplay}</td>
                         <td>£${claim.standbyValue.toFixed(2)}</td>
                         <td>£${claim.overtimeValue.toFixed(2)}</td>
+                        <td>£${(claim.jobsTotalValue || 0).toFixed(2)}</td>
                         <td>
                             <div class="action-btns">
                                 <button class="action-btn edit-btn" onclick="openEditModal(${claimIndex})">Edit</button>
@@ -1049,7 +941,7 @@
                     </tr>`;
             });
 
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             container.innerHTML = html;
         }
 
@@ -1063,6 +955,23 @@
             document.getElementById('editEndTime').value = claim.endTime || '';
             document.getElementById('editStandby').checked = claim.standby;
             document.getElementById('editWorkingAway').checked = claim.workingAway;
+            document.getElementById('editPricePerJob').checked = claim.pricePerJob || false;
+
+            if (claim.pricePerJob && claim.jobs) {
+                document.getElementById('editJobFieldsContainer').style.display = 'block';
+                document.getElementById('editJobCount').value = claim.jobs.length;
+                generateEditJobFields();
+                
+                setTimeout(() => {
+                    claim.jobs.forEach((job, i) => {
+                        document.getElementById(`editJobNumber${i + 1}`).value = job.jobNumber;
+                        document.getElementById(`editJobType${i + 1}`).value = job.jobType;
+                        document.getElementById(`editJobValue${i + 1}`).value = job.value;
+                    });
+                }, 100);
+            } else {
+                document.getElementById('editJobFieldsContainer').style.display = 'none';
+            }
 
             document.getElementById('editModal').classList.add('active');
         }
@@ -1076,6 +985,8 @@
             if (editingClaimIndex === -1) return;
 
             const claim = claims[editingClaimIndex];
+            const jobs = collectEditJobData();
+            
             const updatedClaim = {
                 employeeId: claim.employeeId,
                 employeeName: claim.employeeName,
@@ -1084,11 +995,14 @@
                 endTime: document.getElementById('editEndTime').value || null,
                 standby: document.getElementById('editStandby').checked,
                 workingAway: document.getElementById('editWorkingAway').checked,
+                pricePerJob: document.getElementById('editPricePerJob').checked,
+                jobs: jobs,
                 submittedAt: claim.submittedAt
             };
 
             updatedClaim.standbyValue = updatedClaim.standby ? calculateStandby(updatedClaim.date) : 0;
             updatedClaim.overtimeValue = calculateOvertime(updatedClaim.date, updatedClaim.startTime, updatedClaim.endTime);
+            updatedClaim.jobsTotalValue = jobs ? jobs.reduce((sum, job) => sum + job.value, 0) : 0;
 
             try {
                 const { getFirestore, doc, setDoc } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
@@ -1133,7 +1047,5 @@
             }
         });
     </script>
-</body>
-</html>
 </body>
 </html>
