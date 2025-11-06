@@ -1,1 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonus Calculator | NGU-hrs</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 2.2em;
+        }
+        .back-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: none;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .control-group label {
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        select, input[type="file"] {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        .upload-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .summary-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .summary-card h3 {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        .summary-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .bonus-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .bonus-table thead {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .bonus-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .bonus-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .bonus-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        .bonus-amount {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>💰 Bonus Calculator</h1>
+                <p style="color: #666; margin-top: 5px;">Upload CSV to calculate employee bonuses</p>
+            </div>
+            <a href="index.html" class="back-btn">← Back</a>
+        </header>
 
+        <div class="controls">
+            <div class="control-group">
+                <label for="monthSelect">Month</label>
+                <select id="monthSelect">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="fileInput">CSV File</label>
+                <input type="file" id="fileInput" accept=".csv">
+            </div>
+            <button class="upload-btn" onclick="processFile()">Calculate</button>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <div id="resultsSection" style="display:none;">
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <h3>Employees</h3>
+                    <div class="value" id="totalEmployees">0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Jobs</h3>
+                    <div class="value" id="totalJobs">0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Bonus</h3>
+                    <div class="value" id="totalBonus">£0</div>
+                </div>
+            </div>
+
+            <table class="bonus-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Jobs</th>
+                        <th>Points</th>
+                        <th>Bonus</th>
+                    </tr>
+                </thead>
+                <tbody id="bonusTableBody"></tbody>
+            </table>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+            <div style="font-size:4em;margin-bottom:20px;">📊</div>
+            <h3>No Data</h3>
+            <p>Select month and upload CSV</p>
+        </div>
+    </div>
+
+    <script>
+        const jobTypeMap = {
+            'METERING_ELECTRICITY_METER_REMOVAL': 'Single Fuel - Removal',
+            'METERING_GAS_METER_REMOVAL': 'Single Fuel - Removal',
+            'METERING_GAS_METER_EXCHANGE': 'Single Fuel',
+            'METERING_ELECTRICITY_METER_EXCHANGE': 'Single Fuel',
+            'METERING_GAS_METER_NEW_CONNECTION': 'Single Fuel',
+            'METERING_ELECTRICITY_METER_NEW_CONNECTION': 'Single Fuel',
+            'METERING_ELECTRICITY_METER_COMMISSION': 'Maintenance Visit (Non MX Visit)',
+            'METERING_INSTALL_ISOLATOR_SWITCH': 'Maintenance Visit (Non MX Visit)',
+            'METERING_COMMUNICATIONS_HUB_EXCHANGE': 'Maintenance Visit (Non MX Visit)',
+            'METERING_DUAL_FUEL_METER_COMMISSION': 'Maintenance Visit (Non MX Visit)',
+            'METERING_GAS_METER_COMMISSION': 'Maintenance Visit (Non MX Visit)',
+            'METERING_SITE_INVESTIGATION': 'Maintenance Visit (Non MX Visit)',
+            'METERING_ACCURACY_TEST': 'Maintenance Visit (Non MX Visit)',
+            'METERING_INSTALL_CONSUMER_DEVICE': 'Maintenance Visit (Non MX Visit)',
+            'METERING_TRACE_LABEL': 'Maintenance Visit (Non MX Visit)',
+            'METERING_DUAL_FUEL_METER_EXCHANGE': 'Dual Fuel Install/Exchange/Removal',
+            'METERING_DUAL_FUEL_NEW_CONNECTION': 'Dual Fuel Install/Exchange/Removal',
+            'METERING_RTS_SITE_INVESTIGATION': 'Maintenance Visit (Non MX Visit)'
+        };
+
+        const pointsMap = {
+            'Single Fuel': 1,
+            'Maintenance Visit (Non MX Visit)': 1,
+            'Dual Fuel Install/Exchange/Removal': 2,
+            'Single Fuel - Removal': 1
+        };
+
+        const bonusRates = {
+            'Maintenance Visit (Non MX Visit)': 25,
+            'Single Fuel': 50,
+            'Single Fuel - Removal': 50,
+            'Dual Fuel Install/Exchange/Removal': 80
+        };
+
+        function processFile() {
+            const file = document.getElementById('fileInput').files[0];
+            const month = parseInt(document.getElementById('monthSelect').value);
+
+            if (!file) {
+                document.getElementById('errorMessage').textContent = 'Select a CSV file';
+                document.getElementById('errorMessage').style.display = 'block';
+                return;
+            }
+
+            Papa.parse(file, {
+                header: true,
+                complete: (results) => processBonusData(results.data, month)
+            });
+        }
+
+        function processBonusData(data, month) {
+            const employees = {};
+            let totalJobs = 0;
+
+            data.forEach(row => {
+                const keys = Object.keys(row);
+                let name = keys[25] ? row[keys[25]] : '';
+                let jobType = keys[11] ? row[keys[11]] : '';
+                let date = keys[6] ? row[keys[6]] : '';
+                let status = keys[27] ? row[keys[27]] : '';
+
+                name = name.replace(/1/g, '').trim();
+                
+                if (status.toLowerCase() !== 'completed') return;
+                if (!name || !jobType) return;
+
+                const jobDate = new Date(date);
+                if (jobDate.getMonth() + 1 !== month) return;
+
+                const desc = jobTypeMap[jobType] || jobType;
+                
+                if (!employees[name]) employees[name] = [];
+                employees[name].push({ date: jobDate, desc });
+                totalJobs++;
+            });
+
+            const bonusResults = [];
+            let grandTotal = 0;
+
+            Object.keys(employees).sort().forEach(name => {
+                const jobs = employees[name].sort((a, b) => a.date - b.date);
+                let points = 0;
+                let bonus = 0;
+
+                jobs.forEach(job => {
+                    const jobPoints = pointsMap[job.desc] || 0;
+                    points += jobPoints;
+
+                    if (points > 6) {
+                        bonus += bonusRates[job.desc] || 0;
+                    }
+                });
+
+                bonusResults.push({ name, jobCount: jobs.length, points, bonus });
+                grandTotal += bonus;
+            });
+
+            displayResults(bonusResults, totalJobs, grandTotal);
+        }
+
+        function displayResults(results, totalJobs, grandTotal) {
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+
+            document.getElementById('totalEmployees').textContent = results.length;
+            document.getElementById('totalJobs').textContent = totalJobs;
+            document.getElementById('totalBonus').textContent = `£${grandTotal.toFixed(2)}`;
+
+            const tbody = document.getElementById('bonusTableBody');
+            tbody.innerHTML = results.map(r => `
+                <tr>
+                    <td>${r.name}</td>
+                    <td>${r.jobCount}</td>
+                    <td>${r.points}</td>
+                    <td class="bonus-amount">£${r.bonus.toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('monthSelect').value = new Date().getMonth() + 1;
+    </script>
+</body>
+</html>
