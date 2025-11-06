@@ -124,7 +124,6 @@
         let allClaims = [];
         const HOURLY_RATE = 19.23;
 
-        // Load payment claims from Firebase
         async function loadPaymentClaims() {
             try {
                 const { getFirestore, collection, onSnapshot } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
@@ -136,8 +135,6 @@
                     snapshot.forEach(doc => {
                         allClaims.push({ id: doc.id, ...doc.data() });
                     });
-                    console.log('Payment claims loaded:', allClaims.length);
-                    // Reload attendance data to update payment columns
                     if (window.EMPLOYEES && window.EMPLOYEES.data && window.EMPLOYEES.data.length > 0) {
                         loadAttendanceData();
                     }
@@ -242,20 +239,17 @@
             return count;
         }
 
-        // Calculate absence cost using ACTUAL HOURS from absence submissions
         function calculateAbsenceCost(empId) {
             let totalHours = 0;
             const emp = window.EMPLOYEES.data.find(e => e.id === empId);
 
             if (emp.absences && emp.absences.length > 0) {
                 emp.absences.forEach(abs => {
-                    // Check if absence falls within the current month
                     const absStart = new Date(abs.dateFrom);
                     const absEnd = new Date(abs.dateTo);
                     const monthStart = new Date(currentYear, currentMonth, 1);
                     const monthEnd = new Date(currentYear, currentMonth + 1, 0);
 
-                    // If absence overlaps with current month
                     if (absStart <= monthEnd && absEnd >= monthStart) {
                         if (['sickness', 'aaup', 'tofd'].includes(abs.type)) {
                             const hours = parseFloat(abs.hours);
@@ -270,7 +264,6 @@
             return totalHours * HOURLY_RATE;
         }
 
-        // Calculate payment totals for the month
         function calculatePaymentTotals(empId) {
             let standbyTotal = 0;
             let overtimeTotal = 0;
@@ -314,15 +307,15 @@
                     <td class="name-cell">${emp.name}</td>`;
 
                 const absenceCost = calculateAbsenceCost(emp.id);
-                bodyHTML += `<td class="cost-cell">£${absenceCost.toFixed(2)}</td>`;
+                bodyHTML += `<td class="cost-cell">${absenceCost > 0 ? '£' + absenceCost.toFixed(2) : ''}</td>`;
 
                 const holidayDays = calculateHolidayDays(emp.id);
-                bodyHTML += `<td class="holiday-cell">${holidayDays}</td>`;
+                bodyHTML += `<td class="holiday-cell">${holidayDays > 0 ? holidayDays : ''}</td>`;
 
                 const payments = calculatePaymentTotals(emp.id);
-                bodyHTML += `<td class="payment-cell">£${payments.standbyTotal.toFixed(2)}</td>`;
-                bodyHTML += `<td class="payment-cell">£${payments.overtimeTotal.toFixed(2)}</td>`;
-                bodyHTML += `<td class="payment-cell">£${payments.jobsTotal.toFixed(2)}</td>`;
+                bodyHTML += `<td class="payment-cell">${payments.standbyTotal > 0 ? '£' + payments.standbyTotal.toFixed(2) : ''}</td>`;
+                bodyHTML += `<td class="payment-cell">${payments.overtimeTotal > 0 ? '£' + payments.overtimeTotal.toFixed(2) : ''}</td>`;
+                bodyHTML += `<td class="payment-cell">${payments.jobsTotal > 0 ? '£' + payments.jobsTotal.toFixed(2) : ''}</td>`;
 
                 for (let d = 1; d <= days; d++) {
                     const date = new Date(currentYear, currentMonth, d);
@@ -349,7 +342,7 @@
                         }
                     }
 
-                    const key = `${emp.id}_${dateStr}`;
+                    const key = `${empId}_${dateStr}`;
                     if (attendanceData[key]) {
                         status = attendanceData[key];
                         statusClass = `status-${status}`;
@@ -411,9 +404,9 @@
 
             const row = cell.parentElement;
             const absenceCost = calculateAbsenceCost(empId);
-            row.cells[1].textContent = `£${absenceCost.toFixed(2)}`;
+            row.cells[1].textContent = absenceCost > 0 ? '£' + absenceCost.toFixed(2) : '';
             const holidayDays = calculateHolidayDays(empId);
-            row.cells[2].textContent = holidayDays;
+            row.cells[2].textContent = holidayDays > 0 ? holidayDays : '';
 
             closeStatusModal();
         }
@@ -445,7 +438,6 @@
             const saved = localStorage.getItem('attendanceData');
             if (saved) attendanceData = JSON.parse(saved);
 
-            // Load payment claims
             loadPaymentClaims();
 
             if (window.EMPLOYEES) window.EMPLOYEES.onUpdate(loadAttendanceData);
