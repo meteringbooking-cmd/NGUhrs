@@ -269,49 +269,95 @@
             const employees = {};
             let totalJobs = 0;
 
-            data.forEach(row => {
-                const keys = Object.keys(row);
-                let name = keys[25] ? row[keys[25]] : '';
-                let jobType = keys[11] ? row[keys[11]] : '';
-                let date = keys[6] ? row[keys[6]] : '';
-                let status = keys[27] ? row[keys[27]] : '';
+            console.log('Processing CSV data...');
+            console.log('Sample row:', data[0]); // Debug: see what columns we have
 
+            data.forEach((row, index) => {
+                // Column Z = Name (index 25, or header name)
+                // Column L = Job Type (index 11, or header name)
+                // Column G = Date (index 6, or header name)
+                // Column AB = Status (index 27, or header name)
+                // Column AG = Sort order (index 32, or header name)
+
+                // Try to get values by both index and common header names
+                let name = row['Column Z'] || row['Name'] || row['Engineer Name'] || '';
+                let jobType = row['Column L'] || row['Job Type'] || row['Work Order Type'] || '';
+                let date = row['Column G'] || row['Date'] || row['Appointment Date'] || '';
+                let status = row['Column AB'] || row['Status'] || row['Work Order Status'] || '';
+                let sortOrder = row['Column AG'] || row['Sort'] || '';
+
+                // Remove all "1" from name and trim
                 name = name.replace(/1/g, '').trim();
                 
+                // Skip if status is not "Completed"
                 if (status.toLowerCase() !== 'completed') return;
-                if (!name || !jobType) return;
+                
+                // Skip if missing critical data
+                if (!name || !jobType || !date) return;
 
+                // Parse date
                 const jobDate = new Date(date);
+                
+                // Check if date is valid and in selected month
+                if (isNaN(jobDate.getTime())) return;
                 if (jobDate.getMonth() + 1 !== month) return;
 
+                // Map job type to description
                 const desc = jobTypeMap[jobType] || jobType;
                 
-                if (!employees[name]) employees[name] = [];
-                employees[name].push({ date: jobDate, desc });
+                // Store job info
+                if (!employees[name]) {
+                    employees[name] = [];
+                }
+                
+                employees[name].push({ 
+                    date: jobDate, 
+                    desc: desc,
+                    sortOrder: sortOrder || date // Use sort order if available, otherwise date
+                });
+                
                 totalJobs++;
             });
 
+            console.log('Employees found:', Object.keys(employees).length);
+            console.log('Total jobs:', totalJobs);
+
+            // Calculate bonuses
             const bonusResults = [];
             let grandTotal = 0;
 
             Object.keys(employees).sort().forEach(name => {
+                // Sort jobs by date (Column G)
                 const jobs = employees[name].sort((a, b) => a.date - b.date);
+                
                 let points = 0;
                 let bonus = 0;
 
                 jobs.forEach(job => {
+                    // Get points for this job type
                     const jobPoints = pointsMap[job.desc] || 0;
+                    
+                    // Add points
                     points += jobPoints;
 
+                    // Award bonus only AFTER reaching 6 points
                     if (points > 6) {
-                        bonus += bonusRates[job.desc] || 0;
+                        const jobBonus = bonusRates[job.desc] || 0;
+                        bonus += jobBonus;
                     }
                 });
 
-                bonusResults.push({ name, jobCount: jobs.length, points, bonus });
+                bonusResults.push({ 
+                    name: name, 
+                    jobCount: jobs.length, 
+                    points: points, 
+                    bonus: bonus 
+                });
+                
                 grandTotal += bonus;
             });
 
+            console.log('Bonus results:', bonusResults);
             displayResults(bonusResults, totalJobs, grandTotal);
         }
 
