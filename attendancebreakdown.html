@@ -19,16 +19,15 @@
         .table-container{overflow-x:auto;margin-top:20px;}
         table{width:100%;border-collapse:collapse;font-size:.85em;}
         th{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:12px 8px;text-align:center;font-weight:600;position:sticky;top:0;z-index:10;border:1px solid #5568d3;}
-        th.name-header,th.cost-header{text-align:left;min-width:150px;}
-        th.cost-header{min-width:120px;}
+        th.name-header,th.cost-header{text-align:left;min-width:120px;}
+        th.cost-header{min-width:100px;}
         th.date-header{min-width:50px;}
-        th.weekend{background:linear-gradient(135deg,#8b9dc3 0%,#8e7ba8 100%);}
         td{padding:10px 8px;text-align:center;border:1px solid #ddd;cursor:pointer;transition:background .2s;}
-        td:hover:not(.name-cell):not(.cost-cell):not(.holiday-cell):not(.weekend-cell){background:#e3e7ff;}
-        td.name-cell,td.cost-cell{font-weight:500;background:#f8f9fa;cursor:default;}
-        td.cost-cell{text-align:right;font-weight:bold;background:#fff3cd;color:#856404;}
+        td:hover:not(.name-cell):not(.cost-cell):not(.holiday-cell):not(.payment-cell){background:#e3e7ff;}
+        td.name-cell{text-align:left;font-weight:500;background:#f8f9fa;cursor:default;}
+        td.cost-cell{text-align:right;font-weight:bold;background:#fff3cd;color:#856404;cursor:default;}
+        td.payment-cell{text-align:right;font-weight:bold;background:#e3f2fd;color:#1565c0;cursor:default;}
         td.holiday-cell{text-align:center;font-weight:bold;background:#d1ecf1;color:#0c5460;cursor:default;}
-        td.weekend-cell{background:#e9ecef;cursor:default;}
         tr:nth-child(even){background-color:#f9f9f9;}
         tr:hover{background-color:#f0f0f0;}
         .status-X{color:#28a745;font-weight:bold;}
@@ -101,201 +100,264 @@
         </div>
     </div>
 
-    <!-- Status Modal -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeStatusModal()"></div>
     <div class="status-modal" id="statusModal">
         <h3 id="modalTitle">Set Attendance Status</h3>
         <div class="status-buttons">
-            <button class="status-btn present"   onclick="setStatus('X')">Present (X)</button>
-            <button class="status-btn holiday"   onclick="setStatus('H')">Holiday (H)</button>
-            <button class="status-btn sick"      onclick="setStatus('Sick')">Sick</button>
-            <button class="status-btn aaup"      onclick="setStatus('AAUP')">AAUP</button>
-            <button class="status-btn npt"       onclick="setStatus('NPT')">NPT</button>
-            <button class="status-btn awol"      onclick="setStatus('AWOL')">AWOL</button>
-            <button class="status-btn baby"      onclick="setStatus('baby')">Maternity/Paternity</button>
-            <button class="status-btn tofd"      onclick="setStatus('TOFD')">TOFD</button>
-            <button class="status-btn clear"     onclick="setStatus('')">Clear</button>
+            <button class="status-btn present" onclick="setStatus('X')">Present (X)</button>
+            <button class="status-btn holiday" onclick="setStatus('H')">Holiday (H)</button>
+            <button class="status-btn sick" onclick="setStatus('Sick')">Sick</button>
+            <button class="status-btn aaup" onclick="setStatus('AAUP')">AAUP</button>
+            <button class="status-btn npt" onclick="setStatus('NPT')">NPT</button>
+            <button class="status-btn awol" onclick="setStatus('AWOL')">AWOL</button>
+            <button class="status-btn baby" onclick="setStatus('baby')">Maternity/Paternity</button>
+            <button class="status-btn tofd" onclick="setStatus('TOFD')">TOFD</button>
+            <button class="status-btn clear" onclick="setStatus('')">Clear</button>
         </div>
     </div>
 
     <script>
         let currentMonth = new Date().getMonth();
-        let currentYear  = new Date().getFullYear();
+        let currentYear = new Date().getFullYear();
         let attendanceData = {};
         let currentCell = null;
+        let allClaims = [];
         const HOURLY_RATE = 19.23;
+
+        // Load payment claims from Firebase
+        async function loadPaymentClaims() {
+            try {
+                const { getFirestore, collection, onSnapshot } = await import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js');
+                const db = getFirestore();
+                const claimsCollection = collection(db, 'additionalPaymentClaims');
+
+                onSnapshot(claimsCollection, (snapshot) => {
+                    allClaims = [];
+                    snapshot.forEach(doc => {
+                        allClaims.push({ id: doc.id, ...doc.data() });
+                    });
+                    console.log('Payment claims loaded:', allClaims.length);
+                    // Reload attendance data to update payment columns
+                    if (window.EMPLOYEES && window.EMPLOYEES.data && window.EMPLOYEES.data.length > 0) {
+                        loadAttendanceData();
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading payment claims:', error);
+            }
+        }
 
         function initializeSelectors() {
             const monthSelect = document.getElementById('monthSelect');
-            const yearSelect  = document.getElementById('yearSelect');
+            const yearSelect = document.getElementById('yearSelect');
             const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-            months.forEach((m,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=m;
-                                    if(i===currentMonth) o.selected=true; monthSelect.appendChild(o); });
+            months.forEach((m,i) => {
+                const o = document.createElement('option');
+                o.value = i;
+                o.textContent = m;
+                if (i === currentMonth) o.selected = true;
+                monthSelect.appendChild(o);
+            });
 
-            for(let y=2024;y<=2030;y++){ const o=document.createElement('option'); o.value=y; o.textContent=y;
-                                         if(y===currentYear) o.selected=true; yearSelect.appendChild(o); }
+            for (let y = 2024; y <= 2030; y++) {
+                const o = document.createElement('option');
+                o.value = y;
+                o.textContent = y;
+                if (y === currentYear) o.selected = true;
+                yearSelect.appendChild(o);
+            }
         }
 
         function changeMonth() {
             currentMonth = +document.getElementById('monthSelect').value;
-            currentYear  = +document.getElementById('yearSelect').value;
+            currentYear = +document.getElementById('yearSelect').value;
             loadAttendanceData();
         }
 
-        function getDaysInMonth(m,y){ return new Date(y,m+1,0).getDate(); }
-        function getDayName(d){ return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; }
-        function isWeekend(d){ return d.getDay()===0||d.getDay()===6; }
-        function isWorkingDay(d){ return !isWeekend(d); }
-        function isPastOrToday(d){
-            const today = new Date(); today.setHours(0,0,0,0);
-            const check = new Date(d); check.setHours(0,0,0,0);
-            return check<=today;
+        function getDaysInMonth(m, y) { return new Date(y, m + 1, 0).getDate(); }
+        function getDayName(d) { return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]; }
+        function isWeekend(d) { return d.getDay() === 0 || d.getDay() === 6; }
+        function isWorkingDay(d) { return !isWeekend(d); }
+        function isPastOrToday(d) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const check = new Date(d);
+            check.setHours(0, 0, 0, 0);
+            return check <= today;
         }
-        function isDateInRange(check,start,end){
-            const c=new Date(check), s=new Date(start), e=new Date(end);
-            [c,s,e].forEach(x=>x.setHours(0,0,0,0));
-            return c>=s && c<=e;
+        function isDateInRange(check, start, end) {
+            const c = new Date(check), s = new Date(start), e = new Date(end);
+            [c, s, e].forEach(x => x.setHours(0, 0, 0, 0));
+            return c >= s && c <= e;
         }
 
-        function generateTableHeaders(){
-            const days = getDaysInMonth(currentMonth,currentYear);
-            const monthName = new Date(currentYear,currentMonth).toLocaleString('default',{month:'long'});
+        function generateTableHeaders() {
+            const days = getDaysInMonth(currentMonth, currentYear);
+            const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
             document.getElementById('pageTitle').textContent = `Attendance Breakdown - ${monthName} ${currentYear}`;
 
             let html = `<tr>
                 <th class="name-header">Name</th>
                 <th class="cost-header">Absence Cost</th>
-                <th class="cost-header">Holiday Days</th>`;
+                <th class="cost-header">Holiday Days</th>
+                <th class="cost-header">Standby £</th>
+                <th class="cost-header">Overtime £</th>
+                <th class="cost-header">Jobs £</th>`;
 
-            for(let d=1;d<=days;d++){
-                const date = new Date(currentYear,currentMonth,d);
-                if(!isWeekend(date)) html += `<th class="date-header">${String(d).padStart(2,'0')}-${monthName.substring(0,3)}</th>`;
+            for (let d = 1; d <= days; d++) {
+                const date = new Date(currentYear, currentMonth, d);
+                if (!isWeekend(date)) html += `<th class="date-header">${String(d).padStart(2, '0')}-${monthName.substring(0, 3)}</th>`;
             }
             html += `</tr>`;
 
-            html += `<tr class="day-row"><td></td><td></td><td></td>`;
-            for(let d=1;d<=days;d++){
-                const date = new Date(currentYear,currentMonth,d);
-                if(!isWeekend(date)) html += `<td>${getDayName(date)}</td>`;
+            html += `<tr class="day-row"><td></td><td></td><td></td><td></td><td></td><td></td>`;
+            for (let d = 1; d <= days; d++) {
+                const date = new Date(currentYear, currentMonth, d);
+                if (!isWeekend(date)) html += `<td>${getDayName(date)}</td>`;
             }
             html += `</tr>`;
 
             document.getElementById('tableHeader').innerHTML = html;
         }
 
-        function calculateHolidayDays(empId){
+        function calculateHolidayDays(empId) {
             let count = 0;
-            const days = getDaysInMonth(currentMonth,currentYear);
-            const emp = window.EMPLOYEES.data.find(e=>e.id===empId);
+            const days = getDaysInMonth(currentMonth, currentYear);
+            const emp = window.EMPLOYEES.data.find(e => e.id === empId);
 
-            for(let d=1;d<=days;d++){
-                const date = new Date(currentYear,currentMonth,d);
-                if(isWeekend(date)) continue;
-                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            for (let d = 1; d <= days; d++) {
+                const date = new Date(currentYear, currentMonth, d);
+                if (isWeekend(date)) continue;
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const key = `${empId}_${dateStr}`;
                 let status = attendanceData[key] || '';
 
-                if(!status && emp.holidays){
-                    const hol = emp.holidays.find(h=>h.status==='approved' && isDateInRange(date,h.dateFrom,h.dateTo));
-                    if(hol) status='H';
+                if (!status && emp.holidays) {
+                    const hol = emp.holidays.find(h => h.status === 'approved' && isDateInRange(date, h.dateFrom, h.dateTo));
+                    if (hol) status = 'H';
                 }
-                if(status==='H') count++;
+                if (status === 'H') count++;
             }
             return count;
         }
 
-        // ONLY USES HOURS FROM ABSENCE MODULE — NO DEFAULT TO 8
-        function calculateAbsenceCost(empId){
+        // Calculate absence cost using ACTUAL HOURS from absence submissions
+        function calculateAbsenceCost(empId) {
             let totalHours = 0;
-            const days = getDaysInMonth(currentMonth,currentYear);
-            const emp = window.EMPLOYEES.data.find(e=>e.id===empId);
+            const emp = window.EMPLOYEES.data.find(e => e.id === empId);
 
-            for(let d=1;d<=days;d++){
-                const date = new Date(currentYear,currentMonth,d);
-                if(isWeekend(date)) continue;
-                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const key = `${empId}_${dateStr}`;
-                let status = attendanceData[key] || '';
+            if (emp.absences && emp.absences.length > 0) {
+                emp.absences.forEach(abs => {
+                    // Check if absence falls within the current month
+                    const absStart = new Date(abs.dateFrom);
+                    const absEnd = new Date(abs.dateTo);
+                    const monthStart = new Date(currentYear, currentMonth, 1);
+                    const monthEnd = new Date(currentYear, currentMonth + 1, 0);
 
-                // Manual override in table → assume full day
-                if(status && ['Sick','AAUP','TOFD'].includes(status)){
-                    totalHours += 8;
-                    continue;
-                }
-
-                // Read from Absence module — use hours field only
-                if(emp.absences && emp.absences.length > 0){
-                    const abs = emp.absences.find(a => isDateInRange(date, a.dateFrom, a.dateTo));
-                    if(abs && ['sickness','aaup','tofd'].includes(abs.type)){
-                        const hours = parseFloat(abs.hours);
-                        if(!isNaN(hours) && hours > 0){
-                            totalHours += hours;
+                    // If absence overlaps with current month
+                    if (absStart <= monthEnd && absEnd >= monthStart) {
+                        if (['sickness', 'aaup', 'tofd'].includes(abs.type)) {
+                            const hours = parseFloat(abs.hours);
+                            if (!isNaN(hours) && hours > 0) {
+                                totalHours += hours;
+                            }
                         }
-                        // No fallback — if hours missing → 0
                     }
-                }
+                });
             }
+
             return totalHours * HOURLY_RATE;
         }
 
-        async function loadAttendanceData(){
-            document.getElementById('loadingMessage').style.display='block';
-            document.getElementById('attendanceTable').style.display='none';
+        // Calculate payment totals for the month
+        function calculatePaymentTotals(empId) {
+            let standbyTotal = 0;
+            let overtimeTotal = 0;
+            let jobsTotal = 0;
 
-            if(!window.EMPLOYEES||!window.EMPLOYEES.data||window.EMPLOYEES.data.length===0){
-                setTimeout(loadAttendanceData,500); return;
+            const employeeClaims = allClaims.filter(claim => {
+                if (claim.employeeId !== empId) return false;
+                
+                const claimDate = new Date(claim.date);
+                return claimDate.getMonth() === currentMonth && claimDate.getFullYear() === currentYear;
+            });
+
+            employeeClaims.forEach(claim => {
+                standbyTotal += claim.standbyValue || 0;
+                overtimeTotal += claim.overtimeValue || 0;
+                jobsTotal += claim.jobsTotalValue || 0;
+            });
+
+            return { standbyTotal, overtimeTotal, jobsTotal };
+        }
+
+        async function loadAttendanceData() {
+            document.getElementById('loadingMessage').style.display = 'block';
+            document.getElementById('attendanceTable').style.display = 'none';
+
+            if (!window.EMPLOYEES || !window.EMPLOYEES.data || window.EMPLOYEES.data.length === 0) {
+                setTimeout(loadAttendanceData, 500);
+                return;
             }
 
             const activeEmployees = window.EMPLOYEES.data
-                .filter(e=>!e.dateLeft)
-                .sort((a,b)=>a.name.localeCompare(b.name));  // Alphabetical
+                .filter(e => !e.dateLeft)
+                .sort((a, b) => a.name.localeCompare(b.name));
 
-            const days = getDaysInMonth(currentMonth,currentYear);
+            const days = getDaysInMonth(currentMonth, currentYear);
             generateTableHeaders();
 
             let bodyHTML = '';
-            activeEmployees.forEach(emp=>{
+            activeEmployees.forEach(emp => {
                 bodyHTML += `<tr>
                     <td class="name-cell">${emp.name}</td>`;
 
-                const cost = calculateAbsenceCost(emp.id);
-                bodyHTML += `<td class="cost-cell">£${cost.toFixed(2)}</td>`;
+                const absenceCost = calculateAbsenceCost(emp.id);
+                bodyHTML += `<td class="cost-cell">£${absenceCost.toFixed(2)}</td>`;
 
                 const holidayDays = calculateHolidayDays(emp.id);
                 bodyHTML += `<td class="holiday-cell">${holidayDays}</td>`;
 
-                for(let d=1;d<=days;d++){
-                    const date = new Date(currentYear,currentMonth,d);
-                    if(isWeekend(date)) continue;
+                const payments = calculatePaymentTotals(emp.id);
+                bodyHTML += `<td class="payment-cell">£${payments.standbyTotal.toFixed(2)}</td>`;
+                bodyHTML += `<td class="payment-cell">£${payments.overtimeTotal.toFixed(2)}</td>`;
+                bodyHTML += `<td class="payment-cell">£${payments.jobsTotal.toFixed(2)}</td>`;
 
-                    const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                for (let d = 1; d <= days; d++) {
+                    const date = new Date(currentYear, currentMonth, d);
+                    if (isWeekend(date)) continue;
+
+                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                     let status = '';
                     let statusClass = '';
 
-                    if(emp.holidays){
-                        const hol = emp.holidays.find(h=>h.status==='approved' && isDateInRange(date,h.dateFrom,h.dateTo));
-                        if(hol){ status='H'; statusClass='status-H'; }
+                    if (emp.holidays) {
+                        const hol = emp.holidays.find(h => h.status === 'approved' && isDateInRange(date, h.dateFrom, h.dateTo));
+                        if (hol) {
+                            status = 'H';
+                            statusClass = 'status-H';
+                        }
                     }
 
-                    if(!status && emp.absences){
-                        const abs = emp.absences.find(a=>isDateInRange(date,a.dateFrom,a.dateTo));
-                        if(abs){
-                            if(abs.type==='sickness'){ status='Sick'; statusClass='status-Sick'; }
-                            else if(abs.type==='aaup'){ status='AAUP'; statusClass='status-AAUP'; }
-                            else if(abs.type==='tofd'){ status='TOFD'; statusClass='status-TOFD'; }
+                    if (!status && emp.absences) {
+                        const abs = emp.absences.find(a => isDateInRange(date, a.dateFrom, a.dateTo));
+                        if (abs) {
+                            if (abs.type === 'sickness') { status = 'Sick'; statusClass = 'status-Sick'; }
+                            else if (abs.type === 'aaup') { status = 'AAUP'; statusClass = 'status-AAUP'; }
+                            else if (abs.type === 'tofd') { status = 'TOFD'; statusClass = 'status-TOFD'; }
                         }
                     }
 
                     const key = `${emp.id}_${dateStr}`;
-                    if(attendanceData[key]){
+                    if (attendanceData[key]) {
                         status = attendanceData[key];
                         statusClass = `status-${status}`;
                     }
 
-                    if(!status && isWorkingDay(date) && isPastOrToday(date)){
-                        status='X';
-                        statusClass='status-X';
+                    if (!status && isWorkingDay(date) && isPastOrToday(date)) {
+                        status = 'X';
+                        statusClass = 'status-X';
                     }
 
                     bodyHTML += `<td class="${statusClass}" onclick="openStatusModal('${emp.id}','${dateStr}',this)">${status}</td>`;
@@ -304,83 +366,90 @@
             });
 
             document.getElementById('tableBody').innerHTML = bodyHTML;
-            document.getElementById('loadingMessage').style.display='none';
-            document.getElementById('attendanceTable').style.display='table';
+            document.getElementById('loadingMessage').style.display = 'none';
+            document.getElementById('attendanceTable').style.display = 'table';
         }
 
-        function openStatusModal(empId,date,cell){
-            currentCell = {empId, date, cell};
-            const emp = window.EMPLOYEES.data.find(e=>e.id===empId);
+        function openStatusModal(empId, date, cell) {
+            currentCell = { empId, date, cell };
+            const emp = window.EMPLOYEES.data.find(e => e.id === empId);
             const d = new Date(date);
-            const dateStr = d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+            const dateStr = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
             document.getElementById('modalTitle').textContent = `${emp.name} - ${dateStr}`;
             document.getElementById('statusModal').classList.add('active');
             document.getElementById('modalOverlay').classList.add('active');
         }
 
-        function closeStatusModal(){
+        function closeStatusModal() {
             document.getElementById('statusModal').classList.remove('active');
             document.getElementById('modalOverlay').classList.remove('active');
             currentCell = null;
         }
 
-        function setStatus(status){
-            if(!currentCell) return;
-            const {empId,date,cell} = currentCell;
+        function setStatus(status) {
+            if (!currentCell) return;
+            const { empId, date, cell } = currentCell;
             const key = `${empId}_${date}`;
 
-            if(status===''){
+            if (status === '') {
                 delete attendanceData[key];
                 const d = new Date(date);
-                if(isWorkingDay(d) && isPastOrToday(d)){
-                    cell.textContent='X'; cell.className='status-X';
-                }else{
-                    cell.textContent=''; cell.className='';
+                if (isWorkingDay(d) && isPastOrToday(d)) {
+                    cell.textContent = 'X';
+                    cell.className = 'status-X';
+                } else {
+                    cell.textContent = '';
+                    cell.className = '';
                 }
-            }else{
-                attendanceData[key]=status;
-                cell.textContent=status;
-                cell.className=`status-${status}`;
+            } else {
+                attendanceData[key] = status;
+                cell.textContent = status;
+                cell.className = `status-${status}`;
             }
 
-            localStorage.setItem('attendanceData',JSON.stringify(attendanceData));
+            localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
 
             const row = cell.parentElement;
-            const cost = calculateAbsenceCost(empId);
-            row.cells[1].textContent = `£${cost.toFixed(2)}`;
+            const absenceCost = calculateAbsenceCost(empId);
+            row.cells[1].textContent = `£${absenceCost.toFixed(2)}`;
             const holidayDays = calculateHolidayDays(empId);
             row.cells[2].textContent = holidayDays;
 
             closeStatusModal();
         }
 
-        function exportToCSV(){
+        function exportToCSV() {
             const table = document.getElementById('attendanceTable');
             const rows = table.querySelectorAll('tr');
             const csv = [];
 
-            rows.forEach(r=>{
+            rows.forEach(r => {
                 const cols = r.querySelectorAll('td, th');
-                const line = Array.from(cols).map(c=>`"${(c.innerText||'').replace(/"/g,'""')}"`).join(',');
+                const line = Array.from(cols).map(c => `"${(c.innerText || '').replace(/"/g, '""')}"`).join(',');
                 csv.push(line);
             });
 
-            const monthName = new Date(currentYear,currentMonth).toLocaleString('default',{month:'long'});
-            const blob = new Blob([csv.join('\n')],{type:'text/csv;charset=utf-8;'});
+            const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long' });
+            const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = `attendance_${monthName}_${currentYear}.csv`;
-            a.style.display='none';
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
-        window.onload = ()=>{
+        window.onload = () => {
             initializeSelectors();
             const saved = localStorage.getItem('attendanceData');
-            if(saved) attendanceData = JSON.parse(saved);
+            if (saved) attendanceData = JSON.parse(saved);
 
-            if(window.EMPLOYEES) window.EMPLOYEES.onUpdate(loadAttendanceData);
-            setTimeout(loadAttendanceData,1000);
+            // Load payment claims
+            loadPaymentClaims();
+
+            if (window.EMPLOYEES) window.EMPLOYEES.onUpdate(loadAttendanceData);
+            setTimeout(loadAttendanceData, 1000);
         };
     </script>
 </body>
