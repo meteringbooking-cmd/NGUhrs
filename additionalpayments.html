@@ -802,7 +802,7 @@
             if (day === 6) {
                 return hours * 28.13;
             }
-            return hours * 24.94;
+            return hours * 24.40;
         }
 
         // Submit claim to Firebase
@@ -886,7 +886,12 @@
                 return;
             }
 
-            filteredClaims.sort((a, b) => new Date(b.date) - new Date(a.date));
+            // Sort by employee name alphabetically, then by date (newest first)
+            filteredClaims.sort((a, b) => {
+                const nameCompare = a.employeeName.localeCompare(b.employeeName);
+                if (nameCompare !== 0) return nameCompare;
+                return new Date(b.date) - new Date(a.date);
+            });
 
             let html = `
                 <div class="claims-table-wrapper">
