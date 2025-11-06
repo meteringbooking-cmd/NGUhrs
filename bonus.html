@@ -280,10 +280,10 @@
                 // Column AG = Sort order (index 32, or header name)
 
                 // Try to get values by both index and common header names
-                let name = row['Column Z'] || row['Name'] || row['Engineer Name'] || '';
-                let jobType = row['Column L'] || row['Job Type'] || row['Work Order Type'] || '';
-                let date = row['Column G'] || row['Date'] || row['Appointment Date'] || '';
-                let status = row['Column AB'] || row['Status'] || row['Work Order Status'] || '';
+                let name = row['Column Z'] || row['Name'] || row['Assigned Engineer'] || '';
+                let jobType = row['Column L'] || row['Job Type'] || row['Job Type'] || '';
+                let date = row['Column G'] || row['Date'] || row['Date'] || '';
+                let status = row['Column AB'] || row['Status'] || row['Booking Status'] || '';
                 let sortOrder = row['Column AG'] || row['Sort'] || '';
 
                 // Remove all "1" from name and trim
