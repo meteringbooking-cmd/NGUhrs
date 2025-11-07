@@ -306,12 +306,13 @@
             console.log('Processing', data.length, 'rows for month', month);
 
             data.forEach((row, index) => {
-                // Use actual column header names
-                let name = row['Assigned Engineer'] || '';
-                let jobType = row['Job Type'] || '';
-                let date = row['Date'] || '';
-                let status = row['Booking Status'] || '';
-                let startedAt = row['Started At'] || '';
+                // Use column positions: A=Date, B=Job Type, C=Assigned Engineer, D=Booking Status, E=Started At
+                const headers = Object.keys(row);
+                let date = row[headers[0]] || '';           // Column A - Date
+                let jobType = row[headers[1]] || '';        // Column B - Job Type
+                let name = row[headers[2]] || '';           // Column C - Assigned Engineer
+                let status = row[headers[3]] || '';         // Column D - Booking Status
+                let startedAt = row[headers[4]] || '';      // Column E - Started At
 
                 // Remove "1" from name
                 name = name.replace(/1/g, '').trim();
