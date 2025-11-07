@@ -308,43 +308,55 @@
 
         function processPaymentData(data, filterMonth) {
             console.log('Processing data, total rows:', data.length);
-            console.log('First row (headers):', data[0]);
-            console.log('Second row (sample):', data[1]);
             
             employeeData = {};
             let processedCount = 0;
             let skippedCount = 0;
             
-            // Skip header row, start from row 1
-            for (let i = 1; i < data.length; i++) {
+            // Skip first 2 rows (Excel column numbers + header names), start from row 2
+            for (let i = 2; i < data.length; i++) {
                 const row = data[i];
                 
                 // Column D (index 3) - Name
-                // Column F (index 5) - Date
+                // Column F (index 5) - Date (Excel serial number)
                 // Column I (index 8) - Standby
-                // Column U (index 20) - Overtime Total
+                // Column S (index 18) - Overtime Total
                 
                 let name = row[3] || '';
-                let date = row[5] || '';
+                let dateSerial = row[5];
                 let standby = parseFloat(row[8]) || 0;
-                let overtime = parseFloat(row[20]) || 0;
+                let overtime = parseFloat(row[18]) || 0;
 
-                console.log(`Row ${i}: Name=${name}, Date=${date}, Standby=${standby}, Overtime=${overtime}`);
-
-                // Clean up name
+                // Clean up name and skip if empty
                 name = name.toString().trim();
-                if (!name) {
+                if (!name || name === 'Name') {
                     skippedCount++;
                     continue;
                 }
 
-                // Filter by month if selected
-                if (filterMonth) {
-                    const rowDate = new Date(date);
-                    if (isNaN(rowDate.getTime()) || rowDate.getMonth() + 1 !== parseInt(filterMonth)) {
+                // Convert Excel serial date to JavaScript Date
+                // Excel dates start from 1900-01-01, serial 1 = 1900-01-01
+                let date = '';
+                if (dateSerial && !isNaN(dateSerial)) {
+                    const excelEpoch = new Date(1899, 11, 30); // Excel epoch (Dec 30, 1899)
+                    const jsDate = new Date(excelEpoch.getTime() + dateSerial * 86400000);
+                    date = jsDate.toISOString().split('T')[0];
+                    
+                    // Filter by month if selected
+                    if (filterMonth && jsDate.getMonth() + 1 !== parseInt(filterMonth)) {
                         skippedCount++;
                         continue;
                     }
+                } else if (filterMonth) {
+                    // Skip if filtering by month but no valid date
+                    skippedCount++;
+                    continue;
+                }
+
+                // Skip if both standby and overtime are 0
+                if (standby === 0 && overtime === 0) {
+                    skippedCount++;
+                    continue;
                 }
 
                 // Initialize employee if needed
@@ -370,10 +382,9 @@
 
             console.log(`Processed: ${processedCount}, Skipped: ${skippedCount}`);
             console.log('Employees found:', Object.keys(employeeData).length);
-            console.log('Employee data:', employeeData);
 
             if (Object.keys(employeeData).length === 0) {
-                showError('No data found. Please check the file format and column positions.');
+                showError('No payment data found. Check that columns D (Name), F (Date), I (Standby), and S (Overtime) contain data.');
                 return;
             }
 
