@@ -308,55 +308,94 @@
 
         function processPaymentData(data, filterMonth) {
             console.log('Processing data, total rows:', data.length);
+            console.log('First 5 rows of data:');
+            for (let i = 0; i < Math.min(5, data.length); i++) {
+                console.log(`Row ${i}:`, data[i]);
+            }
             
             employeeData = {};
             let processedCount = 0;
             let skippedCount = 0;
+            let debugInfo = [];
             
-            // Skip first 2 rows (Excel column numbers + header names), start from row 2
-            for (let i = 2; i < data.length; i++) {
+            // Check what we're working with
+            console.log('Checking columns A(0), B(1), C(2), D(3), E(4) in rows 0-5:');
+            for (let i = 0; i < Math.min(5, data.length); i++) {
+                const row = data[i];
+                console.log(`Row ${i}: A="${row[0]}" B="${row[1]}" C="${row[2]}" D="${row[3]}" E="${row[4]}"`);
+            }
+            
+            // Determine where data starts (skip headers)
+            let dataStartRow = 1;
+            if (data[0] && (data[0][2] === 'Assigned Engineer' || data[0][2] === 'Name')) {
+                dataStartRow = 1; // Headers in row 0, data starts at row 1
+            }
+            
+            console.log(`Starting data processing from row ${dataStartRow}`);
+            
+            // Process data
+            for (let i = dataStartRow; i < data.length; i++) {
                 const row = data[i];
                 
-                // Column D (index 3) - Name
-                // Column F (index 5) - Date (Excel serial number)
-                // Column I (index 8) - Standby
-                // Column S (index 18) - Overtime Total
+                // Column A (index 0) - Date
+                // Column B (index 1) - Job Type  
+                // Column C (index 2) - Assigned Engineer (Name)
+                // Column D (index 3) - Booking Status
+                // Column E (index 4) - Started At
                 
-                let name = row[3] || '';
-                let dateSerial = row[5];
-                let standby = parseFloat(row[8]) || 0;
-                let overtime = parseFloat(row[18]) || 0;
+                let dateValue = row[0] || '';
+                let jobType = row[1] || '';
+                let name = row[2] || '';
+                let status = row[3] || '';
+                let startedAt = row[4] || '';
 
-                // Clean up name and skip if empty
+                // Clean up name
                 name = name.toString().trim();
-                if (!name || name === 'Name') {
+                
+                // Skip if name is empty or a header
+                if (!name || name === 'Assigned Engineer' || name === 'Name' || name === 'name') {
                     skippedCount++;
                     continue;
                 }
 
-                // Convert Excel serial date to JavaScript Date
-                // Excel dates start from 1900-01-01, serial 1 = 1900-01-01
+                // Skip if status is not "Completed"
+                if (status.toString().toLowerCase() !== 'completed') {
+                    skippedCount++;
+                    continue;
+                }
+
+                // Parse date
                 let date = '';
-                if (dateSerial && !isNaN(dateSerial)) {
-                    const excelEpoch = new Date(1899, 11, 30); // Excel epoch (Dec 30, 1899)
-                    const jsDate = new Date(excelEpoch.getTime() + dateSerial * 86400000);
+                let jsDate = null;
+                
+                // Try Excel serial number first
+                if (!isNaN(dateValue) && dateValue > 0) {
+                    const excelEpoch = new Date(1899, 11, 30);
+                    jsDate = new Date(excelEpoch.getTime() + dateValue * 86400000);
                     date = jsDate.toISOString().split('T')[0];
-                    
-                    // Filter by month if selected
-                    if (filterMonth && jsDate.getMonth() + 1 !== parseInt(filterMonth)) {
+                } else if (dateValue) {
+                    // Try parsing as date string
+                    jsDate = new Date(dateValue);
+                    if (!isNaN(jsDate.getTime())) {
+                        date = jsDate.toISOString().split('T')[0];
+                    }
+                }
+                
+                // Filter by month if selected
+                if (filterMonth && jsDate) {
+                    if (jsDate.getMonth() + 1 !== parseInt(filterMonth)) {
                         skippedCount++;
                         continue;
                     }
-                } else if (filterMonth) {
-                    // Skip if filtering by month but no valid date
-                    skippedCount++;
-                    continue;
                 }
 
-                // Skip if both standby and overtime are 0
-                if (standby === 0 && overtime === 0) {
-                    skippedCount++;
-                    continue;
+                // For now, we're just showing completed jobs
+                // You mentioned Standby and Overtime columns - where are those in your file?
+                // This current file seems to be job data, not payment data
+                
+                // Log first 5 valid entries
+                if (processedCount < 5) {
+                    debugInfo.push(`Row ${i}: ${name} | Date: ${date} | Job: ${jobType} | Status: ${status}`);
                 }
 
                 // Initialize employee if needed
@@ -368,29 +407,30 @@
                     };
                 }
 
-                // Add entry
+                // Add entry - but we need standby and overtime columns!
                 employeeData[name].entries.push({
                     date: date,
-                    standby: standby,
-                    overtime: overtime
+                    standby: 0, // Need actual column
+                    overtime: 0  // Need actual column
                 });
 
-                employeeData[name].totalStandby += standby;
-                employeeData[name].totalOvertime += overtime;
                 processedCount++;
             }
 
+            console.log('Sample processed entries:', debugInfo);
             console.log(`Processed: ${processedCount}, Skipped: ${skippedCount}`);
             console.log('Employees found:', Object.keys(employeeData).length);
 
             if (Object.keys(employeeData).length === 0) {
-                showError('No payment data found. Check that columns D (Name), F (Date), I (Standby), and S (Overtime) contain data.');
+                showError('No completed jobs found. Make sure Column D contains "Completed" status.');
                 return;
             }
 
+            // IMPORTANT: I need to know which columns contain Standby and Overtime values!
+            alert('⚠️ This appears to be job data. I need the XLSX file with Standby and Overtime payment columns. Can you tell me which columns have Standby £ and Overtime £?');
+            
             displayResults();
         }
-
         function displayResults() {
             document.getElementById('emptyState').style.display = 'none';
             document.getElementById('resultsSection').style.display = 'block';
