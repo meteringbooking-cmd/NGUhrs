@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bonus Calculator | NGU-hrs</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -14,7 +14,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -103,30 +103,68 @@
             font-size: 2em;
             font-weight: bold;
         }
-        .bonus-table {
+        .payment-table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 20px;
         }
-        .bonus-table thead {
+        .payment-table thead {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
-        .bonus-table th {
+        .payment-table th {
             padding: 15px;
             text-align: left;
             font-weight: 600;
         }
-        .bonus-table td {
+        .payment-table td {
             padding: 12px 15px;
             border-bottom: 1px solid #e0e0e0;
         }
-        .bonus-table tbody tr:hover {
+        .payment-table tbody tr {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .payment-table tbody tr:hover {
             background: #f8f9fa;
         }
-        .bonus-amount {
+        .payment-table tbody tr.expanded {
+            background: #e3f2fd;
+        }
+        .amount {
             font-weight: bold;
             color: #28a745;
             font-size: 1.1em;
+        }
+        .details-row {
+            display: none;
+            background: #f8f9fa;
+        }
+        .details-row.show {
+            display: table-row;
+        }
+        .details-cell {
+            padding: 20px !important;
+            border-bottom: 2px solid #667eea !important;
+        }
+        .details-table {
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .details-table th {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+        .details-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.9em;
         }
         .empty-state {
             text-align: center;
@@ -141,13 +179,15 @@
             margin-bottom: 20px;
             display: none;
         }
-        .debug-info {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-            display: none;
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
     </style>
 </head>
@@ -155,16 +195,17 @@
     <div class="container">
         <header>
             <div>
-                <h1>💰 Bonus Calculator</h1>
-                <p style="color: #666; margin-top: 5px;">Upload CSV to calculate employee bonuses</p>
+                <h1>💰 Payment Summary</h1>
+                <p style="color: #666; margin-top: 5px;">Upload XLSX to view standby and overtime totals</p>
             </div>
             <a href="index.html" class="back-btn">← Back</a>
         </header>
 
         <div class="controls">
             <div class="control-group">
-                <label for="monthSelect">Month</label>
+                <label for="monthSelect">Filter by Month (Optional)</label>
                 <select id="monthSelect">
+                    <option value="">All Months</option>
                     <option value="1">January</option>
                     <option value="2">February</option>
                     <option value="3">March</option>
@@ -180,86 +221,56 @@
                 </select>
             </div>
             <div class="control-group">
-                <label for="fileInput">CSV File</label>
-                <input type="file" id="fileInput" accept=".csv">
+                <label for="fileInput">Upload XLSX File</label>
+                <input type="file" id="fileInput" accept=".xlsx">
             </div>
-            <button class="upload-btn" onclick="processFile()">Calculate Bonuses</button>
+            <button class="upload-btn" onclick="processFile()">Process File</button>
         </div>
 
         <div id="errorMessage" class="error-message"></div>
-        <div id="debugInfo" class="debug-info"></div>
 
         <div id="resultsSection" style="display:none;">
             <div class="summary-cards">
                 <div class="summary-card">
-                    <h3>Employees</h3>
+                    <h3>Total Employees</h3>
                     <div class="value" id="totalEmployees">0</div>
                 </div>
                 <div class="summary-card">
-                    <h3>Jobs Processed</h3>
-                    <div class="value" id="totalJobs">0</div>
+                    <h3>Total Standby</h3>
+                    <div class="value" id="totalStandby">£0</div>
                 </div>
                 <div class="summary-card">
-                    <h3>Total Bonus</h3>
-                    <div class="value" id="totalBonus">£0</div>
+                    <h3>Total Overtime</h3>
+                    <div class="value" id="totalOvertime">£0</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Grand Total</h3>
+                    <div class="value" id="grandTotal">£0</div>
                 </div>
             </div>
 
-            <table class="bonus-table">
+            <table class="payment-table">
                 <thead>
                     <tr>
                         <th>Employee Name</th>
-                        <th>Jobs Completed</th>
-                        <th>Total Points</th>
-                        <th>Bonus Amount</th>
+                        <th>Total Standby</th>
+                        <th>Total Overtime</th>
+                        <th>Total Payment</th>
                     </tr>
                 </thead>
-                <tbody id="bonusTableBody"></tbody>
+                <tbody id="paymentTableBody"></tbody>
             </table>
         </div>
 
         <div id="emptyState" class="empty-state">
             <div style="font-size:4em;margin-bottom:20px;">📊</div>
             <h3>No Data Yet</h3>
-            <p>Select a month and upload CSV to calculate bonuses</p>
+            <p>Upload an XLSX file to view payment summaries</p>
         </div>
     </div>
 
     <script>
-        const jobTypeMap = {
-            'METERING_ELECTRICITY_METER_REMOVAL': 'Single Fuel - Removal',
-            'METERING_GAS_METER_REMOVAL': 'Single Fuel - Removal',
-            'METERING_GAS_METER_EXCHANGE': 'Single Fuel',
-            'METERING_ELECTRICITY_METER_EXCHANGE': 'Single Fuel',
-            'METERING_GAS_METER_NEW_CONNECTION': 'Single Fuel',
-            'METERING_ELECTRICITY_METER_NEW_CONNECTION': 'Single Fuel',
-            'METERING_ELECTRICITY_METER_COMMISSION': 'Maintenance Visit (Non MX Visit)',
-            'METERING_INSTALL_ISOLATOR_SWITCH': 'Maintenance Visit (Non MX Visit)',
-            'METERING_COMMUNICATIONS_HUB_EXCHANGE': 'Maintenance Visit (Non MX Visit)',
-            'METERING_DUAL_FUEL_METER_COMMISSION': 'Maintenance Visit (Non MX Visit)',
-            'METERING_GAS_METER_COMMISSION': 'Maintenance Visit (Non MX Visit)',
-            'METERING_SITE_INVESTIGATION': 'Maintenance Visit (Non MX Visit)',
-            'METERING_ACCURACY_TEST': 'Maintenance Visit (Non MX Visit)',
-            'METERING_INSTALL_CONSUMER_DEVICE': 'Maintenance Visit (Non MX Visit)',
-            'METERING_TRACE_LABEL': 'Maintenance Visit (Non MX Visit)',
-            'METERING_DUAL_FUEL_METER_EXCHANGE': 'Dual Fuel Install/Exchange/Removal',
-            'METERING_DUAL_FUEL_NEW_CONNECTION': 'Dual Fuel Install/Exchange/Removal',
-            'METERING_RTS_SITE_INVESTIGATION': 'Maintenance Visit (Non MX Visit)'
-        };
-
-        const pointsMap = {
-            'Single Fuel': 1,
-            'Maintenance Visit (Non MX Visit)': 1,
-            'Dual Fuel Install/Exchange/Removal': 2,
-            'Single Fuel - Removal': 1
-        };
-
-        const bonusRates = {
-            'Maintenance Visit (Non MX Visit)': 25,
-            'Single Fuel': 50,
-            'Single Fuel - Removal': 50,
-            'Dual Fuel Install/Exchange/Removal': 80
-        };
+        let employeeData = {};
 
         function showError(msg) {
             document.getElementById('errorMessage').textContent = msg;
@@ -269,163 +280,167 @@
             }, 5000);
         }
 
-        function showDebug(msg) {
-            document.getElementById('debugInfo').innerHTML = msg;
-            document.getElementById('debugInfo').style.display = 'block';
-        }
-
         function processFile() {
             const file = document.getElementById('fileInput').files[0];
-            const month = parseInt(document.getElementById('monthSelect').value);
+            const filterMonth = document.getElementById('monthSelect').value;
 
             if (!file) {
-                showError('Please select a CSV file');
+                showError('Please select an XLSX file');
                 return;
             }
 
-            Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
-                complete: (results) => {
-                    console.log('CSV parsed, rows:', results.data.length);
-                    console.log('Headers:', Object.keys(results.data[0] || {}));
-                    processBonusData(results.data, month);
-                },
-                error: (error) => {
-                    showError('Error parsing CSV: ' + error.message);
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    processPaymentData(jsonData, filterMonth);
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    showError('Error processing XLSX file: ' + error.message);
                 }
-            });
+            };
+            reader.readAsArrayBuffer(file);
         }
 
-        function processBonusData(data, month) {
-            const employees = {};
-            let totalJobs = 0;
-            let processedRows = 0;
-            let skippedRows = 0;
-
-            console.log('Processing', data.length, 'rows for month', month);
-
-            data.forEach((row, index) => {
-                // Use column positions: A=Date, B=Job Type, C=Assigned Engineer, D=Booking Status, E=Started At
-                const headers = Object.keys(row);
-                let date = row[headers[0]] || '';           // Column A - Date
-                let jobType = row[headers[1]] || '';        // Column B - Job Type
-                let name = row[headers[2]] || '';           // Column C - Assigned Engineer
-                let status = row[headers[3]] || '';         // Column D - Booking Status
-                let startedAt = row[headers[4]] || '';      // Column E - Started At
-
-                // Remove "1" from name
-                name = name.replace(/1/g, '').trim();
-
-                // Filter by status (must be "completed")
-                if (!status || status.toLowerCase() !== 'completed') {
-                    skippedRows++;
-                    return;
-                }
-
-                // Filter by month
-                if (!date) {
-                    skippedRows++;
-                    return;
-                }
-
-                const jobDate = new Date(date);
-                if (isNaN(jobDate.getTime()) || jobDate.getMonth() + 1 !== month) {
-                    skippedRows++;
-                    return;
-                }
-
-                // Convert job type to description
-                const description = jobTypeMap[jobType];
+        function processPaymentData(data, filterMonth) {
+            employeeData = {};
+            
+            // Skip header row, start from row 1
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
                 
-                if (!description) {
-                    console.log('Unknown job type:', jobType);
-                    skippedRows++;
-                    return;
-                }
+                // Column D (index 3) - Name
+                // Column F (index 5) - Date
+                // Column I (index 8) - Standby
+                // Column U (index 20) - Overtime Total
+                
+                let name = row[3] || '';
+                let date = row[5] || '';
+                let standby = parseFloat(row[8]) || 0;
+                let overtime = parseFloat(row[20]) || 0;
 
-                if (!name) {
-                    skippedRows++;
-                    return;
-                }
+                // Clean up name
+                name = name.toString().trim();
+                if (!name) continue;
 
-                // Initialize employee array
-                if (!employees[name]) {
-                    employees[name] = [];
-                }
-
-                employees[name].push({
-                    date: jobDate,
-                    description: description,
-                    startedAt: startedAt,
-                    originalJobType: jobType
-                });
-
-                totalJobs++;
-                processedRows++;
-            });
-
-            console.log('Processed:', processedRows, 'Skipped:', skippedRows);
-            console.log('Employees found:', Object.keys(employees).length);
-
-            showDebug(`Processed ${processedRows} jobs from ${data.length} rows. Found ${Object.keys(employees).length} employees.`);
-
-            // Calculate bonuses
-            const bonusResults = [];
-            let grandTotal = 0;
-
-            Object.keys(employees).sort().forEach(name => {
-                // Sort jobs by Started At (column AG), then by Date
-                const jobs = employees[name].sort((a, b) => {
-                    const dateA = new Date(a.startedAt || a.date);
-                    const dateB = new Date(b.startedAt || b.date);
-                    return dateA - dateB;
-                });
-
-                let points = 0;
-                let bonus = 0;
-
-                jobs.forEach(job => {
-                    const jobPoints = pointsMap[job.description] || 0;
-                    points += jobPoints;
-
-                    // Only award bonus after 6 points
-                    if (points > 6) {
-                        const jobBonus = bonusRates[job.description] || 0;
-                        bonus += jobBonus;
+                // Filter by month if selected
+                if (filterMonth) {
+                    const rowDate = new Date(date);
+                    if (isNaN(rowDate.getTime()) || rowDate.getMonth() + 1 !== parseInt(filterMonth)) {
+                        continue;
                     }
+                }
+
+                // Initialize employee if needed
+                if (!employeeData[name]) {
+                    employeeData[name] = {
+                        entries: [],
+                        totalStandby: 0,
+                        totalOvertime: 0
+                    };
+                }
+
+                // Add entry
+                employeeData[name].entries.push({
+                    date: date,
+                    standby: standby,
+                    overtime: overtime
                 });
 
-                bonusResults.push({
-                    name: name,
-                    jobCount: jobs.length,
-                    points: points,
-                    bonus: bonus
-                });
+                employeeData[name].totalStandby += standby;
+                employeeData[name].totalOvertime += overtime;
+            }
 
-                grandTotal += bonus;
-            });
-
-            displayResults(bonusResults, totalJobs, grandTotal);
+            displayResults();
         }
 
-        function displayResults(results, totalJobs, grandTotal) {
+        function displayResults() {
             document.getElementById('emptyState').style.display = 'none';
             document.getElementById('resultsSection').style.display = 'block';
 
-            document.getElementById('totalEmployees').textContent = results.length;
-            document.getElementById('totalJobs').textContent = totalJobs;
-            document.getElementById('totalBonus').textContent = `£${grandTotal.toFixed(2)}`;
+            const employees = Object.keys(employeeData).sort();
+            
+            let grandStandby = 0;
+            let grandOvertime = 0;
 
-            const tbody = document.getElementById('bonusTableBody');
-            tbody.innerHTML = results.map(r => `
-                <tr>
-                    <td>${r.name}</td>
-                    <td>${r.jobCount}</td>
-                    <td>${r.points}</td>
-                    <td class="bonus-amount">£${r.bonus.toFixed(2)}</td>
-                </tr>
-            `).join('');
+            employees.forEach(name => {
+                grandStandby += employeeData[name].totalStandby;
+                grandOvertime += employeeData[name].totalOvertime;
+            });
+
+            document.getElementById('totalEmployees').textContent = employees.length;
+            document.getElementById('totalStandby').textContent = `£${grandStandby.toFixed(2)}`;
+            document.getElementById('totalOvertime').textContent = `£${grandOvertime.toFixed(2)}`;
+            document.getElementById('grandTotal').textContent = `£${(grandStandby + grandOvertime).toFixed(2)}`;
+
+            const tbody = document.getElementById('paymentTableBody');
+            tbody.innerHTML = '';
+
+            employees.forEach((name, index) => {
+                const emp = employeeData[name];
+                const total = emp.totalStandby + emp.totalOvertime;
+
+                // Main row
+                const mainRow = document.createElement('tr');
+                mainRow.onclick = () => toggleDetails(index);
+                mainRow.innerHTML = `
+                    <td><strong>${name}</strong></td>
+                    <td class="amount">£${emp.totalStandby.toFixed(2)}</td>
+                    <td class="amount">£${emp.totalOvertime.toFixed(2)}</td>
+                    <td class="amount">£${total.toFixed(2)}</td>
+                `;
+                tbody.appendChild(mainRow);
+
+                // Details row
+                const detailsRow = document.createElement('tr');
+                detailsRow.className = 'details-row';
+                detailsRow.id = `details-${index}`;
+                
+                let detailsHTML = `
+                    <td colspan="4" class="details-cell">
+                        <table class="details-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Standby</th>
+                                    <th>Overtime</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                emp.entries.forEach(entry => {
+                    const entryTotal = entry.standby + entry.overtime;
+                    const dateFormatted = entry.date ? new Date(entry.date).toLocaleDateString('en-GB') : 'N/A';
+                    detailsHTML += `
+                        <tr>
+                            <td>${dateFormatted}</td>
+                            <td>£${entry.standby.toFixed(2)}</td>
+                            <td>£${entry.overtime.toFixed(2)}</td>
+                            <td><strong>£${entryTotal.toFixed(2)}</strong></td>
+                        </tr>`;
+                });
+
+                detailsHTML += `
+                            </tbody>
+                        </table>
+                    </td>`;
+                
+                detailsRow.innerHTML = detailsHTML;
+                tbody.appendChild(detailsRow);
+            });
+        }
+
+        function toggleDetails(index) {
+            const detailsRow = document.getElementById(`details-${index}`);
+            const mainRow = detailsRow.previousElementSibling;
+            
+            detailsRow.classList.toggle('show');
+            mainRow.classList.toggle('expanded');
         }
 
         // Set default month to current month
