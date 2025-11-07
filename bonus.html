@@ -78,6 +78,9 @@
             font-size: 1em;
             font-weight: 600;
         }
+        .upload-btn:hover {
+            background: #218838;
+        }
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -138,6 +141,14 @@
             margin-bottom: 20px;
             display: none;
         }
+        .debug-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -172,10 +183,11 @@
                 <label for="fileInput">CSV File</label>
                 <input type="file" id="fileInput" accept=".csv">
             </div>
-            <button class="upload-btn" onclick="processFile()">Calculate</button>
+            <button class="upload-btn" onclick="processFile()">Calculate Bonuses</button>
         </div>
 
         <div id="errorMessage" class="error-message"></div>
+        <div id="debugInfo" class="debug-info"></div>
 
         <div id="resultsSection" style="display:none;">
             <div class="summary-cards">
@@ -184,7 +196,7 @@
                     <div class="value" id="totalEmployees">0</div>
                 </div>
                 <div class="summary-card">
-                    <h3>Jobs</h3>
+                    <h3>Jobs Processed</h3>
                     <div class="value" id="totalJobs">0</div>
                 </div>
                 <div class="summary-card">
@@ -196,10 +208,10 @@
             <table class="bonus-table">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Jobs</th>
-                        <th>Points</th>
-                        <th>Bonus</th>
+                        <th>Employee Name</th>
+                        <th>Jobs Completed</th>
+                        <th>Total Points</th>
+                        <th>Bonus Amount</th>
                     </tr>
                 </thead>
                 <tbody id="bonusTableBody"></tbody>
@@ -208,8 +220,8 @@
 
         <div id="emptyState" class="empty-state">
             <div style="font-size:4em;margin-bottom:20px;">📊</div>
-            <h3>No Data</h3>
-            <p>Select month and upload CSV</p>
+            <h3>No Data Yet</h3>
+            <p>Select a month and upload CSV to calculate bonuses</p>
         </div>
     </div>
 
@@ -249,115 +261,150 @@
             'Dual Fuel Install/Exchange/Removal': 80
         };
 
+        function showError(msg) {
+            document.getElementById('errorMessage').textContent = msg;
+            document.getElementById('errorMessage').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('errorMessage').style.display = 'none';
+            }, 5000);
+        }
+
+        function showDebug(msg) {
+            document.getElementById('debugInfo').innerHTML = msg;
+            document.getElementById('debugInfo').style.display = 'block';
+        }
+
         function processFile() {
             const file = document.getElementById('fileInput').files[0];
             const month = parseInt(document.getElementById('monthSelect').value);
 
             if (!file) {
-                document.getElementById('errorMessage').textContent = 'Select a CSV file';
-                document.getElementById('errorMessage').style.display = 'block';
+                showError('Please select a CSV file');
                 return;
             }
 
             Papa.parse(file, {
                 header: true,
-                complete: (results) => processBonusData(results.data, month)
+                skipEmptyLines: true,
+                complete: (results) => {
+                    console.log('CSV parsed, rows:', results.data.length);
+                    console.log('Headers:', Object.keys(results.data[0] || {}));
+                    processBonusData(results.data, month);
+                },
+                error: (error) => {
+                    showError('Error parsing CSV: ' + error.message);
+                }
             });
         }
 
         function processBonusData(data, month) {
             const employees = {};
             let totalJobs = 0;
+            let processedRows = 0;
+            let skippedRows = 0;
 
-            console.log('Processing CSV data...');
-            console.log('Sample row:', data[0]); // Debug: see what columns we have
+            console.log('Processing', data.length, 'rows for month', month);
 
             data.forEach((row, index) => {
-                // Column Z = Name (index 25, or header name)
-                // Column L = Job Type (index 11, or header name)
-                // Column G = Date (index 6, or header name)
-                // Column AB = Status (index 27, or header name)
-                // Column AG = Sort order (index 32, or header name)
+                // Use actual column header names
+                let name = row['Assigned Engineer'] || '';
+                let jobType = row['Job Type'] || '';
+                let date = row['Date'] || '';
+                let status = row['Booking Status'] || '';
+                let startedAt = row['Started At'] || '';
 
-                // Try to get values by both index and common header names
-                let name = row['Column Z'] || row['Name'] || row['Assigned Engineer'] || '';
-                let jobType = row['Column L'] || row['Job Type'] || row['Job Type'] || '';
-                let date = row['Column G'] || row['Date'] || row['Date'] || '';
-                let status = row['Column AB'] || row['Status'] || row['Booking Status'] || '';
-                let sortOrder = row['Column AG'] || row['Sort'] || '';
-
-                // Remove all "1" from name and trim
+                // Remove "1" from name
                 name = name.replace(/1/g, '').trim();
-                
-                // Skip if status is not "Completed"
-                if (status.toLowerCase() !== 'completed') return;
-                
-                // Skip if missing critical data
-                if (!name || !jobType || !date) return;
 
-                // Parse date
+                // Filter by status (must be "completed")
+                if (!status || status.toLowerCase() !== 'completed') {
+                    skippedRows++;
+                    return;
+                }
+
+                // Filter by month
+                if (!date) {
+                    skippedRows++;
+                    return;
+                }
+
                 const jobDate = new Date(date);
-                
-                // Check if date is valid and in selected month
-                if (isNaN(jobDate.getTime())) return;
-                if (jobDate.getMonth() + 1 !== month) return;
+                if (isNaN(jobDate.getTime()) || jobDate.getMonth() + 1 !== month) {
+                    skippedRows++;
+                    return;
+                }
 
-                // Map job type to description
-                const desc = jobTypeMap[jobType] || jobType;
+                // Convert job type to description
+                const description = jobTypeMap[jobType];
                 
-                // Store job info
+                if (!description) {
+                    console.log('Unknown job type:', jobType);
+                    skippedRows++;
+                    return;
+                }
+
+                if (!name) {
+                    skippedRows++;
+                    return;
+                }
+
+                // Initialize employee array
                 if (!employees[name]) {
                     employees[name] = [];
                 }
-                
-                employees[name].push({ 
-                    date: jobDate, 
-                    desc: desc,
-                    sortOrder: sortOrder || date // Use sort order if available, otherwise date
+
+                employees[name].push({
+                    date: jobDate,
+                    description: description,
+                    startedAt: startedAt,
+                    originalJobType: jobType
                 });
-                
+
                 totalJobs++;
+                processedRows++;
             });
 
+            console.log('Processed:', processedRows, 'Skipped:', skippedRows);
             console.log('Employees found:', Object.keys(employees).length);
-            console.log('Total jobs:', totalJobs);
+
+            showDebug(`Processed ${processedRows} jobs from ${data.length} rows. Found ${Object.keys(employees).length} employees.`);
 
             // Calculate bonuses
             const bonusResults = [];
             let grandTotal = 0;
 
             Object.keys(employees).sort().forEach(name => {
-                // Sort jobs by date (Column G)
-                const jobs = employees[name].sort((a, b) => a.date - b.date);
-                
+                // Sort jobs by Started At (column AG), then by Date
+                const jobs = employees[name].sort((a, b) => {
+                    const dateA = new Date(a.startedAt || a.date);
+                    const dateB = new Date(b.startedAt || b.date);
+                    return dateA - dateB;
+                });
+
                 let points = 0;
                 let bonus = 0;
 
                 jobs.forEach(job => {
-                    // Get points for this job type
-                    const jobPoints = pointsMap[job.desc] || 0;
-                    
-                    // Add points
+                    const jobPoints = pointsMap[job.description] || 0;
                     points += jobPoints;
 
-                    // Award bonus only AFTER reaching 6 points
+                    // Only award bonus after 6 points
                     if (points > 6) {
-                        const jobBonus = bonusRates[job.desc] || 0;
+                        const jobBonus = bonusRates[job.description] || 0;
                         bonus += jobBonus;
                     }
                 });
 
-                bonusResults.push({ 
-                    name: name, 
-                    jobCount: jobs.length, 
-                    points: points, 
-                    bonus: bonus 
+                bonusResults.push({
+                    name: name,
+                    jobCount: jobs.length,
+                    points: points,
+                    bonus: bonus
                 });
-                
+
                 grandTotal += bonus;
             });
 
-            console.log('Bonus results:', bonusResults);
             displayResults(bonusResults, totalJobs, grandTotal);
         }
 
@@ -380,6 +427,7 @@
             `).join('');
         }
 
+        // Set default month to current month
         document.getElementById('monthSelect').value = new Date().getMonth() + 1;
     </script>
 </body>
