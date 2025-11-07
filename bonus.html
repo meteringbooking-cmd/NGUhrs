@@ -307,7 +307,13 @@
         }
 
         function processPaymentData(data, filterMonth) {
+            console.log('Processing data, total rows:', data.length);
+            console.log('First row (headers):', data[0]);
+            console.log('Second row (sample):', data[1]);
+            
             employeeData = {};
+            let processedCount = 0;
+            let skippedCount = 0;
             
             // Skip header row, start from row 1
             for (let i = 1; i < data.length; i++) {
@@ -323,14 +329,20 @@
                 let standby = parseFloat(row[8]) || 0;
                 let overtime = parseFloat(row[20]) || 0;
 
+                console.log(`Row ${i}: Name=${name}, Date=${date}, Standby=${standby}, Overtime=${overtime}`);
+
                 // Clean up name
                 name = name.toString().trim();
-                if (!name) continue;
+                if (!name) {
+                    skippedCount++;
+                    continue;
+                }
 
                 // Filter by month if selected
                 if (filterMonth) {
                     const rowDate = new Date(date);
                     if (isNaN(rowDate.getTime()) || rowDate.getMonth() + 1 !== parseInt(filterMonth)) {
+                        skippedCount++;
                         continue;
                     }
                 }
@@ -353,6 +365,16 @@
 
                 employeeData[name].totalStandby += standby;
                 employeeData[name].totalOvertime += overtime;
+                processedCount++;
+            }
+
+            console.log(`Processed: ${processedCount}, Skipped: ${skippedCount}`);
+            console.log('Employees found:', Object.keys(employeeData).length);
+            console.log('Employee data:', employeeData);
+
+            if (Object.keys(employeeData).length === 0) {
+                showError('No data found. Please check the file format and column positions.');
+                return;
             }
 
             displayResults();
