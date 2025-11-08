@@ -620,9 +620,12 @@
                     const jobElement = document.getElementById(`job-${day}-${job}`);
                     const meterElement = document.getElementById(`meter-${day}-${job}`);
 
+                    // Only get bonus if AFTER this job you're OVER 6 meters
+                    // Calculate how many meters are over the 6 threshold
                     if (dayMeters > 6) {
-                        // Job earns bonus - always full job bonus regardless of crossing threshold
-                        const bonusAmount = bonusRates[type];
+                        const metersOverThreshold = dayMeters - 6;
+                        // Bonus is £50 per meter over 6
+                        const bonusAmount = metersOverThreshold * 50;
                         dayBonus += bonusAmount;
                         
                         jobElement.classList.add('bonus');
@@ -718,8 +721,11 @@
                                         totalMeters += job.meters;
                                         
                                         if (totalMeters > 6) {
-                                            // Any job that pushes total over 6 gets full bonus
-                                            dayBonus += bonusRates[job.type];
+                                            // Bonus is £50 per meter over 6
+                                            const metersOver = totalMeters - 6;
+                                            dayBonus += metersOver * 50;
+                                            // Set back to exactly the meters over for next job calculation
+                                            totalMeters = 6 + metersOver;
                                         }
                                     });
                                     
