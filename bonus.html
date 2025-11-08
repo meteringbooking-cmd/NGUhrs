@@ -37,6 +37,31 @@
             border: none;
             border-radius: 8px;
             text-decoration: none;
+            cursor: pointer;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #e0e0e0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
         }
         .content-grid {
             display: grid;
@@ -97,28 +122,45 @@
             font-size: 1.2em;
             font-weight: bold;
         }
-        .week-section {
+        .week-selector {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+        .week-selector label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .week-selector input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            width: 200px;
+        }
+        .day-section {
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
             border-left: 4px solid #667eea;
         }
-        .week-header {
+        .day-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-        .week-header h3 {
+        .day-header h3 {
             color: #667eea;
             font-size: 1.1em;
         }
-        .date-input {
-            padding: 8px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 1em;
+        .date-display {
+            color: #666;
+            font-size: 0.9em;
         }
         .job-quantity {
             margin-bottom: 15px;
@@ -166,20 +208,33 @@
             border-color: #28a745;
             background: #d4edda;
         }
-        .calculate-btn {
-            background: #28a745;
-            color: white;
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .calculate-btn, .save-btn {
+            flex: 1;
             padding: 15px 30px;
             border: none;
             border-radius: 8px;
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
+        }
+        .calculate-btn {
+            background: #28a745;
+            color: white;
         }
         .calculate-btn:hover {
             background: #218838;
+        }
+        .save-btn {
+            background: #667eea;
+            color: white;
+        }
+        .save-btn:hover {
+            background: #5568d3;
         }
         .meter-count {
             color: #666;
@@ -191,6 +246,124 @@
             padding: 60px;
             color: #666;
         }
+        .month-view {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .month-selector {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+        .month-selector label {
+            color: #333;
+            font-weight: 600;
+        }
+        .month-selector input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        .month-selector button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .summary-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .summary-row {
+            display: grid;
+            grid-template-columns: 1fr 150px;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .summary-row:hover {
+            background: #e3f2fd;
+        }
+        .summary-row.header {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            cursor: default;
+        }
+        .summary-row.header:hover {
+            background: #667eea;
+        }
+        .employee-name {
+            font-weight: 600;
+        }
+        .employee-total {
+            text-align: right;
+            color: #28a745;
+            font-weight: 700;
+        }
+        .detail-view {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            display: none;
+        }
+        .detail-view.active {
+            display: block;
+        }
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+        }
+        .detail-header h3 {
+            color: #667eea;
+        }
+        .close-detail {
+            padding: 8px 15px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .day-detail {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        .day-detail-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .day-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+        .day-bonus {
+            color: #28a745;
+            font-weight: 600;
+        }
+        .job-list {
+            font-size: 0.9em;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -198,44 +371,125 @@
         <header>
             <div>
                 <h1>💰 Bonus Calculator</h1>
-                <p style="color: #666; margin-top: 5px;">Select employee and enter weekly job data</p>
+                <p style="color: #666; margin-top: 5px;">Track daily bonuses and monthly summaries</p>
             </div>
             <a href="index.html" class="back-btn">← Back</a>
         </header>
 
-        <div class="content-grid">
-            <div class="employee-list">
-                <h2>Employees</h2>
-                <div id="employeeListContainer">
-                    <p style="color:#666; text-align:center;">Loading...</p>
-                </div>
-            </div>
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('daily')">Daily Entry</button>
+            <button class="tab-btn" onclick="switchTab('monthly')">Monthly View</button>
+        </div>
 
-            <div class="bonus-form">
-                <div id="emptyState" class="empty-state">
-                    <div style="font-size:4em;margin-bottom:20px;">👤</div>
-                    <h3>No Employee Selected</h3>
-                    <p>Select an employee from the list to calculate bonus</p>
+        <div id="dailyTab" class="tab-content active">
+            <div class="content-grid">
+                <div class="employee-list">
+                    <h2>Employees</h2>
+                    <div id="employeeListContainer">
+                        <p style="color:#666; text-align:center;">Loading...</p>
+                    </div>
                 </div>
 
-                <div id="bonusFormContent" style="display:none;">
-                    <div class="form-header">
-                        <h2 id="selectedEmployeeName">Employee Name</h2>
-                        <div class="bonus-total" id="totalBonus">£0.00</div>
+                <div class="bonus-form">
+                    <div id="emptyState" class="empty-state">
+                        <div style="font-size:4em;margin-bottom:20px;">👤</div>
+                        <h3>No Employee Selected</h3>
+                        <p>Select an employee from the list to calculate bonus</p>
                     </div>
 
-                    <div id="weeksContainer"></div>
+                    <div id="bonusFormContent" style="display:none;">
+                        <div class="form-header">
+                            <h2 id="selectedEmployeeName">Employee Name</h2>
+                            <div class="bonus-total" id="totalBonus">£0.00</div>
+                        </div>
 
-                    <button class="calculate-btn" onclick="calculateBonus()">Calculate Bonus</button>
+                        <div class="week-selector">
+                            <label for="weekStart">Week Starting (Monday):</label>
+                            <input type="date" id="weekStart" onchange="updateWeekDates()">
+                        </div>
+
+                        <div id="daysContainer"></div>
+
+                        <div class="action-buttons">
+                            <button class="calculate-btn" onclick="calculateBonus()">Calculate Bonus</button>
+                            <button class="save-btn" onclick="saveWeekData()">Save Week</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div id="monthlyTab" class="tab-content">
+            <div class="month-view">
+                <div class="month-selector">
+                    <label for="monthSelect">Select Month:</label>
+                    <input type="month" id="monthSelect">
+                    <button onclick="loadMonthlyData()">Load Data</button>
+                </div>
+
+                <div class="summary-table" id="summaryTable">
+                    <div class="summary-row header">
+                        <div>Employee Name</div>
+                        <div style="text-align:right;">Total Bonus</div>
+                    </div>
+                </div>
+
+                <div class="detail-view" id="detailView"></div>
+            </div>
+        </div>
     </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+        import { getDatabase, ref, set, get, child } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
+
+        // Initialize Firebase (use your config from employees-firebase.js)
+        const firebaseConfig = {
+            // Your Firebase config here
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        window.database = database;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbGet = get;
+        window.dbChild = child;
+    </script>
 
     <script>
         let selectedEmployee = null;
         const meterValues = { 'Dual': 2, 'Single': 1, 'Comms': 1 };
         const bonusRates = { 'Dual': 80, 'Single': 50, 'Comms': 25 };
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'daily') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('dailyTab').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                document.getElementById('monthlyTab').classList.add('active');
+                setCurrentMonth();
+            }
+        }
+
+        function setCurrentMonth() {
+            const now = new Date();
+            const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            document.getElementById('monthSelect').value = monthStr;
+        }
 
         function renderEmployeeList() {
             const container = document.getElementById('employeeListContainer');
@@ -271,49 +525,57 @@
             document.getElementById('bonusFormContent').style.display = 'block';
             document.getElementById('selectedEmployeeName').textContent = selectedEmployee.name;
             
-            generateWeeks();
+            setMondayDate();
+            generateDays();
         }
 
-        function generateWeeks() {
-            const container = document.getElementById('weeksContainer');
+        function setMondayDate() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + daysToMonday);
+            
+            document.getElementById('weekStart').value = monday.toISOString().split('T')[0];
+        }
+
+        function updateWeekDates() {
+            generateDays();
+        }
+
+        function generateDays() {
+            const container = document.getElementById('daysContainer');
+            const weekStart = new Date(document.getElementById('weekStart').value);
             let html = '';
 
-            for (let week = 1; week <= 5; week++) {
+            days.forEach((day, index) => {
+                const date = new Date(weekStart);
+                date.setDate(weekStart.getDate() + index);
+                const dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
                 html += `
-                    <div class="week-section">
-                        <div class="week-header">
-                            <h3>Week ${week}</h3>
-                            <input type="date" class="date-input" id="date-week${week}" onchange="updateDates(${week})">
+                    <div class="day-section">
+                        <div class="day-header">
+                            <h3>${day}</h3>
+                            <div class="date-display">${dateStr}</div>
                         </div>
                         <div class="job-quantity">
-                            <label for="qty-week${week}">Number of Jobs:</label>
-                            <select id="qty-week${week}" onchange="generateJobSelectors(${week})">
+                            <label for="qty-${day}">Number of Jobs:</label>
+                            <select id="qty-${day}" onchange="generateJobSelectors('${day}')">
                                 <option value="0">0</option>
                                 ${[...Array(10)].map((_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('')}
                             </select>
                         </div>
-                        <div class="jobs-container" id="jobs-week${week}"></div>
+                        <div class="jobs-container" id="jobs-${day}"></div>
                     </div>`;
-            }
+            });
 
             container.innerHTML = html;
         }
 
-        function updateDates(weekNum) {
-            if (weekNum === 1) {
-                const startDate = new Date(document.getElementById(`date-week1`).value);
-                
-                for (let i = 2; i <= 5; i++) {
-                    const nextDate = new Date(startDate);
-                    nextDate.setDate(startDate.getDate() + (7 * (i - 1)));
-                    document.getElementById(`date-week${i}`).value = nextDate.toISOString().split('T')[0];
-                }
-            }
-        }
-
-        function generateJobSelectors(weekNum) {
-            const qty = parseInt(document.getElementById(`qty-week${weekNum}`).value);
-            const container = document.getElementById(`jobs-week${weekNum}`);
+        function generateJobSelectors(day) {
+            const qty = parseInt(document.getElementById(`qty-${day}`).value);
+            const container = document.getElementById(`jobs-${day}`);
             
             if (qty === 0) {
                 container.innerHTML = '';
@@ -323,15 +585,15 @@
             let html = '';
             for (let i = 1; i <= qty; i++) {
                 html += `
-                    <div class="job-select" id="job-week${weekNum}-${i}">
+                    <div class="job-select" id="job-${day}-${i}">
                         <label>Job ${i}</label>
-                        <select id="type-week${weekNum}-${i}">
+                        <select id="type-${day}-${i}">
                             <option value="">Select...</option>
                             <option value="Dual">Dual (2 meters)</option>
                             <option value="Single">Single (1 meter)</option>
                             <option value="Comms">Comms (1 meter)</option>
                         </select>
-                        <div class="meter-count" id="meter-week${weekNum}-${i}"></div>
+                        <div class="meter-count" id="meter-${day}-${i}"></div>
                     </div>`;
             }
             
@@ -343,26 +605,26 @@
             let totalBonus = 0;
             let jobsProcessed = [];
 
-            // Collect all jobs from all weeks
-            for (let week = 1; week <= 5; week++) {
-                const qty = parseInt(document.getElementById(`qty-week${week}`).value) || 0;
+            // Collect all jobs from all days
+            days.forEach(day => {
+                const qty = parseInt(document.getElementById(`qty-${day}`).value) || 0;
                 
                 for (let job = 1; job <= qty; job++) {
-                    const type = document.getElementById(`type-week${week}-${job}`).value;
+                    const type = document.getElementById(`type-${day}-${job}`).value;
                     if (type) {
-                        jobsProcessed.push({ week, job, type });
+                        jobsProcessed.push({ day, job, type });
                     }
                 }
-            }
+            });
 
             // Process jobs in order and calculate bonus
-            jobsProcessed.forEach(({ week, job, type }) => {
+            jobsProcessed.forEach(({ day, job, type }) => {
                 const meters = meterValues[type];
                 const previousTotal = totalMeters;
                 totalMeters += meters;
 
-                const jobElement = document.getElementById(`job-week${week}-${job}`);
-                const meterElement = document.getElementById(`meter-week${week}-${job}`);
+                const jobElement = document.getElementById(`job-${day}-${job}`);
+                const meterElement = document.getElementById(`meter-${day}-${job}`);
 
                 if (totalMeters > 6) {
                     // Calculate partial bonus if job crosses 6 meter threshold
@@ -390,6 +652,186 @@
 
             document.getElementById('totalBonus').textContent = `£${totalBonus.toFixed(2)}`;
         }
+
+        async function saveWeekData() {
+            if (!selectedEmployee) {
+                alert('Please select an employee first');
+                return;
+            }
+
+            const weekStart = document.getElementById('weekStart').value;
+            if (!weekStart) {
+                alert('Please select a week start date');
+                return;
+            }
+
+            const weekData = {};
+            
+            days.forEach((day, index) => {
+                const date = new Date(weekStart);
+                date.setDate(date.getDate() + index);
+                const dateKey = date.toISOString().split('T')[0];
+                
+                const qty = parseInt(document.getElementById(`qty-${day}`).value) || 0;
+                const jobs = [];
+                
+                for (let i = 1; i <= qty; i++) {
+                    const type = document.getElementById(`type-${day}-${i}`).value;
+                    if (type) {
+                        jobs.push({ type, meters: meterValues[type] });
+                    }
+                }
+                
+                if (jobs.length > 0) {
+                    weekData[dateKey] = { day, jobs };
+                }
+            });
+
+            try {
+                const dbPath = `bonuses/${selectedEmployee.id}/${weekStart}`;
+                await window.dbSet(window.dbRef(window.database, dbPath), weekData);
+                alert('Week data saved successfully!');
+            } catch (error) {
+                console.error('Error saving data:', error);
+                alert('Error saving data. Please try again.');
+            }
+        }
+
+        async function loadMonthlyData() {
+            const monthStr = document.getElementById('monthSelect').value;
+            if (!monthStr) {
+                alert('Please select a month');
+                return;
+            }
+
+            const [year, month] = monthStr.split('-');
+            const employees = window.EMPLOYEES.data.filter(e => !e.dateLeft);
+            
+            const summaryData = [];
+
+            for (const emp of employees) {
+                let totalBonus = 0;
+                const dailyData = [];
+
+                try {
+                    const snapshot = await window.dbGet(window.dbChild(window.dbRef(window.database), `bonuses/${emp.id}`));
+                    
+                    if (snapshot.exists()) {
+                        const allWeeks = snapshot.val();
+                        
+                        Object.keys(allWeeks).forEach(weekStart => {
+                            const weekData = allWeeks[weekStart];
+                            
+                            Object.keys(weekData).forEach(dateKey => {
+                                if (dateKey.startsWith(`${year}-${month}`)) {
+                                    const dayInfo = weekData[dateKey];
+                                    let dayBonus = 0;
+                                    let totalMeters = 0;
+                                    
+                                    dayInfo.jobs.forEach(job => {
+                                        const previousTotal = totalMeters;
+                                        totalMeters += job.meters;
+                                        
+                                        if (totalMeters > 6) {
+                                            if (previousTotal < 6) {
+                                                const metersOver = totalMeters - 6;
+                                                const bonusPerMeter = bonusRates[job.type] / job.meters;
+                                                dayBonus += metersOver * bonusPerMeter;
+                                            } else {
+                                                dayBonus += bonusRates[job.type];
+                                            }
+                                        }
+                                    });
+                                    
+                                    totalBonus += dayBonus;
+                                    dailyData.push({ date: dateKey, day: dayInfo.day, jobs: dayInfo.jobs, bonus: dayBonus });
+                                }
+                            });
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error loading data for ${emp.name}:`, error);
+                }
+
+                if (totalBonus > 0) {
+                    summaryData.push({ employee: emp, total: totalBonus, daily: dailyData });
+                }
+            }
+
+            renderMonthlySummary(summaryData);
+        }
+
+        function renderMonthlySummary(data) {
+            const table = document.getElementById('summaryTable');
+            
+            let html = `
+                <div class="summary-row header">
+                    <div>Employee Name</div>
+                    <div style="text-align:right;">Total Bonus</div>
+                </div>`;
+            
+            if (data.length === 0) {
+                html += '<div style="padding:40px;text-align:center;color:#666;">No bonus data found for this month</div>';
+            } else {
+                data.forEach(item => {
+                    html += `
+                        <div class="summary-row" onclick='showEmployeeDetail(${JSON.stringify(item)})'>
+                            <div class="employee-name">${item.employee.name}</div>
+                            <div class="employee-total">£${item.total.toFixed(2)}</div>
+                        </div>`;
+                });
+            }
+            
+            table.innerHTML = html;
+        }
+
+        function showEmployeeDetail(data) {
+            const detailView = document.getElementById('detailView');
+            
+            let html = `
+                <div class="detail-header">
+                    <h3>${data.employee.name} - Daily Breakdown</h3>
+                    <button class="close-detail" onclick="closeDetail()">Close</button>
+                </div>`;
+            
+            data.daily.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            data.daily.forEach(day => {
+                const dateObj = new Date(day.date);
+                const dateStr = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                
+                html += `
+                    <div class="day-detail">
+                        <div class="day-detail-header">
+                            <div>
+                                <div class="day-name">${day.day}</div>
+                                <div style="font-size:0.85em;color:#666;">${dateStr}</div>
+                            </div>
+                            <div class="day-bonus">£${day.bonus.toFixed(2)}</div>
+                        </div>
+                        <div class="job-list">
+                            ${day.jobs.map(job => `${job.type} (${job.meters} meter${job.meters > 1 ? 's' : ''})`).join(', ')}
+                        </div>
+                    </div>`;
+            });
+            
+            detailView.innerHTML = html;
+            detailView.classList.add('active');
+        }
+
+        function closeDetail() {
+            document.getElementById('detailView').classList.remove('active');
+        }
+
+        window.switchTab = switchTab;
+        window.selectEmployee = selectEmployee;
+        window.generateJobSelectors = generateJobSelectors;
+        window.calculateBonus = calculateBonus;
+        window.saveWeekData = saveWeekData;
+        window.loadMonthlyData = loadMonthlyData;
+        window.showEmployeeDetail = showEmployeeDetail;
+        window.closeDetail = closeDetail;
+        window.updateWeekDates = updateWeekDates;
 
         window.onload = function() {
             if (window.EMPLOYEES) {
