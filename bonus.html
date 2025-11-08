@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bonus Calculator | NGU-hrs</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script type="module" src="employees-firebase.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -28,166 +28,168 @@
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 3px solid #667eea;
-            flex-wrap: wrap;
-            gap: 15px;
         }
-        h1 {
-            color: #667eea;
-            font-size: 2.2em;
-        }
+        h1 { color: #667eea; font-size: 2.2em; }
         .back-btn {
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             padding: 12px 25px;
             border: none;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
             text-decoration: none;
         }
-        .controls {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-        }
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .control-group label {
-            color: #333;
-            font-weight: 600;
-            font-size: 0.95em;
-        }
-        select, input[type="file"] {
-            padding: 10px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-        }
-        .upload-btn {
-            background: #28a745;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-        }
-        .upload-btn:hover {
-            background: #218838;
-        }
-        .summary-cards {
+        .content-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
         }
-        .summary-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+        .employee-list {
+            background: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
-            text-align: center;
+            max-height: 80vh;
+            overflow-y: auto;
         }
-        .summary-card h3 {
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            opacity: 0.9;
+        .employee-list h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
         }
-        .summary-card .value {
-            font-size: 2em;
-            font-weight: bold;
+        .employee-item {
+            background: white;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid #667eea;
         }
-        .payment-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
+        .employee-item:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
         }
-        .payment-table thead {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        .payment-table th {
-            padding: 15px;
-            text-align: left;
+        .employee-item.active {
+            background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2));
             font-weight: 600;
         }
-        .payment-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .payment-table tbody tr {
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .payment-table tbody tr:hover {
+        .bonus-form {
             background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
         }
-        .payment-table tbody tr.expanded {
-            background: #e3f2fd;
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
         }
-        .amount {
+        .form-header h2 {
+            color: #667eea;
+            font-size: 1.5em;
+        }
+        .bonus-total {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1.2em;
             font-weight: bold;
-            color: #28a745;
+        }
+        .week-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .week-header h3 {
+            color: #667eea;
             font-size: 1.1em;
         }
-        .details-row {
-            display: none;
-            background: #f8f9fa;
+        .date-input {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
         }
-        .details-row.show {
-            display: table-row;
+        .job-quantity {
+            margin-bottom: 15px;
         }
-        .details-cell {
-            padding: 20px !important;
-            border-bottom: 2px solid #667eea !important;
+        .job-quantity label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
-        .details-table {
-            width: 100%;
+        .job-quantity select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            width: 200px;
+        }
+        .jobs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .job-select {
             background: white;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        .details-table th {
-            background: #667eea;
+        .job-select label {
+            display: block;
+            color: #666;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+        .job-select select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+        .job-select.bonus {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .calculate-btn {
+            background: #28a745;
             color: white;
-            padding: 10px;
-            text-align: left;
-            font-size: 0.9em;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
         }
-        .details-table td {
-            padding: 10px;
-            border-bottom: 1px solid #e0e0e0;
+        .calculate-btn:hover {
+            background: #218838;
+        }
+        .meter-count {
+            color: #666;
             font-size: 0.9em;
+            margin-top: 5px;
         }
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 60px;
             color: #666;
-        }
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-            }
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
         }
     </style>
 </head>
@@ -195,329 +197,206 @@
     <div class="container">
         <header>
             <div>
-                <h1>💰 Payment Summary</h1>
-                <p style="color: #666; margin-top: 5px;">Upload XLSX to view standby and overtime totals</p>
+                <h1>💰 Bonus Calculator</h1>
+                <p style="color: #666; margin-top: 5px;">Select employee and enter weekly job data</p>
             </div>
             <a href="index.html" class="back-btn">← Back</a>
         </header>
 
-        <div class="controls">
-            <div class="control-group">
-                <label for="monthSelect">Filter by Month (Optional)</label>
-                <select id="monthSelect">
-                    <option value="">All Months</option>
-                    <option value="1">January</option>
-                    <option value="2">February</option>
-                    <option value="3">March</option>
-                    <option value="4">April</option>
-                    <option value="5">May</option>
-                    <option value="6">June</option>
-                    <option value="7">July</option>
-                    <option value="8">August</option>
-                    <option value="9">September</option>
-                    <option value="10">October</option>
-                    <option value="11">November</option>
-                    <option value="12">December</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label for="fileInput">Upload XLSX File</label>
-                <input type="file" id="fileInput" accept=".xlsx">
-            </div>
-            <button class="upload-btn" onclick="processFile()">Process File</button>
-        </div>
-
-        <div id="errorMessage" class="error-message"></div>
-
-        <div id="resultsSection" style="display:none;">
-            <div class="summary-cards">
-                <div class="summary-card">
-                    <h3>Total Employees</h3>
-                    <div class="value" id="totalEmployees">0</div>
-                </div>
-                <div class="summary-card">
-                    <h3>Total Standby</h3>
-                    <div class="value" id="totalStandby">£0</div>
-                </div>
-                <div class="summary-card">
-                    <h3>Total Overtime</h3>
-                    <div class="value" id="totalOvertime">£0</div>
-                </div>
-                <div class="summary-card">
-                    <h3>Grand Total</h3>
-                    <div class="value" id="grandTotal">£0</div>
+        <div class="content-grid">
+            <div class="employee-list">
+                <h2>Employees</h2>
+                <div id="employeeListContainer">
+                    <p style="color:#666; text-align:center;">Loading...</p>
                 </div>
             </div>
 
-            <table class="payment-table">
-                <thead>
-                    <tr>
-                        <th>Employee Name</th>
-                        <th>Total Standby</th>
-                        <th>Total Overtime</th>
-                        <th>Total Payment</th>
-                    </tr>
-                </thead>
-                <tbody id="paymentTableBody"></tbody>
-            </table>
-        </div>
+            <div class="bonus-form">
+                <div id="emptyState" class="empty-state">
+                    <div style="font-size:4em;margin-bottom:20px;">👤</div>
+                    <h3>No Employee Selected</h3>
+                    <p>Select an employee from the list to calculate bonus</p>
+                </div>
 
-        <div id="emptyState" class="empty-state">
-            <div style="font-size:4em;margin-bottom:20px;">📊</div>
-            <h3>No Data Yet</h3>
-            <p>Upload an XLSX file to view payment summaries</p>
+                <div id="bonusFormContent" style="display:none;">
+                    <div class="form-header">
+                        <h2 id="selectedEmployeeName">Employee Name</h2>
+                        <div class="bonus-total" id="totalBonus">£0.00</div>
+                    </div>
+
+                    <div id="weeksContainer"></div>
+
+                    <button class="calculate-btn" onclick="calculateBonus()">Calculate Bonus</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        let employeeData = {};
+        let selectedEmployee = null;
+        const meterValues = { 'Dual': 2, 'Single': 1, 'Comms': 1 };
+        const bonusRates = { 'Dual': 80, 'Single': 50, 'Comms': 25 };
 
-        function showError(msg) {
-            document.getElementById('errorMessage').textContent = msg;
-            document.getElementById('errorMessage').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('errorMessage').style.display = 'none';
-            }, 5000);
-        }
-
-        function processFile() {
-            const file = document.getElementById('fileInput').files[0];
-            const filterMonth = document.getElementById('monthSelect').value;
-
-            if (!file) {
-                showError('Please select an XLSX file');
+        function renderEmployeeList() {
+            const container = document.getElementById('employeeListContainer');
+            
+            if (!window.EMPLOYEES || !window.EMPLOYEES.data) {
+                setTimeout(renderEmployeeList, 500);
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-                    
-                    processPaymentData(jsonData, filterMonth);
-                } catch (error) {
-                    console.error('Error processing file:', error);
-                    showError('Error processing XLSX file: ' + error.message);
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+            const active = window.EMPLOYEES.data
+                .filter(e => !e.dateLeft)
+                .sort((a, b) => a.name.localeCompare(b.name));
 
-        function processPaymentData(data, filterMonth) {
-            console.log('Processing data, total rows:', data.length);
-            console.log('First 5 rows of data:');
-            for (let i = 0; i < Math.min(5, data.length); i++) {
-                console.log(`Row ${i}:`, data[i]);
-            }
-            
-            employeeData = {};
-            let processedCount = 0;
-            let skippedCount = 0;
-            let debugInfo = [];
-            
-            // Check what we're working with
-            console.log('Checking columns A(0), B(1), C(2), D(3), E(4) in rows 0-5:');
-            for (let i = 0; i < Math.min(5, data.length); i++) {
-                const row = data[i];
-                console.log(`Row ${i}: A="${row[0]}" B="${row[1]}" C="${row[2]}" D="${row[3]}" E="${row[4]}"`);
-            }
-            
-            // Determine where data starts (skip headers)
-            let dataStartRow = 1;
-            if (data[0] && (data[0][2] === 'Assigned Engineer' || data[0][2] === 'Name')) {
-                dataStartRow = 1; // Headers in row 0, data starts at row 1
-            }
-            
-            console.log(`Starting data processing from row ${dataStartRow}`);
-            
-            // Process data
-            for (let i = dataStartRow; i < data.length; i++) {
-                const row = data[i];
-                
-                // Column A (index 0) - Date
-                // Column B (index 1) - Job Type  
-                // Column C (index 2) - Assigned Engineer (Name)
-                // Column D (index 3) - Booking Status
-                // Column E (index 4) - Started At
-                
-                let dateValue = row[0] || '';
-                let jobType = row[1] || '';
-                let name = row[2] || '';
-                let status = row[3] || '';
-                let startedAt = row[4] || '';
-
-                // Clean up name
-                name = name.toString().trim();
-                
-                // Skip if name is empty or a header
-                if (!name || name === 'Assigned Engineer' || name === 'Name' || name === 'name') {
-                    skippedCount++;
-                    continue;
-                }
-
-                // Skip if status is not "Completed"
-                if (status.toString().toLowerCase() !== 'completed') {
-                    skippedCount++;
-                    continue;
-                }
-
-                // Parse date
-                let date = '';
-                let jsDate = null;
-                
-                // Try Excel serial number first
-                if (!isNaN(dateValue) && dateValue > 0) {
-                    const excelEpoch = new Date(1899, 11, 30);
-                    jsDate = new Date(excelEpoch.getTime() + dateValue * 86400000);
-                    date = jsDate.toISOString().split('T')[0];
-                } else if (dateValue) {
-                    // Try parsing as date string
-                    jsDate = new Date(dateValue);
-                    if (!isNaN(jsDate.getTime())) {
-                        date = jsDate.toISOString().split('T')[0];
-                    }
-                }
-                
-                // Filter by month if selected
-                if (filterMonth && jsDate) {
-                    if (jsDate.getMonth() + 1 !== parseInt(filterMonth)) {
-                        skippedCount++;
-                        continue;
-                    }
-                }
-
-                // For now, we're just showing completed jobs
-                // You mentioned Standby and Overtime columns - where are those in your file?
-                // This current file seems to be job data, not payment data
-                
-                // Log first 5 valid entries
-                if (processedCount < 5) {
-                    debugInfo.push(`Row ${i}: ${name} | Date: ${date} | Job: ${jobType} | Status: ${status}`);
-                }
-
-                // Initialize employee if needed
-                if (!employeeData[name]) {
-                    employeeData[name] = {
-                        entries: [],
-                        totalStandby: 0,
-                        totalOvertime: 0
-                    };
-                }
-
-                // Add entry - but we need standby and overtime columns!
-                employeeData[name].entries.push({
-                    date: date,
-                    standby: 0, // Need actual column
-                    overtime: 0  // Need actual column
-                });
-
-                processedCount++;
-            }
-
-            console.log('Sample processed entries:', debugInfo);
-            console.log(`Processed: ${processedCount}, Skipped: ${skippedCount}`);
-            console.log('Employees found:', Object.keys(employeeData).length);
-
-            if (Object.keys(employeeData).length === 0) {
-                showError('No completed jobs found. Make sure Column D contains "Completed" status.');
+            if (!active.length) {
+                container.innerHTML = '<p style="color:#666;">No employees found</p>';
                 return;
             }
 
-            // IMPORTANT: I need to know which columns contain Standby and Overtime values!
-            alert('⚠️ This appears to be job data. I need the XLSX file with Standby and Overtime payment columns. Can you tell me which columns have Standby £ and Overtime £?');
-            
-            displayResults();
+            container.innerHTML = active.map(emp => `
+                <div class="employee-item" onclick="selectEmployee('${emp.id}')">
+                    ${emp.name}
+                </div>
+            `).join('');
         }
-        function displayResults() {
+
+        function selectEmployee(id) {
+            selectedEmployee = window.EMPLOYEES.data.find(e => e.id === id);
+            
+            document.querySelectorAll('.employee-item').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            
             document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('resultsSection').style.display = 'block';
-
-            const employees = Object.keys(employeeData).sort();
+            document.getElementById('bonusFormContent').style.display = 'block';
+            document.getElementById('selectedEmployeeName').textContent = selectedEmployee.name;
             
-            let grandStandby = 0;
-            let grandOvertime = 0;
-
-            employees.forEach(name => {
-                grandStandby += employeeData[name].totalStandby;
-                grandOvertime += employeeData[name].totalOvertime;
-            });
-
-            document.getElementById('totalEmployees').textContent = employees.length;
-            document.getElementById('totalStandby').textContent = `£${grandStandby.toFixed(2)}`;
-            document.getElementById('totalOvertime').textContent = `£${grandOvertime.toFixed(2)}`;
-            document.getElementById('grandTotal').textContent = `£${(grandStandby + grandOvertime).toFixed(2)}`;
-
-            const tbody = document.getElementById('paymentTableBody');
-            tbody.innerHTML = '';
-
-            employees.forEach((name, index) => {
-                const emp = employeeData[name];
-                const total = emp.totalStandby + emp.totalOvertime;
-
-                // Main row
-                const mainRow = document.createElement('tr');
-                mainRow.onclick = () => toggleDetails(index);
-                mainRow.innerHTML = `
-                    <td><strong>${name}</strong></td>
-                    <td class="amount">£${emp.totalStandby.toFixed(2)}</td>
-                    <td class="amount">£${emp.totalOvertime.toFixed(2)}</td>
-                    <td class="amount">£${total.toFixed(2)}</td>
-                `;
-                tbody.appendChild(mainRow);
-
-                // Details row
-                const detailsRow = document.createElement('tr');
-                detailsRow.className = 'details-row';
-                detailsRow.id = `details-${index}`;
-                
-                let detailsHTML = `
-                    <td colspan="4" class="details-cell">
-                        <table class="details-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Standby</th>
-                                    <th>Overtime</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-
-                emp.entries.forEach(entry => {
-                    const entryTotal = entry.standby + entry.overtime;
-                    const dateFormatted = entry.date ? new Date(entry.date).toLocaleDateString('en-GB') : 'N/A';
-                    detailsHTML += `
-                        <tr>
-                            <td>${dateFormatted}</td>
-                            <td>£${entry.standby.toFixed(2)}</td>
-                            <td>£${entry.overtime.toFixed(2)}</td>
-                            <td><strong>£${entryTotal.toFixed(2)}</strong></td>
-                        </tr>`;
-                });
-
-                detailsHTML += `
-                            </tbody>
-                        </table>
-                    </td>`;
-                
-                detailsRow.innerHTML = detailsHTML;
-                tbody.appendChild(detailsRow);
-            });
+            generateWeeks();
         }
 
-        function toggleDetails(index) {
-            const detailsRow = document.getElementById(`details-${index}`);
-            const mainRow = detailsRow.previousElementSibling;
-            
-            detailsRow.classList.toggle('show');
-            mainRow.classList.toggle('expanded');
+        function generateWeeks() {
+            const container = document.getElementById('weeksContainer');
+            let html = '';
+
+            for (let week = 1; week <= 5; week++) {
+                html += `
+                    <div class="week-section">
+                        <div class="week-header">
+                            <h3>Week ${week}</h3>
+                            <input type="date" class="date-input" id="date-week${week}" onchange="updateDates(${week})">
+                        </div>
+                        <div class="job-quantity">
+                            <label for="qty-week${week}">Number of Jobs:</label>
+                            <select id="qty-week${week}" onchange="generateJobSelectors(${week})">
+                                <option value="0">0</option>
+                                ${[...Array(10)].map((_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="jobs-container" id="jobs-week${week}"></div>
+                    </div>`;
+            }
+
+            container.innerHTML = html;
         }
 
-        // Set default month to current month
-        document.getElementById('monthSelect').value = new Date().getMonth() + 1;
+        function updateDates(weekNum) {
+            if (weekNum === 1) {
+                const startDate = new Date(document.getElementById(`date-week1`).value);
+                
+                for (let i = 2; i <= 5; i++) {
+                    const nextDate = new Date(startDate);
+                    nextDate.setDate(startDate.getDate() + (7 * (i - 1)));
+                    document.getElementById(`date-week${i}`).value = nextDate.toISOString().split('T')[0];
+                }
+            }
+        }
+
+        function generateJobSelectors(weekNum) {
+            const qty = parseInt(document.getElementById(`qty-week${weekNum}`).value);
+            const container = document.getElementById(`jobs-week${weekNum}`);
+            
+            if (qty === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for (let i = 1; i <= qty; i++) {
+                html += `
+                    <div class="job-select" id="job-week${weekNum}-${i}">
+                        <label>Job ${i}</label>
+                        <select id="type-week${weekNum}-${i}">
+                            <option value="">Select...</option>
+                            <option value="Dual">Dual (2 meters)</option>
+                            <option value="Single">Single (1 meter)</option>
+                            <option value="Comms">Comms (1 meter)</option>
+                        </select>
+                        <div class="meter-count" id="meter-week${weekNum}-${i}"></div>
+                    </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function calculateBonus() {
+            let totalMeters = 0;
+            let totalBonus = 0;
+            let jobsProcessed = [];
+
+            // Collect all jobs from all weeks
+            for (let week = 1; week <= 5; week++) {
+                const qty = parseInt(document.getElementById(`qty-week${week}`).value) || 0;
+                
+                for (let job = 1; job <= qty; job++) {
+                    const type = document.getElementById(`type-week${week}-${job}`).value;
+                    if (type) {
+                        jobsProcessed.push({ week, job, type });
+                    }
+                }
+            }
+
+            // Process jobs in order and calculate bonus
+            jobsProcessed.forEach(({ week, job, type }) => {
+                const meters = meterValues[type];
+                const previousTotal = totalMeters;
+                totalMeters += meters;
+
+                const jobElement = document.getElementById(`job-week${week}-${job}`);
+                const meterElement = document.getElementById(`meter-week${week}-${job}`);
+
+                if (totalMeters > 6) {
+                    // Calculate partial bonus if job crosses 6 meter threshold
+                    if (previousTotal < 6) {
+                        const metersOverThreshold = totalMeters - 6;
+                        const bonusPerMeter = bonusRates[type] / meters;
+                        const bonusAmount = metersOverThreshold * bonusPerMeter;
+                        totalBonus += bonusAmount;
+                        
+                        jobElement.classList.add('bonus');
+                        meterElement.textContent = `${meters} meters (£${bonusAmount.toFixed(2)} bonus)`;
+                    } else {
+                        // Full bonus
+                        const bonusAmount = bonusRates[type];
+                        totalBonus += bonusAmount;
+                        
+                        jobElement.classList.add('bonus');
+                        meterElement.textContent = `${meters} meters (£${bonusAmount.toFixed(2)} bonus)`;
+                    }
+                } else {
+                    jobElement.classList.remove('bonus');
+                    meterElement.textContent = `${meters} meters (no bonus yet)`;
+                }
+            });
+
+            document.getElementById('totalBonus').textContent = `£${totalBonus.toFixed(2)}`;
+        }
+
+        window.onload = function() {
+            if (window.EMPLOYEES) {
+                window.EMPLOYEES.onUpdate(renderEmployeeList);
+            }
+            setTimeout(renderEmployeeList, 1000);
+        };
     </script>
 </body>
 </html>
