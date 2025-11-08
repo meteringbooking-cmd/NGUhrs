@@ -601,56 +601,54 @@
         }
 
         function calculateBonus() {
-            let totalMeters = 0;
-            let totalBonus = 0;
-            let jobsProcessed = [];
+            let weekTotalBonus = 0;
 
-            // Collect all jobs from all days
+            // Process each day separately - meters reset daily
             days.forEach(day => {
+                let dayMeters = 0;
+                let dayBonus = 0;
                 const qty = parseInt(document.getElementById(`qty-${day}`).value) || 0;
                 
                 for (let job = 1; job <= qty; job++) {
                     const type = document.getElementById(`type-${day}-${job}`).value;
-                    if (type) {
-                        jobsProcessed.push({ day, job, type });
-                    }
-                }
-            });
+                    if (!type) continue;
 
-            // Process jobs in order and calculate bonus
-            jobsProcessed.forEach(({ day, job, type }) => {
-                const meters = meterValues[type];
-                const previousTotal = totalMeters;
-                totalMeters += meters;
+                    const meters = meterValues[type];
+                    const previousDayTotal = dayMeters;
+                    dayMeters += meters;
 
-                const jobElement = document.getElementById(`job-${day}-${job}`);
-                const meterElement = document.getElementById(`meter-${day}-${job}`);
+                    const jobElement = document.getElementById(`job-${day}-${job}`);
+                    const meterElement = document.getElementById(`meter-${day}-${job}`);
 
-                if (totalMeters > 6) {
-                    // Calculate partial bonus if job crosses 6 meter threshold
-                    if (previousTotal < 6) {
-                        const metersOverThreshold = totalMeters - 6;
-                        const bonusPerMeter = bonusRates[type] / meters;
-                        const bonusAmount = metersOverThreshold * bonusPerMeter;
-                        totalBonus += bonusAmount;
-                        
-                        jobElement.classList.add('bonus');
-                        meterElement.textContent = `${meters} meters (£${bonusAmount.toFixed(2)} bonus)`;
+                    if (dayMeters > 6) {
+                        // Job earns bonus
+                        if (previousDayTotal >= 6) {
+                            // Already past threshold, full bonus
+                            const bonusAmount = bonusRates[type];
+                            dayBonus += bonusAmount;
+                            
+                            jobElement.classList.add('bonus');
+                            meterElement.textContent = `${meters} meters (£${bonusAmount.toFixed(2)} bonus)`;
+                        } else {
+                            // Crosses threshold - only meters over 6 get bonus, but at FULL job rate
+                            const metersOverThreshold = dayMeters - 6;
+                            const fullJobRate = bonusRates[type];
+                            const bonusAmount = (metersOverThreshold / meters) * fullJobRate;
+                            dayBonus += bonusAmount;
+                            
+                            jobElement.classList.add('bonus');
+                            meterElement.textContent = `${meters} meters (£${bonusAmount.toFixed(2)} bonus)`;
+                        }
                     } else {
-                        // Full bonus
-                        const bonusAmount = bonusRates[type];
-                        totalBonus += bonusAmount;
-                        
-                        jobElement.classList.add('bonus');
-                        meterElement.textContent = `${meters} meters (£${bonusAmount.toFixed(2)} bonus)`;
+                        jobElement.classList.remove('bonus');
+                        meterElement.textContent = `${meters} meters (no bonus yet)`;
                     }
-                } else {
-                    jobElement.classList.remove('bonus');
-                    meterElement.textContent = `${meters} meters (no bonus yet)`;
                 }
+                
+                weekTotalBonus += dayBonus;
             });
 
-            document.getElementById('totalBonus').textContent = `£${totalBonus.toFixed(2)}`;
+            document.getElementById('totalBonus').textContent = `£${weekTotalBonus.toFixed(2)}`;
         }
 
         async function saveWeekData() {
@@ -733,18 +731,21 @@
                                         totalMeters += job.meters;
                                         
                                         if (totalMeters > 6) {
-                                            if (previousTotal < 6) {
-                                                const metersOver = totalMeters - 6;
-                                                const bonusPerMeter = bonusRates[job.type] / job.meters;
-                                                dayBonus += metersOver * bonusPerMeter;
-                                            } else {
+                                            if (previousTotal >= 6) {
+                                                // Already past threshold, full bonus
                                                 dayBonus += bonusRates[job.type];
+                                            } else {
+                                                // Crosses threshold - meters over 6 get bonus at full job rate
+                                                const metersOver = totalMeters - 6;
+                                                const fullJobRate = bonusRates[job.type];
+                                                dayBonus += (metersOver / job.meters) * fullJobRate;
                                             }
                                         }
                                     });
                                     
                                     totalBonus += dayBonus;
                                     dailyData.push({ date: dateKey, day: dayInfo.day, jobs: dayInfo.jobs, bonus: dayBonus });
+                                    totalMeters = 0; // Reset for next day
                                 }
                             });
                         });
