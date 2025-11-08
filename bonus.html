@@ -621,7 +621,7 @@
                     const meterElement = document.getElementById(`meter-${day}-${job}`);
 
                     if (previousDayTotal >= 6) {
-                        // At or over 6 meters - get full job value
+                        // Already at or over 6 meters - get full job value
                         const bonusAmount = bonusRates[type];
                         dayBonus += bonusAmount;
                         
@@ -629,8 +629,9 @@
                         meterElement.textContent = `${meters} meters (£${bonusAmount.toFixed(2)} bonus)`;
                     } else if (dayMeters > 6) {
                         // This job crosses the 6 meter threshold
-                        // Get the full job value (not pro-rated)
-                        const bonusAmount = bonusRates[type];
+                        // Only meters OVER 6 count at £50 per meter
+                        const metersOver = dayMeters - 6;
+                        const bonusAmount = metersOver * 50;
                         dayBonus += bonusAmount;
                         
                         jobElement.classList.add('bonus');
