@@ -620,16 +620,27 @@
                     const jobElement = document.getElementById(`job-${day}-${job}`);
                     const meterElement = document.getElementById(`meter-${day}-${job}`);
 
-                    // Only get bonus if AFTER this job you're OVER 6 meters
-                    // Calculate how many meters are over the 6 threshold
-                    if (dayMeters > 6) {
-                        const metersOverThreshold = dayMeters - 6;
-                        // Bonus is £50 per meter over 6
-                        const bonusAmount = metersOverThreshold * 50;
+                    if (previousDayTotal > 6) {
+                        // Already over 6 meters - get full job value
+                        const bonusAmount = bonusRates[type];
                         dayBonus += bonusAmount;
                         
                         jobElement.classList.add('bonus');
                         meterElement.textContent = `${meters} meters (£${bonusAmount.toFixed(2)} bonus)`;
+                    } else if (dayMeters > 6) {
+                        // This job crosses the 6 meter threshold
+                        // Only the meters OVER 6 count, at £50 per meter
+                        const metersOverThreshold = dayMeters - 6;
+                        const bonusAmount = metersOverThreshold * 50;
+                        dayBonus += bonusAmount;
+                        
+                        if (bonusAmount > 0) {
+                            jobElement.classList.add('bonus');
+                            meterElement.textContent = `${meters} meters (£${bonusAmount.toFixed(2)} bonus)`;
+                        } else {
+                            jobElement.classList.remove('bonus');
+                            meterElement.textContent = `${meters} meters (no bonus)`;
+                        }
                     } else {
                         jobElement.classList.remove('bonus');
                         meterElement.textContent = `${meters} meters (no bonus yet)`;
@@ -715,23 +726,24 @@
                                 if (dateKey.startsWith(`${year}-${month}`)) {
                                     const dayInfo = weekData[dateKey];
                                     let dayBonus = 0;
-                                    let totalMeters = 0;
+                                    let dayMeters = 0;
                                     
                                     dayInfo.jobs.forEach(job => {
-                                        totalMeters += job.meters;
+                                        const previousTotal = dayMeters;
+                                        dayMeters += job.meters;
                                         
-                                        if (totalMeters > 6) {
-                                            // Bonus is £50 per meter over 6
-                                            const metersOver = totalMeters - 6;
+                                        if (previousTotal > 6) {
+                                            // Already over threshold - full job value
+                                            dayBonus += bonusRates[job.type];
+                                        } else if (dayMeters > 6) {
+                                            // Crossing threshold - only meters over 6 at £50/meter
+                                            const metersOver = dayMeters - 6;
                                             dayBonus += metersOver * 50;
-                                            // Set back to exactly the meters over for next job calculation
-                                            totalMeters = 6 + metersOver;
                                         }
                                     });
                                     
                                     totalBonus += dayBonus;
                                     dailyData.push({ date: dateKey, day: dayInfo.day, jobs: dayInfo.jobs, bonus: dayBonus });
-                                    totalMeters = 0; // Reset for next day
                                 }
                             });
                         });
