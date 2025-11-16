@@ -251,7 +251,7 @@
                 <h2 class="module-title">Add/Remove Employee</h2>
                 <p class="module-description">Quickly add or remove employees from the system.</p>
             </div>
-            <div class="module-card" onclick="navigateToModule('application')">
+            <div class="module-card" onclick="navigateToExternal('https://ngu-applications.vercel.app')">
                 <span class="module-icon">📝</span>
                 <h2 class="module-title">Application</h2>
                 <p class="module-description">Manage job applications, track candidates, and streamline the hiring process.</p>
@@ -345,9 +345,9 @@
             </div>
 
             <div class="module-card" onclick="navigateToModule('bonus')">
-                <span class="module-icon">🎁</span>
+                <span class="module-icon">💰</span>
                 <h2 class="module-title">Bonus</h2>
-                <p class="module-description">View your current and historic bonus payments.</p>
+                <p class="module-description">Calculate and track employee bonus payments.</p>
             </div>
         </div>
 
@@ -367,6 +367,11 @@
         function navigateToModule(module) {
             console.log('Navigating to: ' + module + '.html');
             window.location.href = module + '.html';
+        }
+
+        function navigateToExternal(url) {
+            console.log('Navigating to external: ' + url);
+            window.location.href = url;
         }
 
         function toggleReportsSubsections(event) {
